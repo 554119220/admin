@@ -5708,9 +5708,12 @@ function get_user_info ($id)
     if (($_SERVER['REQUEST_TIME']-$user_info['add_time'])/60/60/24>1){
         $user_info['from_where_edit'] = true;
     }
-    if($_SESSION['role_id'] != 33 && !in_array($_SESSION['admin_id'],array(4,493,554,330,277))){
-        $user_info['mobile_phone'] = hideContact($user_info['mobile_phone']);
-        $user_info['home_phone'] = hideContact($user_info['home_phone']);
+
+    if (!admin_priv('all','',false)) {
+        if($_SESSION['role_id'] != 33 && !in_array($_SESSION['admin_id'],array(4,493,554,330,277))){
+            $user_info['mobile_phone'] = hideContact($user_info['mobile_phone']);
+            $user_info['home_phone'] = hideContact($user_info['home_phone']);
+        }
     }
 
     $sql_select = "SELECT r.rank_name,u.rank_points,u.user_rank FROM ".$GLOBALS['ecs']->table('user_rank').' r,'.
@@ -5788,7 +5791,7 @@ function access_purchase_records ($id)
     $order_total = count($order_list);
     foreach ($order_list as &$val)
     {
-        
+
         $val['order_sn'] = !empty($val['platform_order_sn']) ? $val['platform_order_sn'] : $val['p_order_sn'];
         $val['index'] = $order_total--;
         $val['add_time']     = date('Y-m-d', $val['add_time']);   // Buy time
@@ -6521,9 +6524,11 @@ function get_contact_list($user_id)
         if ($val['add_time']) {
             $val['add_time'] = date('Y-m-d H:i:s',$val['add_time']);
         }
-        if (!in_array($_SESSION['role_id'],array(13,33)) || !in_array($_SESSION['admin_id'],array(4,497,467,554,330,277))) {
-            if (in_array($val['contact_name'],array('tel','mobile'))) {
-                $val['contact_value'] = hideContact($val['contact_value']);
+        if (!admin_priv('all','',false)) {
+            if (!in_array($_SESSION['role_id'],array(13,33)) || !in_array($_SESSION['admin_id'],array(4,497,467,554,330,277))) {
+                if (in_array($val['contact_name'],array('tel','mobile'))) {
+                    $val['contact_value'] = hideContact($val['contact_value']);
+                }
             }
         }
         $contact_list[$val['contact_name']][] = $val;
