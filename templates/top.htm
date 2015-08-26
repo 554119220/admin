@@ -2,6 +2,8 @@
 <div id="info" class='hide'></div>
 <div class="rgt sys sys-nav">
   <a target="_blank" href="search.php?act=search_view">公共查询</a>|
+  <a target="_blank" href="http://192.168.1.217/zhishi">知识库</a>|
+  <a target="_blank" href="storage.php?act=goods_list&f=full">商品列表</a>|
   {$hello}
   {if $wav}
   <span id="wav_info" title="半个小时会更新一次">
@@ -12,15 +14,6 @@
   <div id="miss_call_list" style="display:none"></div>
   |
   <a target="_blank" href="feedback.php?act=feedback_form">BUG反馈</a>|
-  {if $admin_id eq 2}
-
-  <select name="admin_id" style="background:rgb(25, 104, 160);color:#fff;border:0px;margin:0px;margin-top:-6px;padding:0px;">
-    <option value="{$admin_id}">{$admin_name}</option>
-    {foreach from=$admin_list item=v}
-    <option value="{$v.user_id}">{$v.user_name}</option>
-    {/foreach}
-  </select>
-  {/if}
   <a href="privilege.php?act=logout" target="_top">退出</a>
 </div>
 <div id="cont-nav">

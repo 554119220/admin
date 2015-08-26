@@ -1,9 +1,11 @@
 <div width="100%">
   <div class="finder-title mt10">
     {$curr_title}<font>{$num}</font>
+    {if $power_turn_on eq 'able'}
     <span style="float:right;margin-right:12px;">
       <input type="button" class="btn_top_right" name="sold_out" value="下架0库存商品" onclick="soldOutZero({$brand_id})"/>
     </span>
+    {/if}
   </div>
   <div class="finder-packet" id="">
     <div class="packet-items" id="">
@@ -139,10 +141,12 @@
         </td>
         {/if}
         <td>
+          {if $power_turn_on eq 'able'}
           {if $v.status eq 0}
           <img src="images/nottrack.gif" {if $mod_stock_role eq 'able'}onclick="modGoodsStatus(this)"{/if} value="{$v.goods_sn}" sta="1" class="png_btn" title="点击恢复进货该商品">
           {else}
           <img src="images/track.png" {if $mod_stock_role eq 'able'} onclick="modGoodsStatus(this)"{/if} value="{$v.goods_sn}" sta="0" class="png_btn" title="点击不再进货该商品">
+          {/if}
           {/if}
         </td>
         <td></td>

@@ -518,8 +518,12 @@ elseif($_REQUEST['act'] == 'goods_list') {
         $smarty->assign('show_safe_storage_number', true);
     }
 
-    $res['main'] = $smarty->fetch('goods_list.htm');
-    die($json->encode($res));
+    if ($_REQUEST['f'] == 'full') {
+        $smarty->display('full_goods_list.htm');
+    }else{
+        $res['main'] = $smarty->fetch('goods_list.htm');
+        die($json->encode($res));
+    }
 }
 
 /*--- 检查库存批次 ---*/
