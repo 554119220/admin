@@ -875,10 +875,10 @@ function goods_list($is_delete, $real_goods=1)
 
         if ($filter['filter']) {
             switch ($filter['filter']) {
-                case 'low_qty'  : $goods_list = get_low_stock_goods('low_qty'); break;  // 库存低于最低库存
-                case '0_qty'    : $goods_list = get_low_stock_goods('0_qty'); break;    // 0库存
-                case 'deadline' : $goods_list = get_low_stock_goods('deadline'); break; // 将过期产品
-                case 'sold_out' : $filter['is_on_sale'] = 0; break;                     // 下架
+            case 'low_qty'  : $goods_list = get_low_stock_goods('low_qty'); break;  // 库存低于最低库存
+            case '0_qty'    : $goods_list = get_low_stock_goods('0_qty'); break;    // 0库存
+            case 'deadline' : $goods_list = get_low_stock_goods('deadline'); break; // 将过期产品
+            case 'sold_out' : $filter['is_on_sale'] = 0; break;                     // 下架
             }
 
             if (!empty($goods_list)) {
@@ -914,14 +914,19 @@ function goods_list($is_delete, $real_goods=1)
             $where .= ' AND (g.suppliers_id = "' . $filter['suppliers_id'] . '")';
         }
 
+        if (!admin_priv('all','',false)) {
+            $sale_platform = $_SESSION['role_id'] == 39?2:1;
+            $where .= " AND g.sale_platform=$sale_platform ";
+        }
+
         /* 记录总数 */
         $sql = 'SELECT COUNT(*) FROM '.$GLOBALS['ecs']->table('goods')." AS g WHERE g.is_delete='$is_delete' $where";
         $filter['record_count'] = $GLOBALS['db']->getOne($sql);
 
-        $sql = 'SELECT g.goods_id,g.goods_name,g.goods_type,g.goods_sn,g.shop_price,g.integral,g.shelflife,g.bar_code,g.warn_number,g.cost_price,'.
+        $sql = 'SELECT g.goods_id,g.goods_name,g.goods_type,g.goods_sn,g.shop_price,g.integral,g.shelflife,g.bar_code,g.warn_number,g.cost_price,e.eff_name goods_effect,'.
             'g.min_price,g.promote_price,g.is_on_sale,s.status,g.goods_weight,IF(SUM(quantity),SUM(quantity),0) goods_number,COUNT(quantity) stock_times FROM '
-            .$GLOBALS['ecs']->table('goods').' g LEFT JOIN '.$GLOBALS['ecs']->table('stock_goods')
-            .' s ON g.goods_sn=s.goods_sn'." WHERE g.is_delete='$is_delete' $where "
+            .$GLOBALS['ecs']->table('goods').' g LEFT JOIN '.$GLOBALS['ecs']->table('stock_goods').' s ON g.goods_sn=s.goods_sn'
+            .' LEFT JOIN '.$GLOBALS['ecs']->table('effects')." e ON e.eff_id=g.goods_effect WHERE g.is_delete='$is_delete' $where "
             ." GROUP BY g.goods_sn ORDER BY {$filter['sort_by']} {$filter['sort_order']}";
 
         //   'LIMIT '
@@ -963,7 +968,7 @@ function goods_list($is_delete, $real_goods=1)
             $val['goods_number'] = $val['goods_number'] >= 100 ? '库存充足' : '库存紧张';
         }
     }
-    
+
     $arr = array(
         'goods'        => $row,
         'filter'       => $filter,

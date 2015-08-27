@@ -518,7 +518,7 @@ elseif($_REQUEST['act'] == 'goods_list') {
         $smarty->assign('show_safe_storage_number', true);
     }
 
-    if ($_REQUEST['f'] == 'full') {
+    if (isset($_REQUEST['f']) && $_REQUEST['f'] == 'full') {
         $smarty->display('full_goods_list.htm');
     }else{
         $res['main'] = $smarty->fetch('goods_list.htm');
@@ -3628,20 +3628,22 @@ function expire_time_list(&$goods_list){
         $goods_sn[] = $v['goods_sn'];
     }
     $goods_sn = implode(',',$goods_sn);
-    $sql = 'SELECT goods_sn,MIN(expire_time) expire_time FROM '.$GLOBALS['ecs']->table('stock_goods')
-        ." WHERE goods_sn IN ($goods_sn) AND quantity>0 GROUP BY goods_sn ORDER BY goods_sn AND expire_time>0";
-    $res = $GLOBALS['db']->getAll($sql);
-    foreach ($goods_list as &$v) {
-        foreach ($res as $r) {
-            if ($v['goods_sn'] == $r['goods_sn']) {
-                if (empty($r['expire_time'])) {
-                    $v['expire_time'] = '-';
-                }else{
-                    $v['expire_time'] = date('Y-m-d',$r['expire_time']);
-                    if (date('Y',strtotime($v['expire_time']))-date('Y') == 0 && intval(date('m'))-intval(date('m',strtotime($v['expire_time'])))<=6) {
-                        $v['expire_status'] = 1;
+    if (!empty($goods_sn)){
+        $sql = 'SELECT goods_sn,MIN(expire_time) expire_time FROM '.$GLOBALS['ecs']->table('stock_goods')
+            ." WHERE goods_sn IN ($goods_sn) AND quantity>0 GROUP BY goods_sn ORDER BY goods_sn AND expire_time>0";
+        $res = $GLOBALS['db']->getAll($sql);
+        foreach ($goods_list as &$v) {
+            foreach ($res as $r) {
+                if ($v['goods_sn'] == $r['goods_sn']) {
+                    if (empty($r['expire_time'])) {
+                        $v['expire_time'] = '-';
                     }else{
-                        $v['expire_status'] = 0;
+                        $v['expire_time'] = date('Y-m-d',$r['expire_time']);
+                        if (date('Y',strtotime($v['expire_time']))-date('Y') == 0 && intval(date('m'))-intval(date('m',strtotime($v['expire_time'])))<=6) {
+                            $v['expire_status'] = 1;
+                        }else{
+                            $v['expire_status'] = 0;
+                        }
                     }
                 }
             }

@@ -1484,7 +1484,9 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
         foreach ($sales_list as $key=>$val) {
             $sort_key[$key] = $val['month_amount'];
         }
-        array_multisort($sort_key, SORT_DESC,$sales_list);
+        if ($sort_key) {
+            array_multisort($sort_key, SORT_DESC,$sales_list);
+        }
         unset($key,$val);
         $sales_list[] = $tmp_sales;
 

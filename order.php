@@ -1216,9 +1216,13 @@ elseif ($_REQUEST['act'] == 'search_goods')
         $order_id = intval($_REQUEST['order_id']);
     }
 
+    if ($_SESSION['role_id'] == 39) {
+        $sale_platform = $_SESSION['role_id'] == 39?2:1;
+        $where = " AND g.sale_platform=$sale_platform ";
+    }
     $sql_select = 'SELECT CONCAT(g.goods_name,"  【库存：",SUM(s.quantity),"】") goods_name,g.goods_sn goods_id,SUM(s.quantity) quantity FROM '.
         $GLOBALS['ecs']->table('goods').' g,'.$GLOBALS['ecs']->table('stock_goods').
-        " s WHERE g.goods_name LIKE '%$keyword%' AND g.is_on_sale=1 AND g.is_delete=0 AND g.goods_sn=s.goods_sn GROUP BY s.goods_sn";
+        " s WHERE g.goods_name LIKE '%$keyword%' $where AND g.is_on_sale=1 AND g.is_delete=0 AND g.goods_sn=s.goods_sn GROUP BY s.goods_sn";
     $goods_list = $GLOBALS['db']->getAll($sql_select);
 
     if ($order_id) {
