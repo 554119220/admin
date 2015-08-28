@@ -661,27 +661,21 @@ elseif($_REQUEST['act'] == 'add_goods_submit')
 {
     //接收数据
     $_REQUEST = addslashes_deep($_REQUEST);
-    $_REQUEST['add_time'] = time();
+    $_REQUEST['add_time'] = $_SERVER['REQUEST_TIME'];
 
     $_REQUEST['goods_sn'] = generate_goods_sn_crm();
     unset($_REQUEST['act'], $_REQUEST['run']);
 
     if($_REQUEST['goods_name'] == '' || $_REQUEST['goods_sn'] == '')// || $shop_price == '')
     {
-        $res['req_msg'] = true;
-        $res['message'] = '提交内容不能为空';
-        $res['timeout'] = 2000;
-
+        $res = crm_msg('提交内容不能为空');
         die($json->encode($res));
     }
 
     // 计算服用天数
     if (!isset($_REQUEST['every_num'], $_REQUEST['everyday_use']) || $_REQUEST['every_num'] == 0)
     {
-        $res['req_msg'] = true;
-        $res['message'] = '请务必填选每次服用量与每天服用次数！';
-        $res['timeout'] = 2000;
-
+        $res = crm_msg('请务必填选每次服用量与每天服用次数');
         die($json->encode($res));
     }
     else {
@@ -701,18 +695,12 @@ elseif($_REQUEST['act'] == 'add_goods_submit')
     if($result)
     {
         record_operate($sql_insert, 'goods');
-        $res['req_msg'] = true;
-        $res['message'] = '新商品添加成功。商品编号为'.$_REQUEST['goods_sn'];
-        $res['timeout'] = 2000;
+        $res = crm_msg('新商品添加成功。商品编号为'.$_REQUEST['goods_sn']);
 
         die($json->encode($res));
     }
-    else
-    {
-        $res['req_msg'] = true;
-        $res['message'] = '添加失败';
-        $res['timeout'] = 2000;
-
+    else {
+        $res = crm_msg('添加失败');
         die($json->encode($res));
     }
 }
