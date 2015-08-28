@@ -23,7 +23,6 @@ if('feedback_form' == $action){
 
 //提交反馈
 elseif('feedback_done' == $action){
-
     $feedback_class = isset($_REQUEST['feedback_class']) ? intval($_REQUEST['feedback_class']) : 0;
     $message        = isset($_REQUEST['feedback']) ? $_REQUEST['feedback'] : '';
     $title          = isset($_REQUEST['title']) ? mysql_real_escape_string($_REQUEST['title']) : '';
