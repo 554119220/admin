@@ -54,7 +54,7 @@
 #ranking_list{margin-top:34px;height:70px;}
 
 /*排行榜*/
-.ranklist_div {border:1px solid #300101;width:180px;margin-top:6px;min-height:180px;}
+.ranklist_div {border:1px solid #300101;width:180px;margin-top:6px;}
 .ranklist_div_title{ background-color:rgb(214, 211, 211);color:#464141;padding:2px;font-weight:bold;line-height:24px;}
 .ranklist_div_title table th td{text-align:center;border:0px;font-size:14px}
 .ranklist_div_title label{ float:right;font-size:smaller;color:chocolate;margin-right:3px;cursor:pointer;}
@@ -152,6 +152,7 @@
 .ibx_advice_logo{background:#1796F9;color:#fff ;float:left;width:47px;height:42px;border:1px solid #D6D6D6;border-right:none;cursor:pointer;line-height:42px;text-align:center } 
 
 .font-size14 td{font-size:14px;line-height:20px;}
+.font-size12 td{font-size:12px;line-height:20px;}
 
 .font-ico-btn{cursor:pointer}
 .font-ico-btn :hover{ color:#EB8A3D;}

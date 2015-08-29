@@ -3309,6 +3309,7 @@ function user_region_stats()
     $sql_select = 'SELECT COUNT(*) user_number,admin_id,admin_name,r.region_name city FROM '.$GLOBALS['ecs']->table('users').
         ' u,'.$GLOBALS['ecs']->table('user_address').' a,'.$GLOBALS['ecs']->table('region')." r WHERE a.user_id=u.user_id $where"
         .' AND u.admin_id>0 AND a.city IN (110100,310100,440100,440300) AND customer_type IN (2,3,4,5,11) AND a.city=r.region_id GROUP BY a.city,u.admin_id ORDER BY u.role_id';
+    echo $sql_select;exit;
     $result = $GLOBALS['db']->getAll($sql_select);
 
     $user_num = array();
