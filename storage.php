@@ -2880,6 +2880,7 @@ function stats_shipping_goods ()
         $sql_select = $sql_append." WHERE $ex_where AND "
             .' i.order_status IN (1,5) AND shipping_status IN (1,2,4) AND g.goods_sn LIKE "%\_%" GROUP BY g.goods_sn';
         $package_goods = $GLOBALS['db']->getAll($sql_select);
+        echo $sql_select;exit;
 
         $package_sn = array();
         foreach ($package_goods as $v){

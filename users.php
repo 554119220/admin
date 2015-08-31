@@ -1415,15 +1415,17 @@ elseif ($_REQUEST['act'] == 'insert_free')
 //高级转移顾客
 elseif ($_REQUEST['act'] == 'advance_batch')
 {
-    $from_admin    = intval($_REQUEST['from_admin']);
-    $to_admin      = intval($_REQUEST['to_admin']);
-    $customer_type = intval($_REQUEST['customer_type']);
-    $ser_startTime = strtotime($_REQUEST['ser_startTime']);
-    $ser_endTime   = strtotime($_REQUEST['ser_endTime']);
-    $buy_startTime = strtotime($_REQUEST['buy_startTime']);
-    $buy_endTime   = strtotime($_REQUEST['buy_endTime']);
-    $add_startTime = strtotime($_REQUEST['add_startTime']);
-    $add_endTime   = strtotime($_REQUEST['add_startTime']);
+    $from_admin       = intval($_REQUEST['from_admin']);
+    $to_admin         = intval($_REQUEST['to_admin']);
+    $customer_type    = intval($_REQUEST['customer_type']);
+    $ser_startTime    = strtotime($_REQUEST['ser_startTime']);
+    $ser_endTime      = strtotime($_REQUEST['ser_endTime']);
+    $buy_startTime    = strtotime($_REQUEST['buy_startTime']);
+    $buy_endTime      = strtotime($_REQUEST['buy_endTime']);
+    $add_startTime    = strtotime($_REQUEST['add_startTime']);
+    $add_endTime      = strtotime($_REQUEST['add_startTime']);
+    $max_service_time = strtotime($_REQUEST['max_service_time']);
+    $adv_number       = intval($_REQUEST['adv_number']);
 
     $where = ' where 1 ';
     if(empty($to_admin)) {
@@ -1444,11 +1446,18 @@ elseif ($_REQUEST['act'] == 'advance_batch')
     if(!empty($buy_startTime) && !empty($buy_endTime)) {
         $where .= " AND order_time BETWEEN $buy_startTime AND $buy_endTime";
     }
+    if (!empty($max_service_time)) {
+        $where .= " AND service_time<=$max_service_time";
+    }
+
+    if ($adv_number) {
+        $where .= " LIMIT $adv_number";
+    }
+
     $sql = ' SELECT COUNT(*) FROM '.$GLOBALS['ecs']->table('users').$where;
     $count = $GLOBALS['db']->getOne($sql);
     $admin_name = $GLOBALS['db']->getOne("SELECT user_name FROM".$GLOBALS['ecs']->table('admin_user')." WHERE user_id=$to_admin");
-    $sql = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET customer_type=$customer_type,admin_id=$to_admin,admin_name='$admin_name',assign_time={$_SERVER['REQUEST_TIME']}"
-        .$where;
+    $sql = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET customer_type=$customer_type,admin_id=$to_admin,admin_name='$admin_name',assign_time={$_SERVER['REQUEST_TIME']}" .$where;
     $code = $GLOBALS['db']->query($sql);
     if ($code) {
         $res = crm_msg("成功转了{$count}个顾客。",$code);

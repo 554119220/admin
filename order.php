@@ -3561,9 +3561,38 @@ elseif ($_REQUEST['act'] == 'order_receipt') {
     }
 
     $order_info['printer'] = $_SESSION['admin_name'];
-
     $smarty->assign('order_info', $order_info);
     $smarty->display('receipt.htm');
+}
+
+//协助订单列表
+elseif($_REQUEST['act'] == 'assist_order'){
+    $sql = 'SELECT order_amount';
+    $res['main'] = $smarty->fetch('assist_order.htm');
+    die($json->encode($res));
+}
+
+
+//协助完成订单操作 , 在添加订单的时候判断并执行
+function assist_order($admin_id,$order_id,$final_amount){
+    $assist_admin_id = intval($_REQUEST['assist_admin_id']);
+    if (empty($assist_admin_id)){
+        return -1;
+        //$res = crm_msg('请选择协助同事');
+    }else{
+        $sql = 'UPDATE '.$GLOBALS['ecs']->table('assist_order')." SET order_type=101 WHERE order_type=101";
+        if ($GLOBALS['db']->query($sql)) {
+            $assist_rate = intval($_REQUEST['assist_rate']);
+            $main_rate = 100-$assist_rate;
+            $assist_amount = $final_amount*($assist_rate/100);
+            $main_amount = $final_amount-$assist_amount;
+            $sql = 'INSERT '.$GLOBALS['ecs']->table('order_info')
+                .'(order_id,main_admin_id,assist_admin_id,main_rate,assist_rate,assist_amount,main_amount,add_time)VALUES('
+                ."$order_id,$admin_id,$assist_admin_id,$main_rate,$assist_amount,$main_amount,{$_SERVER['REQUEST_TIME']})";
+            $code = $GLOBALS['db']->query($sql);
+            return $code||0;
+        }else return 0;
+    }
 }
 
 /**

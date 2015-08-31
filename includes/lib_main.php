@@ -1375,12 +1375,9 @@ function platform_list ($platform = array ())
  */
 function stamp2date ($str, $format = 'Y-m-d')
 {
-    if (strpos($str,'-'))
-    {
+    if (strpos($str,'-')) {
         return $str;
-    }
-    else
-    {
+    } else {
         return date($format, $str);
     }
 }
