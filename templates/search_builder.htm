@@ -20,6 +20,20 @@
 <label><input type="radio" name="sex" value="0" />不详</label>
 {/if}
 
+{if $type eq 'admin_name'}
+<select name="role_id" id="role_id" onchange="getRoleAdminList(this.value,'admin_id')">
+  {foreach from=$role_list item=val}
+  <option value="{$val.role_id}"{if $role_id eq $val.role_id} selected{/if}>{$val.role_name}</option>
+  {/foreach}
+</select>
+<select name="admin_id" id="admin_id">
+  {foreach from=$list item=val}
+  <option value="{$val.id}"{if $value eq $val.id} selected{/if}>{$val.name}</option>
+  {/foreach}
+</select>
+<input type="hidden" value="" id="keywords" size="10">
+{/if}
+
 {if $field eq 'birthday'}
 <!-- 出生日期 -->
 <script language="javascript" type="text/javascript" src="My97DatePicker/WdatePicker.js"></script>

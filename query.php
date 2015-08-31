@@ -6,16 +6,20 @@ require_once(ROOT_PATH . 'includes/lib_order.php');
 date_default_timezone_set('Asia/Shanghai');
 
 if ($_REQUEST['act'] == 'admin_name') {
-    $smarty->assign('type',  'select');
+    $smarty->assign('type',  'admin_name');
     $smarty->assign('field', 'admin_id');
+
+    if (admin_priv('all','',false)) {
+        $role_list = get_role_list(' WHERE role_id>32 OR role_id=13');
+    }
 
     $seller_list = seller_list();
     if ($_SESSION['admin_id'] == 4 || admin_priv('all', '', false)) {
         array_push($seller_list, array('name'=>'李健均', 'id'=>493));
     }
 
+    $smarty->assign('role_list',$role_list);
     $smarty->assign('list',  $seller_list);
-
     $html = $smarty->fetch('search_builder.htm');
     die($html);
 }
