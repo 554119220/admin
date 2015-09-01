@@ -1395,7 +1395,7 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
         $month_days = date('t');
         $sales_list = array ();
         unset($val);
-        
+
         foreach ($month_stats as $val) {
             @$sales_list[$val['admin_id']]['month_amount'] = sprintf("%.2f",$val['final_amount']-$sales_return[$val['admin_id']]['return_amount']);
             @$sales_list[$val['admin_id']]['month_count']  = $val['num'];
@@ -1430,7 +1430,7 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
             } else {
                 $sales_list[$val['admin_id']]['PCT'] = 0;
             }
-            
+
         }
         foreach ($today_stats as $val) {
             $sales_list[$val['admin_id']]['today_amount'] = $val['final_amount'];
@@ -1935,7 +1935,19 @@ elseif ($_REQUEST['act'] == 'service_stats') {
     $today      = service_stats($today_start_time, $today_end_time); // 当日
     $yesterday  = service_stats($yesterday_start_time, $yesterday_end_time); // 昨日
     $month      = service_stats($month_start_time, $month_end_time); // 当月
-    $last_month = service_stats($last_month_start_time, $last_month_end_time);
+    if ($_REQUEST['start_time'] && $_REQUEST['end_time']) {
+        $start_time = strtotime(date('Y-m-d 00:00:00',strtotime($_REQUEST['start_time'])));
+        $end_time = strtotime(date('Y-m-d 23:59:59',strtotime($_REQUEST['end_time'])));
+        if ($end_time<$start_time) {
+            $start_time=$start_time^$end_time;
+            $end_time=$end_time^$start_time;
+            $start_time=$start_time^$end_time;
+        }
+        $last_month = service_stats($start_time,$end_time);
+        $smarty->assign('search',true);
+    }else{
+        $last_month = service_stats($last_month_start_time, $last_month_end_time);
+    }
 
     $final = final_report($today,$yesterday,$month,$last_month);
     $smarty->assign('final', $final);
@@ -1973,8 +1985,8 @@ elseif('order_success_stats' == $_REQUEST['act']){
     $month      = order_success_stats($month_start_time, $month_end_time); // 当月
     $last_month = order_success_stats($last_month_start_time, $last_month_end_time);
     if ($_REQUEST['start_time'] && $_REQUEST['end_time']) {
-       $customer = order_success_stats(strtotime($_REQUEST['start_time']),strtotime($_REQUEST['end_time']));
-       $smarty->assign('search',true);
+        $customer = order_success_stats(strtotime($_REQUEST['start_time']),strtotime($_REQUEST['end_time']));
+        $smarty->assign('search',true);
     }
     $final = final_order_success($month,$last_month,$customer);
     $smarty->assign('final', $final);
@@ -2010,11 +2022,11 @@ elseif('user_service_stats' == $_REQUEST['act']){
     if ($assigned) {
         foreach ($assigned as &$v) {
             foreach ($serviced as $k=>$s) {
-               if ($v['admin_id'] == $s['admin_id']) {
-                  $v['service_num'] = $s['total']; 
-                  $v['service_stats'] = round($v['service_num']/$v['total']*100).'%';
-                  unset($serviced[$k]);
-               } 
+                if ($v['admin_id'] == $s['admin_id']) {
+                    $v['service_num'] = $s['total']; 
+                    $v['service_stats'] = round($v['service_num']/$v['total']*100).'%';
+                    unset($serviced[$k]);
+                } 
             }
         }
         unset($v,$k);
@@ -4398,7 +4410,6 @@ function final_report($today,$yesterday,$month,$pre_month){
         $pre_month_time_info[]     = $pre_month[$val['admin_id']]['time_info'];
         $pre_month_number_info[]   = $pre_month[$val['admin_id']]['number_info'];
         $pre_month_service_info[]  = $pre_month[$val['admin_id']]['service_info'];
-
     }
     $keys = array_keys(current($final));
     foreach ($keys as $val) {
@@ -4429,25 +4440,25 @@ function call_final_report($today,$yesterday,$month,$pre_month){
     $final = array();
     foreach ($month as $id=>$val) {
         $final[$val['admin_id']] = array(
-           'admin_id'           => $val['admin_id'],
-           'admin_name'         => $val['user_name'],
-           'role_id'            => $val['role_id'],
-           'group_id'           => $val['group_id'],
-           'today_call_num'    => $today[$val['admin_id']]['call_num'],
-           'today_call_rate'    => $today[$val['admin_id']]['call_rate'],
-           'today_answered_num'  => $today[$val['admin_id']]['answered'],
-           'today_noanswered_num' => $today[$val['admin_id']]['noanswered'],
-           'yday_call_num'     => $yesterday[$val['admin_id']]['call_num'],
-           'yday_call_rate'   => $yesterday[$val['admin_id']]['call_rate'],
-           'yday_answered_num'  => $yesterday[$val['admin_id']]['answered'],
-           'yday_noanswer_num'  => $yesterday[$val['admin_id']]['noanswered'],
-           'month_call_num'    => $val['call_num'],
-           'month_call_rate'  => $val['call_rate'],
-           'month_answered_num' => $val['answered'],
-           'month_noanswered_num' => $val['noanswered_num'],
-           //'pre_month_time_info'     => $pre_month[$val['admin_id']]['time_info'],
-           //'pre_month_number_info'   => $pre_month[$val['admin_id']]['number_info'],
-           //'pre_month_service_info'  => $pre_month[$val['admin_id']]['service_info'],
+            'admin_id'           => $val['admin_id'],
+            'admin_name'         => $val['user_name'],
+            'role_id'            => $val['role_id'],
+            'group_id'           => $val['group_id'],
+            'today_call_num'    => $today[$val['admin_id']]['call_num'],
+            'today_call_rate'    => $today[$val['admin_id']]['call_rate'],
+            'today_answered_num'  => $today[$val['admin_id']]['answered'],
+            'today_noanswered_num' => $today[$val['admin_id']]['noanswered'],
+            'yday_call_num'     => $yesterday[$val['admin_id']]['call_num'],
+            'yday_call_rate'   => $yesterday[$val['admin_id']]['call_rate'],
+            'yday_answered_num'  => $yesterday[$val['admin_id']]['answered'],
+            'yday_noanswer_num'  => $yesterday[$val['admin_id']]['noanswered'],
+            'month_call_num'    => $val['call_num'],
+            'month_call_rate'  => $val['call_rate'],
+            'month_answered_num' => $val['answered'],
+            'month_noanswered_num' => $val['noanswered_num'],
+            //'pre_month_time_info'     => $pre_month[$val['admin_id']]['time_info'],
+            //'pre_month_number_info'   => $pre_month[$val['admin_id']]['number_info'],
+            //'pre_month_service_info'  => $pre_month[$val['admin_id']]['service_info'],
         );
         $today_call_num[]    = $today[$val['admin_id']]['call_num'];
         $today_call_rate[]  = $today[$val['admin_id']]['call_rate'];

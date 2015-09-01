@@ -5915,7 +5915,7 @@ function assign_user($order_id) {
 
     $sql = 'SELECT customer_type FROM'.$GLOBALS['ecs']->table('users')." WHERE user_id={$order_amount['user_id']}";
     $customer_type = $GLOBALS['db']->getOne($sql);
-    if ($customer_type != 21) {
+    if (!in_array($customer_type,array(21,6))) {
         if ($order_amount['final_amount'] < 800) {
             $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET admin_id=493 WHERE user_id={$order_amount['user_id']} ".
                 ' AND role_id NOT IN ('.OFFLINE_SALE.',8,23) LIMIT 1';

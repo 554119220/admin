@@ -24,6 +24,21 @@ if ($_REQUEST['act'] == 'admin_name') {
     die($html);
 }
 
+elseif ($_REQUEST['act'] == 'platform') {
+    $smarty->assign('type',  'select');
+    $smarty->assign('field', 'platform');
+    $platform_list = platform_list(); // 列出各个销售平台
+    if ($platform_list) {
+        $list = array();
+        foreach ($platform_list as $v) {
+            $list[] = array('id'=>$v['role_id'],'name'=>$v['role_name']);
+        }
+    }
+    $smarty->assign('list',  $list);
+    $html = $smarty->fetch('search_builder.htm');
+    die($html);
+}
+
 /* 订单二次跟进 */
 elseif ($_REQUEST['act'] == 'shipping_feed') {
     $smarty->assign('field', 'shipping_feed_id');

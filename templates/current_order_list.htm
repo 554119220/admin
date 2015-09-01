@@ -21,13 +21,14 @@
             <select id="keyfields" onchange="changeKeywordsArae(this)">
                 <option value="consignee"{if $kf eq 'consignee'} selected{/if}>收货人</option>
                 <option value="order_sn"{if $kf eq 'order_sn'} selected{/if}>订单编号</option>
+                <option value="admin_name"{if $kf eq 'admin_name'} selected{/if}>健康顾问</option>
+                <option value="platform"{if $kf eq 'platform'} selected{/if}>购买平台</option>
                 <option value="qq"{if $kf eq 'qq'} selected{/if}>QQ</option>
                 <option value="aliww"{if $kf eq 'aliww'} selected{/if}>旺旺</option>
                 <option value="mobile"{if $kf eq 'mobile'} selected{/if}>手机号码</option>
                 <option value="tel"{if $kf eq 'tel'} selected{/if}>固话</option>
                 <option value="region"{if $kf eq 'region'} selected{/if}>收货地区</option>
                 <option value="address"{if $kf eq 'address'} selected{/if}>收货地址</option>
-                <option value="admin_name"{if $kf eq 'admin_name'} selected{/if}>健康顾问</option>
             </select>
             <span id="keywordsArea">
                 <input type="text" id="keywords" value="{$kw}">
