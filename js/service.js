@@ -103,8 +103,9 @@ function fullSearch(obj) {
   var userName = obj.elements['user_name'].value;
   var adminId = obj.elements['admin_id'].value;
   var roleId = obj.elements['role_id'].value;
+  var logbook = obj.elements['logbook'].value;
 
-  Ajax.call('service.php?act=service_fuse', 'start_time=' + startTime + '&end_time=' + endTime + '&user_name=' + userName + '&admin_id=' + adminId + '&role_id=' +roleId, fullSearchResponse, 'POST', 'JSON');
+  Ajax.call('service.php?act=service_fuse', 'start_time=' + startTime + '&end_time=' + endTime + '&user_name=' + userName + '&admin_id=' + adminId + '&role_id=' +roleId+'&logbook='+logbook, fullSearchResponse, 'POST', 'JSON');
 }
 
 //服务高级搜索回调

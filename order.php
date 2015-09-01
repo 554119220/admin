@@ -163,7 +163,8 @@ elseif ($_REQUEST['act'] == 'current_order')
     $shipping_list = get_higher_rate_shipping(); // 订单中使用频率最高的5家快递公司
     if (admin_priv('order_list_all', '', false)) {
         $smarty->assign('all',1);
-        $smarty->assign('abnormal',intval($_REQUEST['abnormal']));
+        $abnormal = isset($_REQUEST['abnormal'])? intval($_REQUEST['abnormal']) : 0;
+        $smarty->assign('abnormal',$abnormal);
         @array_unshift($shipping_list, array('shipping_name'=>'全部','shipping_id'=>0));
     }
 

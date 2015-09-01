@@ -3702,6 +3702,17 @@ function service_records($where = '') {
         $condition .= "&role_id=".$_REQUEST['role_id'];
     }
 
+    if (!empty($_REQUEST['logbook'])) {
+        if (isset($_REQUEST['page'])) {
+            $logbook = trim(mysql_real_escape_string(urldecode($_REQUEST['logbook'])));
+        }else{
+            $logbook = trim(mysql_real_escape_string($_REQUEST['logbook']));
+        }
+        $where     .= " AND logbook LIKE '%$logbook%' ";
+        $condition .= "&logbook=".urlencode($logbook);
+    }
+
+
     $filter['page'] = empty($_REQUEST['page']) || (intval($_REQUEST['page'])<=0) ? 1 : intval($_REQUEST['page']);
     if (isset($_REQUEST['page_size']) && intval($_REQUEST['page_size']) > 0) {
         $filter['page_size'] = intval($_REQUEST['page_size']);
