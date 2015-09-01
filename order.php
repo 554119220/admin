@@ -162,6 +162,8 @@ elseif ($_REQUEST['act'] == 'current_order')
     $order_list = order_list();  // 读取订单列表
     $shipping_list = get_higher_rate_shipping(); // 订单中使用频率最高的5家快递公司
     if (admin_priv('order_list_all', '', false)) {
+        $smarty->assign('all',1);
+        $smarty->assign('abnormal',intval($_REQUEST['abnormal']));
         @array_unshift($shipping_list, array('shipping_name'=>'全部','shipping_id'=>0));
     }
 
@@ -3830,6 +3832,7 @@ function order_list()
         $filter['end_time']   = empty($_REQUEST['end_time']) ? '' : strtotime($_REQUEST['end_time']);
 
         $filter['exp_status'] = !isset($_REQUEST['exp_status'])?0:intval($_REQUEST['exp_status']);
+        $filter['abnormal'] = intval($_REQUEST['abnormal']);
 
         // 订单搜索
 
@@ -3999,6 +4002,11 @@ function order_list()
             }
 
             $where .= " AND o.add_time BETWEEN '{$filter['start_time']}' AND '{$filter['end_time']}'";
+        }
+
+        //下单客服和归属客服不属于同个人
+        if ($filter['abnormal']) {
+            $where .= ' AND o.admin_id<>o.add_admin_id';
         }
 
         // 二次跟单

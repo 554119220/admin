@@ -1019,7 +1019,14 @@ function searchOrder (obj)
   var start_time = document.getElementById('start_time').value; // 下单时间段开始时间
   var end_time   = document.getElementById('end_time').value;   // 下单时间段结束时间
   var time_select = document.getElementById('time_select')?document.getElementById('time_select').value:0;
-  var data = '&a=search&keyfields='+keyfields;
+  var abnormal = '';
+  if (document.getElementById('abnormal')) {
+    abnormal = document.getElementById('abnormal');
+    abnormal = abnormal.checked ? 1 : 0;
+  }else{
+    abnormal = 0;
+  }
+  var data = '&a=search&keyfields='+keyfields+'&abnormal='+abnormal;
 
   if(document.getElementById('platform')){
     var platform   = document.getElementById('platform').value;   // 购买平台
