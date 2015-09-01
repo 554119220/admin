@@ -238,6 +238,9 @@ elseif ($_REQUEST['act'] == 'history_order')
 
     if (admin_priv('order_list_all', '', false))
     {
+        $smarty->assign('all',1);
+        $smarty->assign('abnormal',intval($_REQUEST['abnormal']));
+
         $sql_select = 'SELECT role_id,role_name FROM '.$GLOBALS['ecs']->table('role').
             " WHERE role_name LIKE '%微店%'";
         $wei_store = $GLOBALS['db']->getRow($sql_select);
@@ -3832,7 +3835,7 @@ function order_list()
         $filter['end_time']   = empty($_REQUEST['end_time']) ? '' : strtotime($_REQUEST['end_time']);
 
         $filter['exp_status'] = !isset($_REQUEST['exp_status'])?0:intval($_REQUEST['exp_status']);
-        $filter['abnormal'] = intval($_REQUEST['abnormal']);
+        $filter['abnormal'] = isset($_REQUEST['abnormal']) ? intval($_REQUEST['abnormal']) : 0;
 
         // 订单搜索
 
