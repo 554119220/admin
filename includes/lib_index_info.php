@@ -211,7 +211,8 @@ function sales_stats ($start,$end) {
     if ($pwd_info['statistic_part_mgr']) {
         $sql_finish_order_ranklist = " AND platform={$_SESSION['role_id']} ";
     }elseif($pwd_info['statistic_group_mgr']){
-        $sql_finish_order_ranklist = " AND platform={$_SESSION['role_id']} AND group_id={$_SESSION['group_id']} ";
+        //$sql_finish_order_ranklist = " AND platform={$_SESSION['role_id']} AND group_id={$_SESSION['group_id']} ";
+        $sql_finish_order_ranklist = " AND platform={$_SESSION['role_id']} AND group_id={$_SESSION['group_id']} GROUP BY admin_id ";
     }
 
     $sales['finish_order_ranklist'] = get_ranklist($sql_finish_order_ranklist,'finish_order_ranklist',$start,$end);
@@ -222,31 +223,45 @@ function sales_stats ($start,$end) {
     return $sales;
 }
 
-//服务量排行
+//服务量/通话时长排行
 function stats_service($start,$end) {
     $admin_id = $_SESSION['admin_id'];
     $group_id = $_SESSION['group_id'];
     $role_id  = $_SESSION['role_id'];
 
-    $sql_select = 'SELECT s.admin_id,a.user_name,COUNT(*) AS num_service FROM '.
-        $GLOBALS['ecs']->table('service').' s LEFT JOIN '.
-        $GLOBALS['ecs']->table('admin_user').' a ON a.user_id=s.admin_id'.
-        " WHERE a.status>0 AND service_time BETWEEN $start AND $end AND valid=1 ";
-    $order_by = ' ORDER BY num_service DESC';
+    //服务数量
+    //$sql_select = 'SELECT s.admin_id,a.user_name,COUNT(*) AS num_service FROM '.
+    //    $GLOBALS['ecs']->table('service').' s LEFT JOIN '.
+    //    $GLOBALS['ecs']->table('admin_user').' a ON a.user_id=s.admin_id'.
+    //    " WHERE a.status>0 AND service_time BETWEEN $start AND $end AND valid=1 ";
+    //通话时长
+    $sql_select = 'SELECT s.admin_id,a.user_name,SUM(s.time_info) AS num_service FROM '.
+        $GLOBALS['ecs']->table('wavtime').' s LEFT JOIN '.
+        $GLOBALS['ecs']->table('admin_user').' a ON a.user_id=s.admin_id '.
+        " WHERE a.status>0 AND update_time BETWEEN $start AND $end ";
 
+    $order_by = ' ORDER BY num_service DESC';
     $role_id_str = get_role_str();
 
-    $platform_condition = $role_id_str ? " s.platform IN($role_id_str) " : " s.platform=$role_id";
+    $platform_condition = $role_id_str ? " a.role_id IN($role_id_str) " : " a.role_id=$role_id";
 
     if(admin_priv('service_all_mgr','',false) || admin_priv('all','',false)){
         $sql_select .= " GROUP BY admin_id $order_by";
     }elseif(admin_priv('service_part_mgr','',false)){
         $sql_select .= " AND $platform_condition GROUP BY admin_id $order_by";
-    }else{
+    }elseif(admin_priv('service_group_mgr','',false)){
+        $sql_select .= " AND a.group_id=$group_id GROUP BY admin_id $order_by";
+    } else{
         $sql_select .= " AND $platform_condition GROUP BY admin_id $order_by";
     }
 
-    return $GLOBALS['db']->getAll($sql_select);
+    $res = $GLOBALS['db']->getAll($sql_select);
+    if ($res) {
+        foreach ($res as &$v) {
+            $v['num_service'] = round($v['num_service']/60);
+        }
+    }
+    return $res;
 }
 
 //公告

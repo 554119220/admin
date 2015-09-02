@@ -53,12 +53,12 @@
         </li>
         <li>
         <div class="ranklist_div">
-          <div class=ranklist_div_title>服务量排行榜<label id="lab_hide_service_ranklist" onclick="popMoreRanklist('hide_service_ranklist','服务量排行')">more</label></div>
+          <div class=ranklist_div_title>通话时长排行榜<label id="lab_hide_service_ranklist" onclick="popMoreRanklist('hide_service_ranklist','服务量排行')">more</label></div>
           <table cellpadding=0 cellspacing=0 width=100% id=hide_service_ranklist>
             <tr>
               <td>排名</td>
               <td style="text-align:left">客服</td>
-              <td>服务量</td>
+              <td>通话时长</td>
             </tr>
             {foreach from=$stats_info.statistics.service_ranklist item=val name=i}
             {if $smarty.foreach.i.index lt 5}
