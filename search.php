@@ -183,7 +183,7 @@ elseif ($_REQUEST['act'] == 'get_more_info'){
                 .$GLOBALS['ecs']->table($table_name)
                 .' o LEFT JOIN '.$GLOBALS['ecs']->table('role')
                 .' r ON o.platform=r.role_id'
-                ." WHERE o.user_id=$user_id ORDER BY o.add_time DESC LIMIT 5";
+                ." WHERE o.user_id=$user_id AND o.shipping_status<>3 ORDER BY o.add_time DESC LIMIT 6";
 
             try{
                 $order_info = $GLOBALS['db']->getAll($sql_select);
