@@ -2999,6 +2999,7 @@ function user_stats2() {
     foreach ($section_total as &$val) {
         $val['total'] = array_sum($val);
     }
+    //print_r($section_total);exit;
     return array('total' => $user_total, 'section' => $section_total);
 }
 

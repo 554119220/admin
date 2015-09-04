@@ -469,9 +469,13 @@ function tidysql($sql_ranklist_name = ''){
         $tidy_date['sql_group_ranklist'] = $role_id_str ? " AND platform IN($role_id_str) GROUP BY group_id " : " AND platform=$role_id GROUP BY group_id";
         $tidy_date['sql_finish_order_ranklist'] = ' GROUP BY admin_id ORDER BY num DESC';
     }else{
-        $tidy_date['sql_person_ranklist']       = " AND group_id=$group_id GROUP BY admin_id ";
-        $tidy_date['sql_group_ranklist']        = " AND group_id=$group_id GROUP BY group_id "; 
-        $tidy_date['sql_finish_order_ranklist'] = " AND group_id=$group_id GROUP BY admin_id ORDER BY num DESC";
+        //$tidy_date['sql_person_ranklist']       = " AND group_id=$group_id GROUP BY admin_id ";
+        //$tidy_date['sql_group_ranklist']        = " AND group_id=$group_id GROUP BY group_id "; 
+        //$tidy_date['sql_finish_order_ranklist'] = " AND group_id=$group_id GROUP BY admin_id ORDER BY num DESC";
+
+        $tidy_date['sql_person_ranklist']       = " AND platform=$role_id GROUP BY admin_id ";
+        $tidy_date['sql_group_ranklist']        = " AND platform=$role_id GROUP BY group_id "; 
+        $tidy_date['sql_finish_order_ranklist'] = " AND platform=$role_id GROUP BY admin_id ORDER BY num DESC";
     }
 
     $tidy_date['sql_role_ranklist'] = " GROUP BY platform ";

@@ -1103,7 +1103,7 @@ elseif ($_REQUEST['act'] == 'edit')
             $list = list_effects_common();
             break;
         case 'customer_type' :
-            if (in_array($_SESSION['role_id'],array(34,35,36))) {
+            if (in_array($_SESSION['role_id'],array(34,35,36,40))) {
                 $customer_where = ' type_id NOT IN (21) AND ';
             }
             $list = list_customer_type($customer_where);
@@ -1451,13 +1451,18 @@ elseif ($_REQUEST['act'] == 'advance_batch')
     }
 
     if ($adv_number) {
-        $where .= " LIMIT $adv_number";
+        $limit = " LIMIT $adv_number";
     }
 
-    $sql = ' SELECT COUNT(*) FROM '.$GLOBALS['ecs']->table('users').$where;
-    $count = $GLOBALS['db']->getOne($sql);
+    $sql = ' SELECT user_id FROM '.$GLOBALS['ecs']->table('users').$where.$limit;
+    $count = $GLOBALS['db']->getCol($sql);
+    if ($count) {
+        $count = count($count);
+    }
+    
     $admin_name = $GLOBALS['db']->getOne("SELECT user_name FROM".$GLOBALS['ecs']->table('admin_user')." WHERE user_id=$to_admin");
-    $sql = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET customer_type=$customer_type,admin_id=$to_admin,admin_name='$admin_name',assign_time={$_SERVER['REQUEST_TIME']}" .$where;
+    $sql = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET customer_type=$customer_type,admin_id=$to_admin,admin_name='$admin_name',assign_time={$_SERVER['REQUEST_TIME']}" .$where.$limit;
+
     $code = $GLOBALS['db']->query($sql);
     if ($code) {
         $res = crm_msg("成功转了{$count}个顾客。",$code);
@@ -4548,7 +4553,7 @@ elseif ($_REQUEST['act'] == 'search_by_goods') {
     }
     if (admin_priv('all','',false)) {
         $smarty->assign('all',true);
-        $smarty->assign('role_list', get_role_customer(' AND role_id IN(33,34,35,36,37,13)'));
+        $smarty->assign('role_list', get_role_customer(' AND role_id IN(33,34,35,36,37,40,13)'));
     }
 
     // 品牌列表
@@ -4799,7 +4804,7 @@ elseif($_REQUEST['act'] == 'recyle_user'){
     $role_id       = intval($_REQUEST['role_id']);
     $admin_id      = intval($_REQUEST['recyle_admin']);
     $customer_type = intval($_REQUEST['customer_type']);
-    if (in_array($role_id,array(33,34,35,36,37))) {
+    if (in_array($role_id,array(33,34,35,36,37,40))) {
         $sql = 'SELECT role_id FROM '.$GLOBALS['ecs']->table('admin_user')." WHERE user_id=$admin_id";
         $to_role_id = $GLOBALS['db']->getOne($sql);
         $where = " WHERE role_id=$role_id AND customer_type=4";
@@ -5133,6 +5138,8 @@ function user_list() {
                 $filter['end_time']   = $filter['start_time'];
                 $filter['start_time'] = $time_tmp;
             }
+            $filter['start_time'] = strtotime(date('Y-m-d 00:00:00',$filter['start_time']));
+            $filter['end_time'] = strtotime(date('Y-m-d 23:59:59',$filter['end_time']));
             switch ($filter['time_select']) {
             case 1 :
                 $time_where = 'service_time';
