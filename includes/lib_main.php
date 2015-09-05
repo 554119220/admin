@@ -1704,6 +1704,8 @@ function get_role_by_all(){
     $where = ' WHERE role_id>31';
     if ($_SESSION['admin_id'] == 493) {
         $where .= " AND role_id IN(34,35,36,40)";
+    }elseif($_SESSION['admin_id'] == 4){
+        $where .= " AND role_id IN(36,37)";
     }elseif (!empty($_SESSION['role_id'])) {
         $where .= " AND role_id={$_SESSION['role_id']}";
     }
