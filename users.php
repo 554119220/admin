@@ -5092,7 +5092,8 @@ function user_list() {
                     $ex_where .= " AND u.admin_id={$filter['admin_id']} ";
                 }
             } elseif (admin_priv('user_group_view', '', false)) {
-                $ex_where .= " AND u.group_id={$_SESSION['group_id']}";
+                //$ex_where .= " AND u.group_id={$_SESSION['group_id']}";
+                $ex_where .= " AND u.role_id={$_SESSION['role_id']}";
                 if ($filter['admin_id']) {
                     $ex_where .= " AND u.admin_id={$filter['admin_id']} ";
                 }
@@ -5260,7 +5261,8 @@ function user_list() {
                     $where = " u.admin_id={$filter['admin_id']} ";
                 }
             } elseif (admin_priv('user_group_view', '', false)) {
-                $where = " u.group_id={$_SESSION['group_id']}";
+                //$where = " u.group_id={$_SESSION['group_id']}";
+                $where = " u.role_id={$_SESSION['role_id']}";
                 if ($filter['admin_id']) {
                     $where .= " AND u.admin_id={$filter['admin_id']} ";
                 }

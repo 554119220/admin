@@ -3660,7 +3660,8 @@ function order_list()
         } elseif (admin_priv('order_part_view', '', false)) {
             $order_status = " AND order_status=0 AND o.platform IN ($role_list_str) ";
         } elseif (admin_priv('order_group_view', '', false)) {
-            $order_status = ' AND order_status=0 AND o.admin_id>0 AND o.group_id='.$_SESSION['group_id'];
+            //$order_status = ' AND order_status=0 AND o.admin_id>0 AND o.group_id='.$_SESSION['group_id'];
+            $order_status = ' AND order_status=0 AND o.admin_id>0 AND o.role_id='.$_SESSION['role_id'];
             if (isset($_REQUEST['admin_id']) && intval($_REQUEST['admin_id'])) {
                 $order_status = ' AND order_status=0 AND o.admin_id='.intval($_REQUEST['admin_id']);
             }
@@ -3685,7 +3686,8 @@ function order_list()
         } elseif (admin_priv('order_part_view', '', false)) {
             $auth = " AND o.platform IN ($role_list_str) ";
         } elseif (admin_priv('order_group_view', '', false)) {
-            $auth = " AND o.group_id={$_SESSION['group_id']} ";
+            //$auth = " AND o.group_id={$_SESSION['group_id']} ";
+            $auth = " AND u.role_id={$_SESSION['role_id']} ";
             if (isset($_REQUEST['admin_id']) && intval($_REQUEST['admin_id'])) {
                 $auth = ' AND o.admin_id='.intval($_REQUEST['admin_id']);
             }
@@ -3706,7 +3708,8 @@ function order_list()
         } elseif (admin_priv('order_part_view', '', false)) {
             $auth = " AND u.role_id IN ($role_list_str) "; //如果以顾客所属部门检索就是u.role_id如果以订单平台检索就是o.platform
         } elseif (admin_priv('order_group_view', '', false)) {
-            $auth = " AND u.group_id={$_SESSION['group_id']} ";
+            //$auth = " AND u.group_id={$_SESSION['group_id']} ";
+            $auth = " AND u.role_id={$_SESSION['role_id']} ";
             if (isset($_REQUEST['admin_id']) && intval($_REQUEST['admin_id'])) {
                 $auth = ' AND u.admin_id='.intval($_REQUEST['admin_id']);
             }
@@ -3727,7 +3730,8 @@ function order_list()
         } elseif (admin_priv('order_part_view', '', false)) {
             $auth = " AND u.role_id IN ($role_list_str) ";  //如果以顾客所属部门检索就是u.role_id如果以订单平台检索就是o.platform
         } elseif (admin_priv('order_group_view', '', false)) {
-            $auth = " AND u.group_id={$_SESSION['group_id']} ";
+            //$auth = " AND u.group_id={$_SESSION['group_id']} ";
+            $auth = " AND u.role_id={$_SESSION['role_id']} ";
             if (isset($_REQUEST['admin_id']) && intval($_REQUEST['admin_id'])) {
                 $auth = ' AND u.admin_id='.intval($_REQUEST['admin_id']);
             }
@@ -3748,7 +3752,8 @@ function order_list()
         } elseif (admin_priv('order_part_view', '', false)) {
             $auth = " AND u.role_id IN ($role_list_str) ";  //如果以顾客所属部门检索就是u.role_id如果以订单平台检索就是o.platform
         } elseif (admin_priv('order_group_view', '', false)) {
-            $auth = " AND u.group_id={$_SESSION['group_id']} ";
+            //$auth = " AND u.group_id={$_SESSION['group_id']} ";
+            $auth = " AND u.role_id={$_SESSION['role_id']} ";
             if (isset($_REQUEST['admin_id']) && intval($_REQUEST['admin_id'])) {
                 $auth = ' AND u.admin_id='.intval($_REQUEST['admin_id']);
             }
@@ -3769,7 +3774,8 @@ function order_list()
         } elseif (admin_priv('order_part_view', '', false)) {
             $auth = " AND u.role_id IN ($role_list_str) ";  //如果以顾客所属部门检索就是u.role_id如果以订单平台检索就是o.platform
         } elseif (admin_priv('order_group_view', '', false)) {
-            $auth = " AND u.group_id={$_SESSION['group_id']} ";
+            //$auth = " AND u.group_id={$_SESSION['group_id']} ";
+            $auth = " AND u.role_id={$_SESSION['role_id']} ";
             if (isset($_REQUEST['admin_id']) && intval($_REQUEST['admin_id'])) {
                 $auth = ' AND u.admin_id='.intval($_REQUEST['admin_id']);
             }
