@@ -160,9 +160,6 @@ function eventResponse(res) {
   promptMsg(res);
 }
 
-//删除服务
-function del_service(service_id) {}
-
 /*
  * 验证函数
  */
@@ -1666,5 +1663,14 @@ function getUserDetail(user_id){
     return ;
   }else if (user_id) {
     Ajax.call("users.php?act=user_detail&id="+user_id,'',sendToServerResponse,'GET','JSON');
+  }
+}
+
+//删除服务
+function delServiceLog(obj,serviceId){
+  if (serviceId) {
+    var index = obj.parentNode.parentNode.rowIndex;
+    obj.parentNode.parentNode.parentNode.deleteRow(index);
+    Ajax.call('service.php?act=del_service','service_id='+serviceId,showMsg,'GET','JSON');
   }
 }

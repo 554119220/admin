@@ -685,15 +685,16 @@
         </fieldset>
       </div>
 
-      <!-- 添加新服务 -->
+      <!-- 跟进历史 -->
       <div id="new_service" class="hide">
         <table id="service_list" class="wu_table_list tr_hover" width="100%">
           <tr>
             <th width="4%">序号</th>
-            <th width="63%">跟进结果</th>
-            <th width="10%">录音回放</th>
+            <th width="53%">跟进结果</th>
+            <th width="7%">录音回放</th>
             <th width="13%">跟进时间</th>
-            <th width="8%">跟进人</th>
+            <th width="6%">跟进人</th>
+            <th width="7%">操作</th>
           </tr>
           {if $service}
           {foreach from=$service item=val}
@@ -706,11 +707,12 @@
             </td>
             <td>{$val.service_time}</td>
             <td>{$val.admin_name}</td>
+            <td><span class="btn_new" onclick="delServiceLog(this,{$val.service_id})">删除</span></td>
           </tr>
           {/foreach}
           {else}
           <tr>
-            <td colspan="5">没有跟进记录</td>
+            <td colspan="6">没有跟进记录</td>
           </tr>
           {/if}
         </table>

@@ -2686,7 +2686,9 @@ elseif ($_REQUEST['act'] == 'batch')
         $role_info = get_role_by_all();
     } elseif (admin_priv('batch_transfer', '', false)) {
         $sql = 'SELECT user_id,user_name FROM '.$GLOBALS['ecs']->table('admin_user').' WHERE role_id='.$_SESSION['role_id'];
-        $admin_list = admin_list_by_role($role_list);
+        $role_info = get_role(" role_id={$_SESSION['role_id']}");
+        //$admin_list = admin_list_by_role($role_list);
+        $admin_list = $GLOBALS['db']->getAll($sql);
     } else {
         $res = crm_msg('对不起，您还不能访问该页面！');
         die($json->encode($res));
@@ -5859,7 +5861,7 @@ function access_purchase_records ($id)
 function get_user_services ($user_id)
 {
     $sql_select = 'SELECT service_id,user_name,user_id,logbook,admin_name,service_time FROM '.
-        $GLOBALS['ecs']->table('service')." WHERE user_id=$user_id ORDER BY service_time DESC";
+        $GLOBALS['ecs']->table('service')." WHERE user_id=$user_id AND show_sev=1 ORDER BY service_time DESC";
     $res = $GLOBALS['db']->getAll($sql_select);
     $total = count($res);
     foreach ($res as &$val) {

@@ -3612,6 +3612,20 @@ elseif('call_history' == $_REQUEST['act']){
     die($json->encode($res));
 }
 
+//删除服务记录
+elseif($_REQUEST['act'] == 'del_service'){
+    $service_id = intval($_REQUEST['service_id']);
+    if ($service_id) {
+        $sql = 'UPDATE '.$GLOBALS['ecs']->table('service').' SET show_sev=0 WHERE service_id='.$service_id;
+        $code = $GLOBALS['db']->query($sql);
+       $res = $code ? crm_msg('删除成功') :crm_msg('删除失败');
+    }else{
+        $res = crm_msg('删除失败');
+    }
+
+    die($json->encode($res));
+}
+
 
 /* 函数区 */
 
