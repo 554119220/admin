@@ -1389,7 +1389,7 @@ function get_admin_tmp_list ($role = 0)
 {
     $sql = 'SELECT user_name,user_id,group_id,role_id FROM '.
         $GLOBALS['ecs']->table('admin_user').' WHERE status>0 AND stats>0';
-    if (!admin_priv('all', '', false) && $role && $_SESSION['role_id']) {
+    if (!admin_priv('all', '', false) && $_SESSION['role_id']) {
         $sql .= " AND role_id={$_SESSION['role_id']}";
     } else {
         $sql .= ' AND role_id IN ('.SALE.') ';

@@ -902,7 +902,7 @@ elseif ($_REQUEST['act'] == 'ordersyn_verify') {
             $resp = $c->execute($req, $sk['access_token']);
         }
         //按购买商品分类顾客到数据中心
-        assignUserToData($id,$goods_list);
+        assignUserToData($id);
         $sql = ' UPDATE '.$GLOBALS['ecs']->table('users')." SET order_time={$_SERVER['REQUEST_TIME']} WHERE user_id={$order_info['user_id']} LIMIT 1";
         $GLOBALS['db']->query($sql);
 
@@ -1438,6 +1438,8 @@ elseif ($_REQUEST['act'] == 'add_new_order') {
             " SET goods_kind={$goods_info['goods_id']},goods_num={$goods_info['goods_num']} WHERE order_id=$order_id";
         $GLOBALS['db']->query($sql_update);
 
+        //将顾客按购买商品分类
+        assignUserToData($order_id);
         /*
         // 处理库存
         $handle_message = '';
@@ -3661,7 +3663,7 @@ function order_list()
             $order_status = " AND order_status=0 AND o.platform IN ($role_list_str) ";
         } elseif (admin_priv('order_group_view', '', false)) {
             //$order_status = ' AND order_status=0 AND o.admin_id>0 AND o.group_id='.$_SESSION['group_id'];
-            $order_status = ' AND order_status=0 AND o.admin_id>0 AND o.role_id='.$_SESSION['role_id'];
+            $order_status = ' AND order_status=0 AND o.admin_id>0 AND o.platform='.$_SESSION['role_id'];
             if (isset($_REQUEST['admin_id']) && intval($_REQUEST['admin_id'])) {
                 $order_status = ' AND order_status=0 AND o.admin_id='.intval($_REQUEST['admin_id']);
             }
@@ -6146,7 +6148,7 @@ function shipping_zto($order){
 }
 
 //确认订单后将按顾客需求分类到数据中心
-function assignUserToData($order_id,$goods_list=array()){
+function assignUserToData($order_id){
     $sql = 'SELECT u.user_id,u.eff_id FROM '.$GLOBALS['ecs']->table('users').' u LEFT JOIN '.$GLOBALS['ecs']->table('order_info')
         ." o ON u.user_id=o.user_id WHERE o.order_id=$order_id";
     $user_info = $GLOBALS['db']->getRow($sql);

@@ -884,7 +884,7 @@ elseif ($_REQUEST['act'] == 'user_detail') {
     $smarty->assign('bmi',get_user_bmi($user_id));
 
 
-    if (in_array($_SESSION['admin_id'],array(1,493,2,4))) {
+    if (in_array($_SESSION['admin_id'],array(1,493,2,4,580))) {
         $admin_list = get_admin_tmp_list();
         $smarty->assign('all_power',true);
     }elseif(in_array($_SESSION['admin_id'],array(520,359))){
