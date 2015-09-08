@@ -3580,6 +3580,23 @@ elseif($_REQUEST['act'] == 'assist_order'){
     die($json->encode($res));
 }
 
+//批量确认刷单订单
+elseif($_REQUEST['act'] == 'deal_flush_order'){
+    $behave = $_REQUEST['behave'] ? $_REQUEST['behave'] : 'show';
+    switch($behave){
+    case 'deal':
+        $order_sn_list = trim(mysql_real_escape_string($_REQUEST['order_sn_list']));
+        $shippig_code_list = trim($_REQUEST['shipping_code_list']);
+        $plarform = intval($_REQUEST['platform']);
+        break;
+    case 'show':
+        $res['main'] = $smarty->fetch('deal_flush_order.htm');
+        die($json->encode($res));
+        break;
+    }
+}
+
+
 
 //协助完成订单操作 , 在添加订单的时候判断并执行
 function assist_order($admin_id,$order_id,$final_amount){
