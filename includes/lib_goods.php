@@ -892,7 +892,7 @@ function goods_list($is_delete, $real_goods=1)
         /* 品牌 */
         if ($filter['brand_id'])
         {
-            $where .= " AND g.brand_id='$filter[brand_id]'";
+            $where .= " AND g.brand_id='{$filter[brand_id]}'";
         }
 
         /* 上架 */
@@ -915,8 +915,12 @@ function goods_list($is_delete, $real_goods=1)
         }
 
         if (!admin_priv('all','',false)) {
-            $sale_platform = $_SESSION['role_id'] == 39?2:1;
-            $where .= " AND g.sale_platform=$sale_platform ";
+            if ($_SESSION['role_id'] == 39) {
+                $where .= " AND g.sale_platform=2";
+            }elseif($_SESSION['role_id'] != 8){
+                $where .= " AND g.sale_platform=1";
+            }
+            //$sale_platform = $_SESSION['role_id'] == 39?2:1;
         }
 
         /* 记录总数 */

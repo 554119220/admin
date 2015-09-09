@@ -104,9 +104,14 @@ function addOrderSnForBrushResp(res) {
  * 显示顾客联系信息：手机、电话、地址
  */
 function showThisInfo(oid, table) {
-  Ajax.call('order.php?act=show_single_info&order_id='+oid+'&table='+table, '', showThisInfoResp, 'GET', 'JSON');
+  Ajax.call('order.php?act=show_single_info&order_id='+oid+'&table='+table, '', showMsg, 'GET', 'JSON');
 }
 
-function showThisInfoResp(res) {
-  showMsg(res);
+//批量确认订单
+function dealFlushOrder(obj){
+  var orderlist = obj.elements['order_sn_list'].value;
+  var shipping_id = obj.elements['shipping_id'].value;
+  if (orderlist) {
+    Ajax.call('order.php?act=deal_flush_order&behave=deal','&orderlist='+orderlist+'&shipping_id='+shipping_id,showMsg,'POST','JSON');
+  }
 }

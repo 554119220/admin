@@ -1222,10 +1222,9 @@ elseif ($_REQUEST['act'] == 'search_goods')
         $order_id = intval($_REQUEST['order_id']);
     }
 
-    if ($_SESSION['role_id'] == 39) {
-        $sale_platform = $_SESSION['role_id'] == 39?2:1;
-        $where = " AND g.sale_platform=$sale_platform ";
-    }
+    $sale_platform = $_SESSION['role_id'] == 39?2:1;
+    $where = " AND g.sale_platform=$sale_platform ";
+
     $sql_select = 'SELECT CONCAT(g.goods_name,"  【库存：",SUM(s.quantity),"】") goods_name,g.goods_sn goods_id,SUM(s.quantity) quantity FROM '.
         $GLOBALS['ecs']->table('goods').' g,'.$GLOBALS['ecs']->table('stock_goods').
         " s WHERE g.goods_name LIKE '%$keyword%' $where AND g.is_on_sale=1 AND g.is_delete=0 AND g.goods_sn=s.goods_sn GROUP BY s.goods_sn";
@@ -3585,18 +3584,91 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
     $behave = $_REQUEST['behave'] ? $_REQUEST['behave'] : 'show';
     switch($behave){
     case 'deal':
-        $order_sn_list = trim(mysql_real_escape_string($_REQUEST['order_sn_list']));
-        $shippig_code_list = trim($_REQUEST['shipping_code_list']);
-        $plarform = intval($_REQUEST['platform']);
+        $order_sn_list = trim(mysql_real_escape_string($_REQUEST['orderlist']));
+        $shipping_id = intval($_REQUEST['shipping_id']);
+        if ($order_sn_list && $shipping_id) {
+
+            $sql = 'SELECT shipping_code,shipping_name FROM '.$GLOBALS['ecs']->table('shipping')." WHERE shipping_id=$shipping_id";
+            $shipping_info = $GLOBALS['db']->getRow($sql);
+
+            // 验证运单号与快递公司是否一致
+            $sql_select = 'SELECT code_regexp FROM '.$GLOBALS['ecs']->table('shipping')." WHERE shipping_id=$shipping_id";
+            $regexp = $GLOBALS['db']->getOne($sql_select);
+
+            $order_sn_list = explode('\n',$order_sn_list);
+            $order_sn_list = array_filter($order_sn_list);
+            foreach ($order_sn_list as $v) {
+                $arr = explode('--',$v);
+                $order_list[] = $arr[0];
+                $shipping_list[$arr[0]] = $arr[1];
+            }
+            //匹配已经同步到系统的订单
+            $order_str = implode("','",$order_list);
+            $sql = 'SELECT order_sn,order_id FROM '.$GLOBALS['ecs']->table('ordersyn_info')
+                ." WHERE order_sn IN('$order_str') AND order_status=0 AND shipping_status=0" ;
+            $syn_order = $GLOBALS['db']->getAll($sql);
+            if ($syn_order) {
+                foreach ($syn_order as $v) {
+                    $syn_order_sn[$v['order_id']] = $v['order_sn']; 
+                }
+                //未同步的订单
+                $unsyn = array_diff($order_list,$syn_order_sn);
+                unset($v);
+                foreach ($syn_order_sn as $k=>$v) {
+                    $order_info = array(
+                        'order_id'      => $k,
+                        'shipping_time' => $_SERVER['REQUEST_TIME'],
+                        'tracking_sn'   => $shipping_list[$v],
+                    );
+                    if ($regexp && !preg_match($regexp, $order_info['tracking_sn'])) {
+                        $error_shiping[] = $order_info['tracking_sn'];
+                    }else{
+                        $sql = 'UPDATE '.$GLOBALS['ecs']->table('ordersyn_info')
+                            ." SET shipping_time={$_SERVER['REQUEST_TIME']},order_status=5,shipping_status=1,"
+                            ."tracking_sn='{$order_info['tracking_sn']}',shipping_id=$shipping_id,"
+                            ."shipping_code='{$shipping_info['shipping_code']}',shipping_name='{$shipping_info['shipping_name']}',pay_status=1"
+                            ." WHERE order_id=$k AND tracking_sn<>'{$order_info['tracking_sn']}'";
+                        if ($GLOBALS['db']->query($sql)) {
+                            $error_sn[] = shipping_synchro($k);
+                        }
+                    }
+                    $record_sql .= "$sql;";
+                }
+            }
+            if ($error_sn) {
+                $error_sn = array_filter($error_sn);
+            }
+            record_operate($record_sql, 'ordersyn_info');// 记录确认操作
+            if ($unsyn) {
+                $msg = '还没有同步到系统的订单:'.implode(',',$unsyn);
+            }
+            if ($error_sn) {
+                $msg .= '<br/> 还没有同步到系统的订单:'.implode(',',$error_sn);
+            }
+
+            if ($error_shiping) {
+                $msg .= '<br/>快递单号错误:'.implode(',',$error_shiping);
+            }
+
+            if ($msg) {
+                $res = crm_msg($msg,true,20000);
+            }else{
+                $res = crm_msg('全部同步发货');
+            }
+        }else{
+            $res = crm_msg('确认失败');
+        }
+        die($json->encode($res));
+        //$shippig_code_list = trim($_REQUEST['shipping_code_list']);
+        //$plarform = intval($_REQUEST['platform']);
         break;
     case 'show':
+        $smarty->assign('shipping_list',shipping_list(3));
         $res['main'] = $smarty->fetch('deal_flush_order.htm');
         die($json->encode($res));
         break;
     }
 }
-
-
 
 //协助完成订单操作 , 在添加订单的时候判断并执行
 function assist_order($admin_id,$order_id,$final_amount){
@@ -5096,9 +5168,15 @@ function shipping_synchro($order_id)
 {
     global $json;
     // 获取标记发货所需的相关订单参数
-    $sql = 'SELECT IF(platform_order_sn,platform_order_sn,order_sn) order_sn,team,'.
-        'tracking_sn,shipping_id,shipping_name,shipping_code,province,shipping_time FROM '.
-        $GLOBALS['ecs']->table('order_info')." WHERE order_id=$order_id";
+    if ($_SESSION['role_id'] == 10) {
+        $sql = 'SELECT order_sn,team,'.
+            'tracking_sn,shipping_id,shipping_name,shipping_code,province,shipping_time FROM '.
+            $GLOBALS['ecs']->table('ordersyn_info')." WHERE order_id=$order_id";
+    }else{
+        $sql = 'SELECT IF(platform_order_sn,platform_order_sn,order_sn) order_sn,team,'.
+            'tracking_sn,shipping_id,shipping_name,shipping_code,province,shipping_time FROM '.
+            $GLOBALS['ecs']->table('order_info')." WHERE order_id=$order_id";
+    }
     $order_info = $GLOBALS['db']->getRow($sql);
     $tracking_sn = $order_info['tracking_sn'];
 
@@ -5529,7 +5607,6 @@ function shipping_synchro($order_id)
         $resp = json_decode($resp, true);
         $res = true;
     }
-
     return $res;
 }
 

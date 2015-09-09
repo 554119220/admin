@@ -1,26 +1,29 @@
 <br />
 <h3>批量确认刷单</h3>
 <br />
-<div style="width:70%;" class="white_bg">
+<div style="width:40%;" class="white_bg">
   <form action="javascript:void(0)" onsubmit="dealFlushOrder(this)">
     <table class="form_table" style="width:100%;">
       <tr>
         <th></th>
-        <td> 订单编号和快递单号要严格按照：  订单编号|快递单号  的格式填写 </td>
+        <td>
+          订单编号和快递单号要严格按照：  订单编号--递单号  的格式填写
+          <br />示例： 10035314094--720003657638
+        </td>
       </tr>
       <tr>
         <th>订单号和快递单号列：</th>
         <td>
-          <textarea name="order_sn_list" style="width:773px;height:149px;resize:vertical;" placeholder="10035314094|720003657638"></textarea>
+          <textarea name="order_sn_list" style="width:236px;height:343px;resize:vertical;" placeholder="10035314094--720003657638"></textarea>
         </td>
       </tr>
       <tr>
         <th>发货商品:</th>
         <td>
-          <input type="text" name="search" value="" size="20" oninput="searchGoods(this)" onblur="searchGoods(this)"/>
-          <select name="goods_id" id="goods_id">
-            <option value="0003" selected>康健人生小药盒</option>
-            <option value="0">请先输入要搜索的商品</option>
+          <select name="shipping_id" id="shipping_id">
+            {foreach from=$shipping_list item=v}
+            <option value="{$v.shipping_id}" {if $v.shipping_id eq 41}selected{/if}>{$v.shipping_name}</option>
+            {/foreach}
           </select>
           <input type="submit" value="确认" class="input_submit"/>
         </td>
