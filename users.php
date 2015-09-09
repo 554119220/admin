@@ -5796,12 +5796,15 @@ function get_user_info ($id)
  */
 function access_purchase_records ($id)
 {
+    if ($_SESSION['role_id'] == 13) {
+        $where = " AND o.shipping_status<>3 ";
+    }
     // Get user to buy records 获取顾客购买记录
     $sql_select = 'SELECT o.order_id,o.platform_order_sn,o.order_sn p_order_sn,o.consignee,o.order_status,o.shipping_status,o.add_time,'.
         'o.shipping_name,o.pay_name,o.final_amount,o.tracking_sn express_number,a.user_name operator,o.receive_time,o.shipping_code, '.
         ' r.role_describe platform FROM '.$GLOBALS['ecs']->table('order_info').' o,'.$GLOBALS['ecs']->table('admin_user').' a, '.
         $GLOBALS['ecs']->table('role').' r WHERE  o.add_admin_id=a.user_id AND '.
-        " r.role_id=o.team AND o.user_id=$id AND o.shipping_status<>3 GROUP BY o.order_id ORDER BY o.add_time ASC ";
+        " r.role_id=o.team AND o.user_id=$id $where GROUP BY o.order_id ORDER BY o.add_time ASC ";
 
     $order_list = $GLOBALS['db']->getAll($sql_select);
 

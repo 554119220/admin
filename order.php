@@ -3605,7 +3605,7 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
             //匹配已经同步到系统的订单
             $order_str = implode("','",$order_list);
             $sql = 'SELECT order_sn,order_id FROM '.$GLOBALS['ecs']->table('ordersyn_info')
-                ." WHERE order_sn IN('$order_str') AND order_status=0 AND shipping_status=0" ;
+                ." WHERE order_sn IN('$order_str') AND order_status IN(0,-2) AND shipping_status=0" ;
             $syn_order = $GLOBALS['db']->getAll($sql);
             if ($syn_order) {
                 foreach ($syn_order as $v) {
@@ -3615,24 +3615,21 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
                 $unsyn = array_diff($order_list,$syn_order_sn);
                 unset($v);
                 foreach ($syn_order_sn as $k=>$v) {
-                    $order_info = array(
-                        'order_id'      => $k,
-                        'shipping_time' => $_SERVER['REQUEST_TIME'],
-                        'tracking_sn'   => $shipping_list[$v],
-                    );
-                    if ($regexp && !preg_match($regexp, $order_info['tracking_sn'])) {
-                        $error_shiping[] = $order_info['tracking_sn'];
+                    if ($regexp && !preg_match($regexp, $shipping_list[$v])) {
+                        $error_shiping[] = $shipping_list[$v];
+                        continue;
                     }else{
                         $sql = 'UPDATE '.$GLOBALS['ecs']->table('ordersyn_info')
-                            ." SET shipping_time={$_SERVER['REQUEST_TIME']},order_status=5,shipping_status=1,"
-                            ."tracking_sn='{$order_info['tracking_sn']}',shipping_id=$shipping_id,"
+                            ." SET shipping_time={$_SERVER['REQUEST_TIME']},order_status=-2,"
+                            ."tracking_sn='{$shipping_list[$v]}',shipping_id=$shipping_id,"
                             ."shipping_code='{$shipping_info['shipping_code']}',shipping_name='{$shipping_info['shipping_name']}',pay_status=1"
-                            ." WHERE order_id=$k AND tracking_sn<>'{$order_info['tracking_sn']}'";
+                            ." WHERE order_id=$k";
                         if ($GLOBALS['db']->query($sql)) {
-                            $error_sn[] = shipping_synchro($k);
+                            $error_sn[] = jingdong_shiping_syn($k);
+                            //$error_sn[] = shipping_synchro($k);
                         }
+                        $record_sql .= "$sql;";
                     }
-                    $record_sql .= "$sql;";
                 }
             }
             if ($error_sn) {
@@ -5172,6 +5169,7 @@ function shipping_synchro($order_id)
         $sql = 'SELECT order_sn,team,'.
             'tracking_sn,shipping_id,shipping_name,shipping_code,province,shipping_time FROM '.
             $GLOBALS['ecs']->table('ordersyn_info')." WHERE order_id=$order_id";
+        file_put_contents('service.txt',$sql.'\n\r',FILE_APPEND);
     }else{
         $sql = 'SELECT IF(platform_order_sn,platform_order_sn,order_sn) order_sn,team,'.
             'tracking_sn,shipping_id,shipping_name,shipping_code,province,shipping_time FROM '.
@@ -5374,6 +5372,8 @@ function shipping_synchro($order_id)
             $res['message'] = $resp['error_response']['zh_desc'].'【京东商城提示您】';
             $res['tracking_sn'] = $order_info['tracking_sn'];
         }
+
+        file_put_contents('service.txt',$resp['error_response']['zh_desc'].'【京东商城提示您】'.$res['message'].'\n\r',FILE_APPEND);
     }
 
     // 同步发货（1号店）
@@ -6260,4 +6260,66 @@ function assignUserToData($order_id){
             $GLOBALS['db']->query($sql);
         }
     }else return false;
+}
+
+//刷单同步出库
+function jingdong_shiping_syn($order_id){
+    // 获取标记发货所需的相关订单参数
+    $sql = 'SELECT order_sn,team,'.'tracking_sn,shipping_id,shipping_name,shipping_code,province,shipping_time FROM '.
+        $GLOBALS['ecs']->table('ordersyn_info')." WHERE order_id=$order_id";
+
+    $order_info = $GLOBALS['db']->getRow($sql);
+    $tracking_sn = $order_info['tracking_sn'];
+
+    // 获取快递公司编码
+    $sql = 'SELECT company_code, company_name FROM '.$GLOBALS['ecs']->table('shipping').
+        " WHERE shipping_id='{$order_info['shipping_id']}'";
+    $logistics = $GLOBALS['db']->getRow($sql);   
+    // 同步发货（京东）
+    if ($order_info['shipping_time'] && $order_info['team'] == 10) {
+        include_once dirname(__FILE__).'/jingdong/JdClient.php';
+        include_once dirname(__FILE__).'/jingdong/JdException.php';
+        include_once dirname(__FILE__).'/jingdong/request/order/OrderSopOutstorageRequest.php';
+
+        //include_once dirname(__FILE__).'/jingdong/sk.php';
+        //$auth = include dirname(__FILE__).'/jingdong/config.php';
+        $sk = array (
+            'access_token'  => '9a35e657-2247-4c54-a270-232e100913b7',
+            'code'          => 0,
+            'expires_in'    => 13457820,
+            'refresh_token' => 'c1112a83-dd6b-45ff-b2e2-ed10a4d81570',
+            'time'          => '1418624799233',
+            'token_type'    => 'bearer',
+            'uid'           => '1021634047',
+        );
+        $auth = array (
+            'appkey'     => '6F8B4579DB13C33DDC521ECDCF750929',
+            'secretKey'  => 'a337ac10d1b541edaed7d458c7402ce9',
+            'platform'   => 'jingdong',
+        );
+
+        $req = new OrderSopOutstorageRequest;
+        $req->setOrderId($order_info['order_sn']);
+        $req->setWaybill($tracking_sn);
+
+        $sql_select = 'SELECT jd_code FROM '.$GLOBALS['ecs']->table('shipping').
+            " WHERE shipping_id={$order_info['shipping_id']}";
+        $req->setLogisticsId($GLOBALS['db']->getOne($sql_select));
+
+        $jd = new JdClient;
+
+        $jd->appKey      = $auth['appkey'];     // 京东AppKey
+        $jd->appSecret   = $auth['secretKey'];  // 京东AppSecret
+        $jd->accessToken = $sk['access_token']; // 京东sessionkey(access_token)
+        $jd->timestamp   = date('Y-m-d H:i:s');
+        $jd->v = '2.0';
+
+        $resp = $jd->execute($req);
+        $resp = json_decode(json_encode($resp), true);
+
+        if ($resp['error_response']['code']) {
+            //return $resp['error_response']['zh_desc'].'【京东商城提示您】';
+           return $tracking_sn; 
+        }else return false;
+    }else return $tracking_sn;
 }
