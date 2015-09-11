@@ -38,7 +38,7 @@
             <span id="keywordsArea"><input type="text" id="keywords" value="{$kw}"></span>
         </div>
         <button value="order.php?act={$act}&platform={$platform}" onclick="searchOrder(this)" class="b_submit" style="margin:2px 0 0 5px">搜索</button>
-        <button value="order.php?act=rand_order&a=verify&platform={$platform}" onclick="giveMeOrder(this)" class="b_submit">获取订单</button>
+        <button value="order.php?act=rand_order&a=verify&platform={$platform}&order_type={$order_type}" onclick="giveMeOrder(this)" class="b_submit">获取订单</button>
     </div>
 
     <!-- 订单列表 -->

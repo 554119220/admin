@@ -541,6 +541,7 @@ function addAdminRes(res) {
 
 //编辑管理员
 function updateAdmin(obj) {
+  var obj = document.forms['form'];
   var user_id      = document.getElementById('id').value;
   var username     = obj.elements['username'].value;
   var number       = obj.elements['number'].value;

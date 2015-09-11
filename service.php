@@ -3628,8 +3628,32 @@ elseif($_REQUEST['act'] == 'del_service'){
 
 //知识库
 elseif($_REQUEST['act'] == 'knowlage_list'){
-    //$goods_list =goods_knowlage_list();
-    $smarty->assign('goods_list',$goods_list);
+    //$sql = "SELECT zyyl FROM `cz_ecms_goods`";
+    //$component = $GLOBALS['db']->getCol($sql);
+    //$c = array();
+    //foreach ($component as $v) {
+    //    $c1 = explode('、',$v);
+    //    //$c2 = explode('，',$v);
+    //    $c3 = explode(' ',$v);
+    //    ////$co = preg_split('/[\s、，]/',$v);
+    //    $c = array_merge($c,$c1);
+    //    //$c = array_merge($c,$c3);
+    //}
+    //unset($v);
+    //$d = array();
+    //foreach ($c as $v) {
+    //    $d1 = explode(' ',$v);
+    //    $d = array_merge($d,$d1);
+    //}
+    //$c = array_filter($d);
+    //$c = array_unique($d);
+    //unset($v);
+    //foreach ($c as $v) {
+    //    $sql = ' REPLACE INTO '.$GLOBALS['ecs']->table('goods_cat')."(cat_name)VALUES('$v')";
+    //    $GLOBALS['db']->query($sql);
+    //}
+    $cat_list =get_cat_list();
+    $smarty->assign('cat_list',$cat_list);
 
     $res['main'] = $smarty->fetch('knowlage_list.htm');
     die($json->encode($res));
@@ -4144,5 +4168,10 @@ function goods_knowlage_list(){
     }
 
     $sql = 'SELECT goods_name,goods_sn FROM '.$GLOBALS['ecs']->table('goods').$where;
+    return $GLOBALS['db']->getAll($sql);
+}
+
+function get_cat_list(){
+    $sql = 'SELECT cat_id,cat_name FROM '.$GLOBALS['ecs']->table('goods_cat');
     return $GLOBALS['db']->getAll($sql);
 }

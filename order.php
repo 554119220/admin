@@ -3046,7 +3046,8 @@ elseif ($_REQUEST['act'] == 'unlock') { die(''); }
 elseif ($_REQUEST['act'] == 'rand_order') {
     $now_time = time();
     if (isset($_REQUEST['order_type']) && $_REQUEST['order_type'] == 1) {
-        $order_type = " AND order_type=1 ";
+        $order_type = " AND (order_type=1 OR admin_id=185)";
+        $smarty->assign('order_type',$_REQUEST['order_type']);
     } else {
         $order_type = " AND order_type<>1 ";
     }
@@ -3078,15 +3079,21 @@ elseif ($_REQUEST['act'] == 'rand_order') {
     // 统计未处理的新订单总数
     if ($_REQUEST['a'] == 'verify') {
         $table = 'ordersyn_info';
-        $where_select = ' WHERE order_status=0 AND shipping_status=0 AND admin_id=0 '.$order_type;
-        $where_update = " WHERE order_status=0 AND shipping_status=0 AND operator=0 $order_type AND admin_id=0 AND (order_lock IN (0,{$_SESSION['admin_id']}) OR lock_timeout<$now_time)";
+        if (isset($_REQUEST['order_type']) && $_REQUEST['order_type'] == 1) {
+            $where = ' AND ((order_type=1 AND admin_id=0) OR admin_id=185) ';
+            $template = 'flush_order_list.htm';
+        }else{
+            $where = ' AND admin_id=0 AND order_type<>1 ';
+            $template = 'order_list.htm';
+        }
+        $where_select = ' WHERE order_status=0 AND shipping_status=0 '.$where;
+        $where_update = " WHERE order_status=0 AND shipping_status=0 AND operator IN (0,185) $where AND (order_lock IN (0,{$_SESSION['admin_id']}) OR lock_timeout<$now_time)";
         if (intval($_REQUEST['platform'])) {
             $where_select .= ' AND platform='.intval($_REQUEST['platform']);
             $where_update .= ' AND platform='.intval($_REQUEST['platform']);
         }
 
         $platform_list = platform_list();      // 销售平台
-        $template = 'order_list.htm';
 
         $smarty->assign('act', 'temp_order');
         $smarty->assign('curr_title',    isset($_REQUEST['order_type']) ? '刷单列表' : '新顾客订单');
@@ -3132,7 +3139,7 @@ elseif ($_REQUEST['act'] == 'rand_order') {
     $per_admin_order = ceil($order_total/$online_admin_count) ?: 1;
     $per_admin_order = $per_admin_order > $order_limit ? $order_limit : $per_admin_order; // 如果平均每人订单数量超过20则每人只分配20个订单
 
-    $limit_time = $now_time + $per_admin_order * 120; // 每个订单2分钟的处理时间
+    $limit_time = $_SERVER['REQUEST_TIME'] + $per_admin_order * 180; // 每个订单3分钟的处理时间
 
     // 清除订单分配信息后 再重新分配订单
     $sql_update = 'UPDATE '.$GLOBALS['ecs']->table($table)." SET order_lock={$_SESSION['admin_id']}, ".
@@ -3707,14 +3714,16 @@ function order_list()
     {
     case 'rand_order' :
         if (isset($_REQUEST['order_type']) && $_REQUEST['order_type'] == 1) {
-            $order_type = " AND order_type=1 ";
+            $order_type = " AND (o.order_type=1 OR o.admin_id=185) ";
+            $table_user  = 'users';
         } else {
-            $order_type = " AND order_type<>1 ";
+            $order_type = " AND o.order_type<>1 AND o.admin_id=0 ";
+            $table_user  = 'userssyn';
         }
         if ($_REQUEST['a'] == 'verify') {
             $table_order = 'ordersyn_info';
-            $table_user  = 'userssyn';
-            $where       = " AND order_status=0 AND o.admin_id=0 AND o.order_lock={$_SESSION['admin_id']} AND o.lock_timeout>$now_time $order_type";
+            //$table_user  = 'userssyn';
+            $where       = " AND order_status=0 AND o.order_lock={$_SESSION['admin_id']} AND o.lock_timeout>$now_time $order_type";
             $temp_fields = " ,o.order_lock, IF(lock_timeout<$now_time,'锁定','已锁定') lock_status";
             $sort_by = ' o.pay_id DESC, o.add_time ASC ';
         } elseif ($_REQUEST['a'] == 'print') {

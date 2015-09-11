@@ -355,7 +355,7 @@ elseif ($_REQUEST['act'] == 'edit_admin_done')
 
         if ($ext) {
             $ext = ' ,ext='.$ext;
-        }
+        }else $ext = '';
 
         if (!empty($role_id)) {
             $sql = 'SELECT action_list FROM '.$GLOBALS['ecs']->table('role')." WHERE role_id=$role_id";
@@ -373,7 +373,7 @@ elseif ($_REQUEST['act'] == 'edit_admin_done')
                 $password.
                 $ext.
                 ',mobile='."'$mobile'".
-                ',ec_salt='."'$number'".
+                ',ec_salt='."''".
                 " WHERE user_id=$user_id";
         }
         else
