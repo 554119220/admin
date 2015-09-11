@@ -1,0 +1,48 @@
+<br />
+<h3>产品知识</h3>
+<div id="search_div" class="list_panel">
+  <form action="javascript:void(0)" onsubmit="">
+    主要成分 <input type="text" name="component" value=""/>
+    <input type="text" name="search" value="" size="20" oninput="searchGoods(this)" onblur="searchGoods(this)" placehoder="产品名"/>
+    <select name="goods_id" id="goods_id">
+      <option value="0">请先输入要搜索的商品</option>
+    </select>
+    <input type="submit" value="搜索" class="b_submit"/>
+  </form>
+</div>
+<div class="white_bg" style="width:70%">
+  <form action="" method="" name="effect_transfer">
+    <table>
+      <tr>
+        <td> </td>
+      </tr>
+      <tr>
+        <td colspan="6" style="line-height:30px;">
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
+<div width="100%" id="listDiv">
+  <table border="0" cellpadding="0" cellspacing="0" class="wu_table_list rb_border wu_rb_border tr_hover" width="100%" style="border-top:0" id="goods_table">
+    <tr class="goods_fixed">
+      <th>成分</th>
+      <th>功效</th>
+      <th>话述</th>
+      <th>相关产品</th>
+      <th>操作</th>
+    </tr>
+    {foreach from=$goods_list item=v}
+    <tr>
+      <td>{$v.goods_sn}</td>
+      <td>{$v.goods_name}</td>
+      <td></td>
+      <td></td>
+      <td>
+        <button class="btn_new">编辑</button>
+        <button class="btn_new">不显示</button>
+      </td>
+    </tr>
+    {/foreach}
+  </table>
+</div>

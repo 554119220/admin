@@ -3756,6 +3756,8 @@ function order_list()
         } else {
             $order_status = ' AND order_status=0 AND o.admin_id='.$_SESSION['admin_id'];
         }
+
+        $order_status .= ' AND o.admin_id<>185 AND o.order_type<>1';
         $temp_fields  = " ,o.order_lock, IF(lock_timeout<$now_time,'锁定','已锁定') lock_status";
         $sort_by = ' o.add_time ASC ';
         break;
@@ -3883,7 +3885,7 @@ function order_list()
     case 'flush_order' :
         $table_order = 'ordersyn_info';
         $table_user  = 'userssyn';
-        $where       = ' AND o.order_status=0 AND o.order_type=1 AND o.admin_id=0';
+        $where       = ' AND o.order_status=0 AND (o.order_type=1 OR o.admin_id=185)';
         $temp_fields = " ,o.order_lock, IF(lock_timeout<$now_time,'锁定','已锁定') lock_status";
         $sort_by = ' o.add_time ASC ';
         break;
@@ -5169,7 +5171,6 @@ function shipping_synchro($order_id)
         $sql = 'SELECT order_sn,team,'.
             'tracking_sn,shipping_id,shipping_name,shipping_code,province,shipping_time FROM '.
             $GLOBALS['ecs']->table('ordersyn_info')." WHERE order_id=$order_id";
-        file_put_contents('service.txt',$sql.'\n\r',FILE_APPEND);
     }else{
         $sql = 'SELECT IF(platform_order_sn,platform_order_sn,order_sn) order_sn,team,'.
             'tracking_sn,shipping_id,shipping_name,shipping_code,province,shipping_time FROM '.
@@ -5372,8 +5373,6 @@ function shipping_synchro($order_id)
             $res['message'] = $resp['error_response']['zh_desc'].'【京东商城提示您】';
             $res['tracking_sn'] = $order_info['tracking_sn'];
         }
-
-        file_put_contents('service.txt',$resp['error_response']['zh_desc'].'【京东商城提示您】'.$res['message'].'\n\r',FILE_APPEND);
     }
 
     // 同步发货（1号店）

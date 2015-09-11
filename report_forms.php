@@ -2961,9 +2961,9 @@ function user_stats()
  * 顾客统计
  */
 function user_stats2() {
-    // 获取所有顾客数据
+    // 获取所有顾客数据(过滤黑名单，刷单，DM顾客)
     $sql_select = 'SELECT COUNT(*) total, customer_type FROM '.$GLOBALS['ecs']->table('users').
-        ' GROUP BY customer_type ORDER BY role_id';
+        ' WHERE customer_type NOT IN(5,6,7,21) GROUP BY customer_type ORDER BY role_id';
     $result = $GLOBALS['db']->getAll($sql_select);
     $user_total = array();
     foreach ($result as $val) {
@@ -2982,6 +2982,7 @@ function user_stats2() {
     $ex_group = 'u.role_id,u.customer_type';
     $ex_field = 'u.role_id id ,r.role_name k';
     $ex_where = 'r.role_id=u.role_id';
+    //克服的顾客数量
     if (isset($_REQUEST['person']) && 1 == $_REQUEST['person']) {
         $table    = 'admin_user';
         $ex_group = 'u.admin_id,u.customer_type';
