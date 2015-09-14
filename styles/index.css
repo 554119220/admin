@@ -54,7 +54,7 @@
 #ranking_list{margin-top:34px;height:70px;}
 
 /*排行榜*/
-.ranklist_div {border:1px solid #300101;width:180px;margin-top:6px;}
+.ranklist_div {border:1px solid #300101;width:180px;margin-top:6px;min-height:180px;}
 .ranklist_div_title{ background-color:rgb(214, 211, 211);color:#464141;padding:2px;font-weight:bold;line-height:24px;}
 .ranklist_div_title table th td{text-align:center;border:0px;font-size:14px}
 .ranklist_div_title label{ float:right;font-size:smaller;color:chocolate;margin-right:3px;cursor:pointer;}
@@ -132,8 +132,7 @@
 
 .block_span{width:132px;border:1px solid #EDEDED;padding:5px;}
 .mgl_7{margin-left:2px}
-.td_al {text-align:left;padding-left:3px;}
-
+.td_al{text-align:left;padding-left:3px;}
 /*输入框警报*/
 .input_alarm{background:#FF9F9;border:1px solid #5F91B0;}
 

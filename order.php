@@ -3081,11 +3081,14 @@ elseif ($_REQUEST['act'] == 'rand_order') {
         $table = 'ordersyn_info';
         if (isset($_REQUEST['order_type']) && $_REQUEST['order_type'] == 1) {
             $where = ' AND ((order_type=1 AND admin_id=0) OR admin_id=185) ';
-            $template = 'flush_order_list.htm';
+            $smarty->assign('order_type',1);
+            $smarty->assign('act', 'flush_order');
+            //$template = 'flush_order_list.htm';
         }else{
             $where = ' AND admin_id=0 AND order_type<>1 ';
-            $template = 'order_list.htm';
+            $smarty->assign('act', 'temp_order');
         }
+        $template = 'order_list.htm';
         $where_select = ' WHERE order_status=0 AND shipping_status=0 '.$where;
         $where_update = " WHERE order_status=0 AND shipping_status=0 AND operator IN (0,185) $where AND (order_lock IN (0,{$_SESSION['admin_id']}) OR lock_timeout<$now_time)";
         if (intval($_REQUEST['platform'])) {
@@ -3095,7 +3098,6 @@ elseif ($_REQUEST['act'] == 'rand_order') {
 
         $platform_list = platform_list();      // 销售平台
 
-        $smarty->assign('act', 'temp_order');
         $smarty->assign('curr_title',    isset($_REQUEST['order_type']) ? '刷单列表' : '新顾客订单');
 
         if (admin_priv('order_list_all', '', false)) {
@@ -3139,7 +3141,7 @@ elseif ($_REQUEST['act'] == 'rand_order') {
     $per_admin_order = ceil($order_total/$online_admin_count) ?: 1;
     $per_admin_order = $per_admin_order > $order_limit ? $order_limit : $per_admin_order; // 如果平均每人订单数量超过20则每人只分配20个订单
 
-    $limit_time = $_SERVER['REQUEST_TIME'] + $per_admin_order * 180; // 每个订单3分钟的处理时间
+    $limit_time = $_SERVER['REQUEST_TIME'] + $per_admin_order * 120; // 每个订单3分钟的处理时间
 
     // 清除订单分配信息后 再重新分配订单
     $sql_update = 'UPDATE '.$GLOBALS['ecs']->table($table)." SET order_lock={$_SESSION['admin_id']}, ".
@@ -3599,12 +3601,17 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
             $shipping_info = $GLOBALS['db']->getRow($sql);
 
             // 验证运单号与快递公司是否一致
-            $sql_select = 'SELECT code_regexp FROM '.$GLOBALS['ecs']->table('shipping')." WHERE shipping_id=$shipping_id";
-            $regexp = $GLOBALS['db']->getOne($sql_select);
-
+            if ($shipping_id==99) {
+                $regexp = '/^(5011|5014|7020)\d{10}$/';
+                $shipping_info = array('shipping_code'=>'huitong','shipping_name'=>'汇通');
+            }else{
+                $sql_select = 'SELECT code_regexp FROM '.$GLOBALS['ecs']->table('shipping')." WHERE shipping_id=$shipping_id";
+                $regexp = $GLOBALS['db']->getOne($sql_select);
+            }
             $order_sn_list = explode('\n',$order_sn_list);
             $order_sn_list = array_filter($order_sn_list);
             foreach ($order_sn_list as $v) {
+                $v = trim($v);
                 $arr = explode('--',$v);
                 $order_list[] = $arr[0];
                 $shipping_list[$arr[0]] = $arr[1];
@@ -3714,15 +3721,13 @@ function order_list()
     {
     case 'rand_order' :
         if (isset($_REQUEST['order_type']) && $_REQUEST['order_type'] == 1) {
-            $order_type = " AND (o.order_type=1 OR o.admin_id=185) ";
-            $table_user  = 'users';
+            $order_type = " AND o.order_type IN(1,0) ";
         } else {
             $order_type = " AND o.order_type<>1 AND o.admin_id=0 ";
-            $table_user  = 'userssyn';
         }
         if ($_REQUEST['a'] == 'verify') {
             $table_order = 'ordersyn_info';
-            //$table_user  = 'userssyn';
+            $table_user  = 'userssyn';
             $where       = " AND order_status=0 AND o.order_lock={$_SESSION['admin_id']} AND o.lock_timeout>$now_time $order_type";
             $temp_fields = " ,o.order_lock, IF(lock_timeout<$now_time,'锁定','已锁定') lock_status";
             $sort_by = ' o.pay_id DESC, o.add_time ASC ';

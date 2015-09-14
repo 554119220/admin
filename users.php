@@ -1418,6 +1418,7 @@ elseif ($_REQUEST['act'] == 'advance_batch')
     $from_admin       = intval($_REQUEST['from_admin']);
     $to_admin         = intval($_REQUEST['to_admin']);
     $customer_type    = intval($_REQUEST['customer_type']);
+    $from_customer_type    = intval($_REQUEST['from_customer_type']);
     $ser_startTime    = strtotime($_REQUEST['ser_startTime']);
     $ser_endTime      = strtotime($_REQUEST['ser_endTime']);
     $buy_startTime    = strtotime($_REQUEST['buy_startTime']);
@@ -1435,6 +1436,9 @@ elseif ($_REQUEST['act'] == 'advance_batch')
         $where .= " AND admin_id=$from_admin ";
     }
 
+    if (!empty($from_customer_type)) {
+        $where .= " AND customer_type=$from_customer_type ";
+    }
     if(!empty($ser_startTime) && !empty($ser_endTime)) {
         $where .= " AND service_time BETWEEN $ser_startTime AND $ser_endTime";
     }

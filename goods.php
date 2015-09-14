@@ -820,6 +820,7 @@ elseif($_REQUEST['act'] == 'ajax_update')
     die($json->encode($res)); 
 
 }
+
 elseif($_REQUEST['act'] == 'syn_goods'){
    $sql = 'SELECT zyyl,peiliao,cfplb,fyff,syff,scs,sccj,id FROM crm_ecms_goods'; 
    $emcs_goods = $GLOBALS['db']->getAll($sql);
@@ -848,7 +849,6 @@ elseif($_REQUEST['act'] == 'syn_goods'){
    //    }
    //}
 }
-
 
 function get_accountlist($user_id, $account_type = '')
 {

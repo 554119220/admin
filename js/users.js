@@ -1289,6 +1289,7 @@ function advanceBatch(obj)
   var max_service_time = obj.elements['max_service_time'].value;
   var adv_number       = obj.elements['adv_number'].value;
   var customer_type    = obj.elements['customer_type'].value;
+  var from_customer_type    = obj.elements['from_customer_type'].value;
 
   if (!ser_startTime && !buy_startTime && !add_startTime && !max_service_time) {
     var msg = [];
@@ -1296,7 +1297,7 @@ function advanceBatch(obj)
     msg['timeout'] = 2000;
     showMsg(msg);
   }else if(from_admin>=0 && to_admin) {
-    Ajax.call('users.php?act=advance_batch&','from_admin='+from_admin+'&to_admin='+to_admin+'&ser_startTime='+ser_startTime+'&ser_endTime='+ser_endTime+'&buy_startTime='+buy_startTime+'&buy_endTime='+buy_endTime+'&add_startTime='+add_startTime+'&add_endTime='+add_endTime+'&customer_type='+customer_type+'&max_service_time='+max_service_time+'&adv_number='+adv_number,showMsg,'POST','JSON');  
+    Ajax.call('users.php?act=advance_batch&','from_admin='+from_admin+'&to_admin='+to_admin+'&ser_startTime='+ser_startTime+'&ser_endTime='+ser_endTime+'&buy_startTime='+buy_startTime+'&buy_endTime='+buy_endTime+'&add_startTime='+add_startTime+'&add_endTime='+add_endTime+'&customer_type='+customer_type+'&max_service_time='+max_service_time+'&adv_number='+adv_number+'&from_customer_type='+from_customer_type,showMsg,'POST','JSON');  
   }else return false;
 }
 

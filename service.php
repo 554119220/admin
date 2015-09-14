@@ -3652,9 +3652,12 @@ elseif($_REQUEST['act'] == 'knowlage_list'){
     //    $sql = ' REPLACE INTO '.$GLOBALS['ecs']->table('goods_cat')."(cat_name)VALUES('$v')";
     //    $GLOBALS['db']->query($sql);
     //}
+    $goods_list = goods_knowlage_list();
     $cat_list =get_cat_list();
     $smarty->assign('cat_list',$cat_list);
+    $smarty->assign('goods_list',$goods_list);
 
+    $smarty->assign('knowlage_edit',$smarty->fetch('knowlage_edit.htm'));
     $res['main'] = $smarty->fetch('knowlage_list.htm');
     die($json->encode($res));
 }

@@ -1,7 +1,7 @@
 <br />
 <h3>产品知识</h3>
 <div id="search_div" class="list_panel">
-  <form action="javascript:void(0)" onsubmit="">
+  <form action="javascript:void(0)" onsubmit="searchArticle(this)">
     主要成分 <input type="text" name="component" value=""/>
     <input type="text" name="search" value="" size="20" oninput="searchGoods(this)" onblur="searchGoods(this)" placehoder="产品名"/>
     <select name="goods_id" id="goods_id">
@@ -10,43 +10,41 @@
     <input type="submit" value="搜索" class="b_submit"/>
   </form>
 </div>
-<div class="white_bg" style="width:70%">
-  <form action="" method="" name="effect_transfer">
-    <table>
-      <tr>
-        <td> </td>
+<br />
+<div width="100%" id="listDiv" >
+  <div style="overflow-y:scroll;">
+    <table border="0" cellpadding="0" cellspacing="0" class="wu_table_list rb_border wu_rb_border tr_hover" id="component_table"  style='width:30%;float:left;'>
+      <tr class="goods_fixed">
+        <th width="5%">序号</th>
+        <th width="10%">成分</th>
+        <th width="10%">操作</th>
       </tr>
+      {foreach from=$cat_list item=v}
       <tr>
-        <td colspan="6" style="line-height:30px;">
+        <td>{$v.cat_id}</td>
+        <td style="text-align:left;padding-left:3px;">{$v.cat_name}</td>
+        <td>
+          <a class="btn_new" target="_blank" href="article.php?act=edit_article&cat_id={$v.cat_id}">编辑</a>
+          <a class="btn_new" target="_blank" href="#" >预览</a>
         </td>
       </tr>
+      {/foreach}
     </table>
-  </form>
-</div>
-<br />
-<div width="100%" id="listDiv">
-  <table border="0" cellpadding="0" cellspacing="0" class="wu_table_list rb_border wu_rb_border tr_hover" width="50%" style="float:left;" id="goods_table">
-    <tr class="goods_fixed">
-      <th width="5%">序号</th>
-      <th width="10%">成分</th>
-      <th width="50%">相关产品</th>
-      <th width="10%">操作</th>
-    </tr>
-    {foreach from=$cat_list item=v}
-    <tr>
-      <td>{$v.cat_id}</td>
-      <td class="td_al">{$v.cat_name}</td>
-      <td></td>
-      <td>
-        <button class="btn_new">编辑</button>
-        <button class="btn_new">不显示</button>
-      </td>
-    </tr>
-    {/foreach}
-  </table>
-  <div style="margin-left:3px;border:1px solid #ccc;float:left;width:40%;height:500px;">
-    <table class="wu_table_list" border="0" cellpadding="0" cellspacing="0" width="100%">
-      <tr><th>编辑区</th></tr>
+    <table border="0" cellpadding="0" cellspacing="0" class="wu_table_list rb_border wu_rb_border tr_hover" id="goods_table"  style='float:left;width:40%;margin-left:6px;'>
+      <tr class="goods_fixed">
+        <th width="5%">编号</th>
+        <th width="20%">产品名</th>
+        <th width="10%">操作</th>
+      </tr>
+      {foreach from=$goods_list item=v}
+      <tr>
+        <td>{$v.goods_sn}</td>
+        <td style="text-align:left;padding-left:3px;">{$v.goods_name}</td>
+        <td>
+          <button class="btn_new" onclick="editGoods({v.goods_id})">编辑</button>
+        </td>
+      </tr>
+      {/foreach}
     </table>
   </div>
 </div>

@@ -1972,7 +1972,7 @@ elseif('phone_connect_stats' == $_REQUEST['act']){
 
     $final = call_final_report($today,$yesterday,$month,$last_month);
     $smarty->assign('final', $final);
-    $smarty->assign('role_list', get_role_customer(' AND role_id IN(33,34,35,36,37)'));
+    $smarty->assign('role_list', get_role_customer(' AND role_id IN(33,34,35,36,37,40)'));
     $smarty->assign('curr_title', '电话接通率');
     $res['main'] = $smarty->fetch('connect_stats.htm');
     die($json->encode($res));

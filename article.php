@@ -497,9 +497,16 @@ if ($_REQUEST['act'] == 'get_goods_list')
 
     make_json_result($opt);
 }
+
+//编辑成分
+elseif ($_REQUEST['act'] == 'edit_article'){
+    $smarty->display('edit_article.htm');
+}
+
 /*------------------------------------------------------ */
 //-- 批量操作
 /*------------------------------------------------------ */
+
 
 elseif ($_REQUEST['act'] == 'batch')
 {

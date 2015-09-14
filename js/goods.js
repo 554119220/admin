@@ -250,8 +250,7 @@ function submitForm(formName) {
             data[theForm.elements[i].name] = theForm.elements[i].value;
         }
     }
-    data = JSON.stringify(data);
-    Ajax.call(theForm.action, 'info='+data, submitFormResp, 'POST', 'JSON');
+    data = JSON.stringify(data); Ajax.call(theForm.action, 'info='+data, submitFormResp, 'POST', 'JSON');
     return false;
 }
 
