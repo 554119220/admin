@@ -500,7 +500,49 @@ if ($_REQUEST['act'] == 'get_goods_list')
 
 //编辑成分
 elseif ($_REQUEST['act'] == 'edit_article'){
+    $goods_cat_id = intval($_REQUEST['cat_id']);
+    if ($goods_cat_id) {
+        $sql = 'SELECT cat_name FROM '.$GLOBALS['ecs']->table('goods_cat')." WHERE cat_id=$goods_cat_id";
+        $smarty->assign('component',$GLOBALS['db']->getOne($sql));
+        $sql = 'SELECT content FROM '.$GLOBALS['ecs']->table('article')." WHERE goods_cat_id=$goods_cat_id";
+        $content = $GLOBALS['db']->getOne($sql);
+        $smarty->assign('talk_skill',$content);
+    }
+    $smarty->assign('cat_id',$goods_cat_id);
     $smarty->display('edit_article.htm');
+}
+
+//保存文章信息
+elseif ($_REQUEST['act'] == 'save_article'){
+    $goods_cat_id = intval($_REQUEST['cat_id']);
+    $cat_name = mysql_real_escape_string($_REQUEST['cat_name']);
+    $talk_skill   = $_REQUEST['talk_skill'];
+    $effect       = $_REQUEST['effect'];
+    $add_time     = $_SERVER['REQUEST_TIME'];
+
+    if ($goods_cat_id) {
+        $sql_insert  = "INSERT INTO ".$GLOBALS['ecs']->table('article')."(goods_cat_id,title,article_type,content, add_time) ";
+        if ($talk_skill) {
+            $sql = 'SELECT COUNT(*) FROM '.$GLOBALS['ecs']->table('article')." WHERE article_type=3 AND goods_cat_id=$goods_cat_id";
+            if ($GLOBALS['db']->getOne($sql)) {
+                $sql_upd = 'UPDATE '.$GLOBALS['ecs']->table('article')." SET content='$talk_skill',add_time=$add_time".
+                    " WHERE goods_cat_id=$goods_cat_id";
+            }else{
+                $sql = $sql_insert."VALUES ($goods_cat_id,'{$cat_name}的话述',3,'$talk_skill',$add_time)";
+                $GLOBALS['db']->query($sql);
+            }
+        }
+
+        if ($effect) {
+
+        }
+    }else{
+        $talk_skill = '没有找到该原料';
+    }
+    $smarty->assign('talk_skill',$talk_skill); 
+    $smarty->assign('effect',$effect); 
+    $res['main'] = $smarty->fetch('knowlage.htm');
+    die($json->encode($res));
 }
 
 //搜索产品知识
@@ -537,8 +579,8 @@ elseif ($_REQUEST['act'] == 'batch')
 
             /* 删除原来的文件 */
             $sql = "SELECT file_url FROM " . $ecs->table('article') .
-                    " WHERE article_id " . db_create_in(join(',', $_POST['checkboxes'])) .
-                    " AND file_url <> ''";
+                " WHERE article_id " . db_create_in(join(',', $_POST['checkboxes'])) .
+                " AND file_url <> ''";
 
             $res = $db->query($sql);
             while ($row = $db->fetchRow($res))
@@ -572,7 +614,7 @@ elseif ($_REQUEST['act'] == 'batch')
 
             foreach ($_POST['checkboxes'] AS $key => $id)
             {
-              $exc->edit("is_open = '0'", $id);
+                $exc->edit("is_open = '0'", $id);
             }
         }
 
@@ -587,7 +629,7 @@ elseif ($_REQUEST['act'] == 'batch')
 
             foreach ($_POST['checkboxes'] AS $key => $id)
             {
-              $exc->edit("is_open = '1'", $id);
+                $exc->edit("is_open = '1'", $id);
             }
         }
 

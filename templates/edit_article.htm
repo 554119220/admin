@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>{$tile}</title>
+    <title>编辑【{$component}】的资料</title>
     <style type="text/css" media="screen">
       label{padding:6px;border:1px solid #eee;color:#fff;background:#267980;margin:5px 0px;display:block;}
     </style>
@@ -14,7 +14,7 @@
           <div>
             <table width="100%">
               <tr>
-                <th>编辑产品信息
+                <th>编辑 【{$component}】 的相关资料
                   <input type="submit" value="提交" style="float:right;"/>
                 </th>
               </tr>
@@ -22,15 +22,11 @@
           </div>
           <div>
             <label for="talk_skill">产品话述</label>
-            <textarea name="talk_skill"> </textarea>
+            <textarea name="talk_skill">{$talk_skill} </textarea>
           </div>
           <div>
             <label for="effect">产品功效</label>
             <textarea name="effect"> </textarea>
-          </div>
-          <div>
-            <label for="goods_important">产品卖点</label>
-            <textarea name="goods_important" id="goods_important"> </textarea>
           </div>
           <br />
           <input type="submit" value="提交" style="float:right;"/>
@@ -44,6 +40,8 @@
       <p></p>
       <input type="button" value="" id="msgBtn" class="hide" style="display:none">
     </div>
+    <input type="hidden" id="cat_id" value="{$cat_id}"/>
+    <input type="hidden" id="cat_name" value="{$component}"/>
   </body>
 </html>
 {insert_scripts files="json2.js,reportSorting.js,service.js,main.js,users.js"}
@@ -51,10 +49,16 @@
 {insert_scripts files="ckeditor/ckeditor.js"}
 <script language="javascript" type="text/javascript">
   init();
-  var goodsImportant = CKEDITOR.replace('goods_important');
   var talkSkill = CKEDITOR.replace('talk_skill');
   var effect = CKEDITOR.replace('effect');
-  function editArticle(){
-    alert (talkSkill.getData());
-  }
+  function editArticle() {
+  var talkSkillContent =  talkSkill.getData();
+  var effectContent =  effect.getData();
+  var catId = document.getElementById('cat_id').value;
+  var catName = document.getElementById('cat_name').value;
+  Ajax.call('article.php?act=save_article','talk_skill='+talkSkillContent+'&effect='+effectContent+'&cat_id='+catId+'&cat_name='+catName,resp,'POST','JSON');
+}
+function resp(res){
+  document.body.innerHTML = res['main'];
+}
 </script>
