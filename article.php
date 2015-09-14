@@ -763,5 +763,4 @@ function upload_article_file($upload)
         return false;
     }
 }
-
 ?>
