@@ -240,7 +240,8 @@ elseif ($_REQUEST['act'] == 'history_order')
     if (admin_priv('order_list_all', '', false))
     {
         $smarty->assign('all',1);
-        $smarty->assign('abnormal',intval($_REQUEST['abnormal']));
+        $abnormal = isset($_REQUEST['abnormal']) ? intval($_REQUEST['abnormal']) : 0;
+        $smarty->assign('abnormal',$abnormal);
 
         $sql_select = 'SELECT role_id,role_name FROM '.$GLOBALS['ecs']->table('role').
             " WHERE role_name LIKE '%微店%'";

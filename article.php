@@ -503,6 +503,19 @@ elseif ($_REQUEST['act'] == 'edit_article'){
     $smarty->display('edit_article.htm');
 }
 
+//搜索产品知识
+elseif ($_REQUEST['act'] == 'sch_article'){
+    $goods_sn   = intval($_REQUEST['goods_sn']);
+    $goods_list = goods_knowlage_list();
+    $cat_list   = get_cat_list();
+    $smarty->assign('cat_list',$cat_list);
+    $smarty->assign('goods_list',$goods_list);
+    $res['response_action'] = 'search_service';
+    $res['main'] = $smarty->fetch('knowlage_div.htm');
+    die($json->encode($res));
+}
+
+
 /*------------------------------------------------------ */
 //-- 批量操作
 /*------------------------------------------------------ */

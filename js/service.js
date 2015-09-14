@@ -1674,3 +1674,10 @@ function delServiceLog(obj,serviceId){
     Ajax.call('service.php?act=del_service','service_id='+serviceId,showMsg,'GET','JSON');
   }
 }
+
+//搜索产品知识
+function searchArticle(obj){
+  var component = obj.elements['component'].value;
+  var goodsSn = obj.elements['goods_id'].value;
+  Ajax.call('article.php?act=sch_article','component='+component+'&goods_sn='+goodsSn,sendToServerResponse,'POST','JSON');
+}

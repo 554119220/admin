@@ -3657,11 +3657,10 @@ elseif($_REQUEST['act'] == 'knowlage_list'){
     $smarty->assign('cat_list',$cat_list);
     $smarty->assign('goods_list',$goods_list);
 
-    $smarty->assign('knowlage_edit',$smarty->fetch('knowlage_edit.htm'));
+    $smarty->assign('knowlage_div',$smarty->fetch('knowlage_div.htm'));
     $res['main'] = $smarty->fetch('knowlage_list.htm');
     die($json->encode($res));
 }
-
 
 /* 函数区 */
 
@@ -4154,27 +4153,4 @@ function save_miss_call($miss_call_list){
             $GLOBALS['db']->query($sql_insert);
         }
     }
-}
-
-//产品知识列表
-function goods_knowlage_list(){
-    $filter['cat_id']        = empty($_REQUEST['cat_id']) ? 0 : intval($_REQUEST['cat_id']);
-    $filter['intro_type']    = empty($_REQUEST['intro_type']) ? '' : trim($_REQUEST['intro_type']);
-    $filter['is_promote']    = empty($_REQUEST['is_promote']) ? 0 : intval($_REQUEST['is_promote']);
-    $filter['brand_id']      = empty($_REQUEST['brand_id']) ? 0 : $_REQUEST['brand_id'];
-    $filter['keyword']       = empty($_REQUEST['keyword']) ? '' : trim($_REQUEST['keyword']);
-    //$filter['suppliers_id']  = isset($_REQUEST['suppliers_id']) ? (empty($_REQUEST['suppliers_id']) ? '' : trim($_REQUEST['suppliers_id'])) : '';
-    //$filter['is_on_sale']    = isset($_REQUEST['is_on_sale']) ? ((empty($_REQUEST['is_on_sale']) && $_REQUEST['is_on_sale'] === 0) ? 0 : intval($_REQUEST['is_on_sale'])) : 1;
-    $where = " WHERE is_delete=0 AND is_on_sale=1";
-    if ($filter['brand_id']) {
-        $where .= " AND brand_id={$filter['brand_id']}";
-    }
-
-    $sql = 'SELECT goods_name,goods_sn FROM '.$GLOBALS['ecs']->table('goods').$where;
-    return $GLOBALS['db']->getAll($sql);
-}
-
-function get_cat_list(){
-    $sql = 'SELECT cat_id,cat_name FROM '.$GLOBALS['ecs']->table('goods_cat');
-    return $GLOBALS['db']->getAll($sql);
 }

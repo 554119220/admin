@@ -1738,3 +1738,30 @@ function data_from_jinlun($act,$parameter){
     curl_close($ch);
     return json_decode($result,true);
 }
+
+//产品知识列表
+function goods_knowlage_list(){
+    $filter['cat_id']        = empty($_REQUEST['cat_id']) ? 0 : intval($_REQUEST['cat_id']);
+    $filter['brand_id']      = empty($_REQUEST['brand_id']) ? 0 : $_REQUEST['brand_id'];
+    $filter['goods_sn']       = empty($_REQUEST['goods_sn']) ? '' : trim($_REQUEST['goods_sn']);
+    $where = " WHERE is_delete=0 AND is_on_sale=1";
+    if ($filter['brand_id']) {
+        $where .= " AND brand_id={$filter['brand_id']}";
+    }
+    if ($filter['goods_sn']) {
+        $where .= " AND goods_sn={$filter['goods_sn']}";
+    }
+
+    $sql = 'SELECT goods_name,goods_sn FROM '.$GLOBALS['ecs']->table('goods').$where;
+    return $GLOBALS['db']->getAll($sql);
+}
+
+//产品成分
+function get_cat_list(){
+    $cat_name = isset($_REQUEST['component']) ? trim(mysql_real_escape_string($_REQUEST['component'])) : '';
+    if ($cat_name) {
+        $where = " WHERE cat_name LIKE '%$cat_name%'";
+    }
+    $sql = 'SELECT cat_id,cat_name FROM '.$GLOBALS['ecs']->table('goods_cat').$where;
+    return $GLOBALS['db']->getAll($sql);
+}
