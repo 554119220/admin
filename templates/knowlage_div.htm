@@ -1,5 +1,5 @@
 <div style="overflow-y:scroll;">
-  <table border="0" cellpadding="0" cellspacing="0" class="wu_table_list rb_border wu_rb_border tr_hover" id="component_table"  style='width:30%;float:left;'>
+  <table border="0" cellpadding="0" cellspacing="0" class="wu_table_list rb_border wu_rb_border tr_hover" id="component_table"  style='width:28%;float:left;'>
     <tr class="goods_fixed">
       <th width="5%">序号</th>
       <th width="10%">成分</th>
@@ -8,28 +8,68 @@
     {foreach from=$cat_list item=v}
     <tr>
       <td>{$v.cat_id}</td>
-      <td style="text-align:left;padding-left:3px;">{$v.cat_name}</td>
+      <td style="text-align:left;padding-left:3px;">
+        <button value="{$v.cat_id}" onclick="editComponnet(this)">
+        {$v.cat_name}
+        </button>
+      </td>
       <td>
         <a class="btn_new" target="_blank" href="article.php?act=edit_article&cat_id={$v.cat_id}">编辑</a>
-        <a class="btn_new" target="_blank" href="#" >预览</a>
+        <a class="btn_new" target="_blank" href="article.php?act=view_article&cat_id={$v.cat_id}" >预览</a>
       </td>
     </tr>
     {/foreach}
   </table>
-  <table border="0" cellpadding="0" cellspacing="0" class="wu_table_list rb_border wu_rb_border tr_hover" id="goods_table"  style='float:left;width:40%;margin-left:6px;'>
+  <table border="0" cellpadding="0" cellspacing="0" class="wu_table_list rb_border wu_rb_border tr_hover" id="goods_table"  style='float:left;width:30%;margin-left:6px;'>
     <tr class="goods_fixed">
-      <th width="5%">编号</th>
-      <th width="20%">产品名</th>
-      <th width="10%">操作</th>
+      <th width="10%">编号</th>
+      <th width="25%">产品名</th>
+      <th width="6%">操作</th>
     </tr>
     {foreach from=$goods_list item=v}
     <tr>
       <td>{$v.goods_sn}</td>
       <td style="text-align:left;padding-left:3px;">{$v.goods_name}</td>
       <td>
-        <button class="btn_new" onclick="editGoods({v.goods_id})">编辑</button>
+        <button class="btn_new" onclick="editGoodsComponent(this,{$v.goods_sn})">编辑</button>
       </td>
     </tr>
     {/foreach}
   </table>
+  <form action="javascript:void(0)" onsubmit="combineGoodsComponent(this)">
+    <table border="0" cellpadding="0" cellspacing="0" class="wu_table_list wu_rb_border" id="goods_cat_relation" style='float:left;width:35%;margin-left:6px;'>
+      <tr>
+        <th colspan="3">为产品添加成分</th>
+      </tr>
+      <tr>
+        <td width="30%">产品名：</td>
+        <td colspan="2" style="text-align:left;padding-left:6px;"><label id="goods_relation">没有选择产品</label></td>
+      </tr>
+      <tr>
+        <td>搜索成分</td>
+        <td colspan="2" style="text-align:left;">
+          <input type="text" id="keyword" value=""/>
+          <input type="button" value="搜索" class="b_submit"/>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          {foreach from=$goods_component item=v}
+          <label onclick="setGoodsComponent({$v.cat_id},{$v.goods_sn})">{$v.cat_name}</label>
+          {/foreach}
+        </td>
+      </tr>
+      {foreach from=$arr_list item=v}
+      <tr>
+        {foreach from=$v item=t}
+        <td style="text-align:left;">
+          <label>
+            <input type="checkbox" name="component_name[]" value="{$t.cat_id}"/> {$t.cat_name}
+          </label>
+        </td>
+        {/foreach}
+      </tr>
+      {/foreach}
+    </table>
+  </form>
 </div>

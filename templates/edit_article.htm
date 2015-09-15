@@ -5,6 +5,7 @@
     <title>编辑【{$component}】的资料</title>
     <style type="text/css" media="screen">
       label{padding:6px;border:1px solid #eee;color:#fff;background:#267980;margin:5px 0px;display:block;}
+      a:hover{color:#ccc;}
     </style>
   </head>
   <body style="overflow-y:auto;padding-bottom:16px;">
@@ -26,7 +27,7 @@
           </div>
           <div>
             <label for="effect">产品功效</label>
-            <textarea name="effect"> </textarea>
+            <textarea name="effect">{$effect}</textarea>
           </div>
           <br />
           <input type="submit" value="提交" style="float:right;"/>

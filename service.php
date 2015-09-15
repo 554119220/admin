@@ -3653,10 +3653,22 @@ elseif($_REQUEST['act'] == 'knowlage_list'){
     //    $GLOBALS['db']->query($sql);
     //}
     $goods_list = goods_knowlage_list();
-    $cat_list =get_cat_list();
+    $cat_list   = get_cat_list();
     $smarty->assign('cat_list',$cat_list);
     $smarty->assign('goods_list',$goods_list);
 
+    //整理格式
+    $list = array();
+    
+    $length = count($cat_list);
+    for ($i = 0; $i < $length; $i++) {
+        $arr    = array_slice($cat_list,$i,3,true);
+        $list[] = $arr;
+        //$cat_list = array_diff($cat_list,$arr);
+        $i +=2;
+    }
+
+    $smarty->assign('arr_list',$list);
     $smarty->assign('knowlage_div',$smarty->fetch('knowlage_div.htm'));
     $res['main'] = $smarty->fetch('knowlage_list.htm');
     die($json->encode($res));

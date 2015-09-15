@@ -1681,3 +1681,25 @@ function searchArticle(obj){
   var goodsSn = obj.elements['goods_id'].value;
   Ajax.call('article.php?act=sch_article','component='+component+'&goods_sn='+goodsSn,sendToServerResponse,'POST','JSON');
 }
+
+//编辑成分
+function editComponnet(obj){
+  obj.parentNode.innerHTML =  '<input type="text" value="'+obj.innerText+'" onblur="saveComponent(this,'+obj.value+')" id="cp"/>';
+}
+function saveComponent(obj,id){
+  Ajax.call('article.php?act=edit_component','cat_id='+id+'&cat_name='+obj.value,saveResp,'GET','JSON');
+}
+function saveResp(res){
+  if (res.code) {
+    $("#cp").parent().html(res.main);
+  }else return false;
+}
+
+//编辑产品成分
+function editGoodsComponent(obj,id){
+  $("#goods_relation").html(obj.parentNode.parentNode.cells[1].innerHTML);
+  Ajax.call('archive.php?act=get_goods_component','&goods_id='+goods_id,goodsComponentResp,'post','JSON');
+}
+function goodsComponentResp(res){
+  
+}
