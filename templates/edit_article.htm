@@ -3,10 +3,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>编辑【{$component}】的资料</title>
-    <style type="text/css" media="screen">
-      label{padding:6px;border:1px solid #eee;color:#fff;background:#267980;margin:5px 0px;display:block;}
-      a:hover{color:#ccc;}
-    </style>
+    <link rel="stylesheet" type="text/css" href="./styles/article.css" />
   </head>
   <body style="overflow-y:auto;padding-bottom:16px;">
     <div style="margin-left:3px;border:1px solid #ccc;width:70%;margin:0 auto;">
@@ -15,18 +12,18 @@
           <div>
             <table width="100%">
               <tr>
-                <th>编辑 【{$component}】 的相关资料
+                <th class="title">编辑 【{$component}】 的相关资料
                   <input type="submit" value="提交" style="float:right;"/>
                 </th>
               </tr>
             </table>
           </div>
           <div>
-            <label for="talk_skill">产品话述</label>
+            <span class="title" for="talk_skill">产品话术</span>
             <textarea name="talk_skill">{$talk_skill} </textarea>
           </div>
           <div>
-            <label for="effect">产品功效</label>
+            <span class="title" for="effect">产品功效</span>
             <textarea name="effect">{$effect}</textarea>
           </div>
           <br />
@@ -45,7 +42,7 @@
     <input type="hidden" id="cat_name" value="{$component}"/>
   </body>
 </html>
-{insert_scripts files="json2.js,reportSorting.js,service.js,main.js,users.js"}
+{insert_scripts files="json2.js,reportSorting.js,goods.js,main.js"}
 {insert_scripts files="transport.js"}
 {insert_scripts files="ckeditor/ckeditor.js"}
 <script language="javascript" type="text/javascript">

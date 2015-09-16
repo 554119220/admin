@@ -1,6 +1,6 @@
 {if $full_page}
 <style type="text/css" media="screen">
-  label{padding:6px;border:1px solid #eee;color:#fff;background:#267980;margin:5px 0px;display:block;}
+  span.title{padding:6px;border:1px solid #eee;color:#fff;background:#267980;margin:5px 0px;display:block;}
   a:hover{color:#ccc;}
 </style>
 {/if}
@@ -8,13 +8,13 @@
 <div style="margin-left:3px;border:1px solid #ccc;width:70%;margin:0 auto;">
   <div style="overflow:auto;">
     <div>
-      <label for="talk_skill">产品话述
+      <span class="title">产品话术
         <a class="btn_new" target="_self" href="article.php?act=edit_article&cat_id={$cat_id}">编辑</a>
-      </label>
+      </span>
       <div>{$talk_skill}</div>
     </div>
     <div>
-      <label for="talk_skill">产品功效</label>
+      <span class="title">产品功效</span>
       <div>{$effect}</div>
     </div>
   </div>

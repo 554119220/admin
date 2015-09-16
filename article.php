@@ -506,10 +506,10 @@ elseif ($_REQUEST['act'] == 'edit_article'){
         $smarty->assign('component',$GLOBALS['db']->getOne($sql));
 
         $where = " WHERE goods_cat_id=$goods_cat_id";
-        $sql = 'SELECT content FROM '.$GLOBALS['ecs']->table('article').$where.' AND article_type=3';
+        $sql = 'SELECT content FROM '.$GLOBALS['ecs']->table('article').$where.' AND cat_id=4';
         $talk_skill = $GLOBALS['db']->getOne($sql);
 
-        $sql = 'SELECT content FROM '.$GLOBALS['ecs']->table('article').$where.' AND article_type=4';
+        $sql = 'SELECT content FROM '.$GLOBALS['ecs']->table('article').$where.' AND cat_id=6';
         $effect = $GLOBALS['db']->getOne($sql);
 
         $smarty->assign('talk_skill',$talk_skill);
@@ -532,24 +532,91 @@ elseif ('edit_component' == $_REQUEST['act']) {
     $res['main'] = $html;
     die($json->encode($res));
 }
-//获取产品成分
-elseif ('get_goods_component' == $_REQUEST['act']) {
 
+//获取产品成分
+elseif ('edit_goods_article' == $_REQUEST['act']) {
+    $goods_sn = mysql_real_escape_string($_REQUEST['goods_sn']);
+    $goods_name = mysql_real_escape_string($_REQUEST['goods_name']);
+
+    $cat_list   = get_cat_list();
+    //整理格式
+    $list = array();
+    $length = count($cat_list);
+    for ($i = 0; $i < $length; $i++) {
+        $arr    = array_slice($cat_list,$i,7,true);
+        $list[] = $arr;
+        //$cat_list = array_diff($cat_list,$arr);
+        $i +=6;
+    }
+
+    $smarty->assign('arr_list',$list);
+    $smarty->assign('goods_name',$goods_name);
+    $smarty->assign('goods_sn',$goods_sn);
+    $smarty->display('edit_goods_article.htm');
 }
 
-
-//预览产品知识
+//预览原料知识
 elseif($_REQUEST['act'] == 'view_article'){
     $goods_cat_id = intval($_REQUEST['cat_id']);
-    $sql = 'SELECT content FROM '.$GLOBALS['ecs']->table('article')." WHERE article_type=%d AND goods_cat_id=$goods_cat_id";
-    $smarty->assign('talk_skill',$db->getOne(sprintf($sql,3)));
+    $sql = 'SELECT content FROM '.$GLOBALS['ecs']->table('article')." WHERE cat_id=%d AND goods_cat_id=$goods_cat_id";
     $smarty->assign('talk_skill',$db->getOne(sprintf($sql,4)));
+    $smarty->assign('effect',$db->getOne(sprintf($sql,6)));
     $smarty->assign('full_page',true);
     $smarty->assign('cat_id',$goods_cat_id);
     $smarty->display('knowlage.htm');
 }
 
-//保存文章信息
+//编辑产品详情
+elseif('edit_goods_detail' == $_REQUEST['act']){
+    $data = stripslashes($_REQUEST['JSON']);
+    $data = json_decode($data,true);
+    extract($data);
+    if ($goods_sn) {
+        $where = " WHERE goods_sn='$goods_sn'";
+        $sql = 'SELECT cat_id FROM '.$GLOBALS['ecs']->table('goods_component').$where;
+        $pre_component = $GLOBALS['db']->getCol($sql);
+        if ($pre_component) {
+            $del_component = array_diff($pre_component,$component);
+            if ($del_component) {
+                $del_component = implode(',',$del_component);
+                $sql_del = 'DELETE FROM '.$GLOBALS['ecs']->table('goods_component').$where." AND cat_id IN($del_component)";
+            }
+            $pre_component = array_diff($pre_component,$del_component);
+            $component = array_diff($component,$pre_component);
+        }
+        if ($component) {
+            //事务处理
+            $GLOBALS['db']->query('BEGIN');exit;
+            foreach ($component as $v) {
+                $sql = 'INSERT INTO '.$GLOBALS['ecs']->table('goods_component')
+                    ."(cat_id,goods_sn)VALUES($v,'$godos_sn')";
+                $code = $GLOBALS['db']->query($sql);
+                if (!$code) {
+                    $GLOBALS['db']->query('ROLLBACK');
+                    break;
+                }
+            }
+            $GLOBALS['db']->query('COMMIT');
+        }
+
+        if ($feature) {
+            $sql = 'SELECT article_id FROM '.$GLOBALS['ecs']->table('article').$where.' AND cat_id=5';
+            $article_id = $GLOBALS['db']->getOne($sql);
+            if ($article_id) {
+                $sql = 'UPDATE '.$GLOBALS['ecs']->table('article')." SET content='$feature' WHERE article_id=$article_id";
+            }else{
+                $sql = "INSERT INTO ".$GLOBALS['ecs']->table('article')."(goods_sn,title,cat_id,content,add_time) "
+                    ."VALUES('$goods_sn','{$goods_sn}的卖点',5,'$feature',{$_SERVER['REQUEST_TIME']})";
+            }
+            $cdoe = $GLOBALS['db']->query($sql);
+        }
+        $res = !$code ? crm_msg('编辑失败') : crm_msg('编辑成功');
+    }
+
+    die($json->encode($res));
+}
+
+//保存原料文章信息
 elseif ($_REQUEST['act'] == 'save_article'){
     $goods_cat_id = intval($_REQUEST['cat_id']);
     $cat_name = mysql_real_escape_string($_REQUEST['cat_name']);
@@ -558,24 +625,24 @@ elseif ($_REQUEST['act'] == 'save_article'){
     $add_time     = $_SERVER['REQUEST_TIME'];
 
     if ($goods_cat_id) {
-        $sql_insert  = "INSERT INTO ".$GLOBALS['ecs']->table('article')."(goods_cat_id,title,article_type,content, add_time) ";
-        $sql = 'SELECT COUNT(*) FROM '.$GLOBALS['ecs']->table('article')." WHERE article_type=%d AND goods_cat_id=$goods_cat_id";
+        $sql_insert  = "INSERT INTO ".$GLOBALS['ecs']->table('article')."(goods_cat_id,title,cat_id,content, add_time) ";
+        $sql = 'SELECT COUNT(*) FROM '.$GLOBALS['ecs']->table('article')." WHERE cat_id=%d AND goods_cat_id=$goods_cat_id";
         $sql_upd = 'UPDATE '.$GLOBALS['ecs']->table('article')." SET content='%s',add_time=$add_time".
-            " WHERE goods_cat_id=$goods_cat_id";
+            " WHERE goods_cat_id=$goods_cat_id AND cat_id=%d";
         if ($talk_skill) {
-            if ($GLOBALS['db']->getOne(sprintf($sql,3))) {
-                $GLOBALS['db']->query(sprintf($sql_upd,$talk_skill));
+            if ($GLOBALS['db']->getOne(sprintf($sql,4))) {
+                $GLOBALS['db']->query(sprintf($sql_upd,$talk_skill,4));
             }else{
-                $sql = $sql_insert."VALUES ($goods_cat_id,'{$cat_name}的话述',3,'$talk_skill',$add_time)";
+                $sql = $sql_insert."VALUES ($goods_cat_id,'{$cat_name}的话述',4,'$talk_skill',$add_time)";
                 $GLOBALS['db']->query($sql);
             }
         }
 
         if ($effect) {
-            if ($GLOBALS['db']->getOne(sprintf($sql,4))) {
-                $GLOBALS['db']->query(sprintf($sql_upd,$effect));
+            if ($GLOBALS['db']->getOne(sprintf($sql,6))) {
+                $GLOBALS['db']->query(sprintf($sql_upd,$effect,6));
             }else{
-                $sql = $sql_insert."VALUES ($goods_cat_id,'{$cat_name}的功效',4,'$effect',$add_time)";
+                $sql = $sql_insert."VALUES ($goods_cat_id,'{$cat_name}的功效',6,'$effect',$add_time)";
                 $GLOBALS['db']->query($sql);
             }
         }
@@ -589,7 +656,7 @@ elseif ($_REQUEST['act'] == 'save_article'){
     die($json->encode($res));
 }
 
-//搜索产品知识
+//搜索原料知识
 elseif ($_REQUEST['act'] == 'sch_article'){
     $goods_sn   = intval($_REQUEST['goods_sn']);
     $goods_list = goods_knowlage_list();

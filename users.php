@@ -5800,7 +5800,7 @@ function get_user_info ($id)
  */
 function access_purchase_records ($id)
 {
-    if ($_SESSION['role_id'] == 13) {
+    if ($_SESSION['role_id'] != 13) {
         $where = " AND o.shipping_status<>3 ";
     }
     // Get user to buy records 获取顾客购买记录

@@ -257,3 +257,53 @@ function submitForm(formName) {
 function submitFormResp(res) {
     showMsg(res);
 }
+
+//搜索产品知识
+function searchArticle(obj){
+  var component = obj.elements['component'].value;
+  var goodsSn = obj.elements['goods_id'].value;
+  Ajax.call('article.php?act=sch_article','component='+component+'&goods_sn='+goodsSn,sendToServerResponse,'POST','JSON');
+}
+
+//编辑成分
+function editComponnet(obj){
+  obj.parentNode.innerHTML =  '<input type="text" value="'+obj.innerText+'" onblur="saveComponent(this,'+obj.value+')" id="cp"/>';
+}
+function saveComponent(obj,id){
+  Ajax.call('article.php?act=edit_component','cat_id='+id+'&cat_name='+obj.value,saveResp,'GET','JSON');
+}
+function saveResp(res){
+  if (res.code) {
+    $("#cp").parent().html(res.main);
+  }else return false;
+}
+
+//编辑产品详细情
+function goodsArticle(obj,goodsSn){
+  $("#goods_relation").html(obj.parentNode.parentNode.cells[1].innerHTML);
+  Ajax.call('article.php?act=edit_goods_article','&goods_sn='+goodsSn,goodsArticleResp,'post','JSON');
+}
+
+function goodsArticleResp(res){
+  
+}
+
+function editGoodsDetail(){
+  var arrChk = $("input[name='component_name[]']");
+  var goodsFeatureContent = goodsFeature.getData();
+  var component =[];
+  var data = {};
+  arrChk.each(function(){
+    if ($(this).prop('checked')) {
+      component.push($(this).val());
+    }
+  });
+  if (component.length == 0 && $.trim(goodsFeatureContent) == '') {
+    return false;
+  }else{
+    data['component'] = component;
+    data['feature'] = goodsFeatureContent;
+    data['goods_sn'] = $("#goods_sn").val();
+    Ajax.call('article.php?act=edit_goods_detail',data,showMsg,'POST','JSON');
+  }
+}
