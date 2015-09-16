@@ -10,3 +10,4 @@ tr.search td{padding:6px 0px 6px 9px;background-color:papayawhip;}
 caption{padding:6px;}
 .fr{float:right;padding-right:6px;}
 label:hover{cursor:pointer;}
+label.bookmark{border:1px solid #ccc;padding:3px;margin-left:5px;background:#FFEFD5;}

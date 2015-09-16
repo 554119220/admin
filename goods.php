@@ -821,34 +821,8 @@ elseif($_REQUEST['act'] == 'ajax_update')
 
 }
 
-elseif($_REQUEST['act'] == 'syn_goods'){
-   $sql = 'SELECT zyyl,peiliao,cfplb,fyff,syff,scs,sccj,id FROM crm_ecms_goods'; 
-   $emcs_goods = $GLOBALS['db']->getAll($sql);
-   $sql = 'SELECT goods_sn,goods_name FROM '.$GLOBALS['ecs']->table('goods');
-   $crm_goods = $GLOBALS['db']->getAll($sql);
 
-   foreach ($emcs_goods as $v) {
-       $field_values = array(); 
-       if (empty($v['zyyl'])){
-           $field_values['zyyl'] = !empty($v['peiliao'])?$v['peiliao']:$v['cfplb'];
-       }
-       if (empty($v['syff'])){
-           $field_values['syff'] = $v['fyff'];
-       }
-       if (empty($v['sccj'])){
-           $field_values['sccj'] = addslashes_deep($v['scs']);
-       }
-       $GLOBALS['db']->autoExecute($GLOBALS['ecs']->table('ecms_goods'),$field_values,'UPDATE',"id={$v['id']}");
-   }
-   //foreach ($emcs_goods as $v) {
-   //    foreach ($crm_goods as $c) {
-   //        if (!strcmp($v['title'],$c['goods_name']) || strpos($c['goods_name'],$v['title']) !== false){
-   //            $sql = 'UPDATE '.$GLOBALS['ecs']->table('ecms_goods')." SET good_sn={$c['goods_sn']} WHERE id={$v['id']}";
-   //            $GLOBALS['db']->query($sql);
-   //        }
-   //    }
-   //}
-}
+//分页函数；
 
 function get_accountlist($user_id, $account_type = '')
 {

@@ -250,7 +250,8 @@ function submitForm(formName) {
             data[theForm.elements[i].name] = theForm.elements[i].value;
         }
     }
-    data = JSON.stringify(data); Ajax.call(theForm.action, 'info='+data, submitFormResp, 'POST', 'JSON');
+    data = JSON.stringify(data);
+    Ajax.call(theForm.action, 'info='+data, submitFormResp, 'POST', 'JSON');
     return false;
 }
 
@@ -278,7 +279,7 @@ function saveResp(res){
   }else return false;
 }
 
-//编辑产品详细情
+//产品详细情
 function goodsArticle(obj,goodsSn){
   $("#goods_relation").html(obj.parentNode.parentNode.cells[1].innerHTML);
   Ajax.call('article.php?act=edit_goods_article','&goods_sn='+goodsSn,goodsArticleResp,'post','JSON');
@@ -288,6 +289,7 @@ function goodsArticleResp(res){
   
 }
 
+//编辑产品详情
 function editGoodsDetail(){
   var arrChk = $("input[name='component_name[]']");
   var goodsFeatureContent = goodsFeature.getData();

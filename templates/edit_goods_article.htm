@@ -4,6 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>编辑【{$goods_name}】的资料</title>
     <link rel="stylesheet" type="text/css" href="./styles/article.css" />
+    <link rel="stylesheet" type="text/css" href="./styles/new.css" />
   </head>
   <body>
     <div class="main" >
@@ -23,7 +24,7 @@
           <div class="checkfield">
             {if $goods_component}
             {foreach from=$goods_component item=v}
-            <label onclick="setGoodsComponent({$v.cat_id},{$v.goods_sn})">{$v.cat_name}</label>
+            <label class="bookmark">{$v.cat_name}</label>
             {/foreach}
             {else}
             还没有给产品添加成分信息
@@ -36,9 +37,10 @@
             {foreach from=$arr_list item=v}
             <tr>
               {foreach from=$v item=t}
-              <td style="text-align:left;">
+              <td style="text-align:left;{if $t.ck}background:#F7CC86;{/if}">
                 <label>
-                  <input type="checkbox" name="component_name[]" value="{$t.cat_id}" text="{$t.cat_name}"/> {$t.cat_name}
+                  <input type="checkbox" name="component_name[]" value="{$t.cat_id}" text="{$t.cat_name}"
+                   {if $t.ck}checked{/if}/> {$t.cat_name}
                 </label>
               </td>
               {/foreach}

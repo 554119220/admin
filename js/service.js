@@ -1674,4 +1674,3 @@ function delServiceLog(obj,serviceId){
     Ajax.call('service.php?act=del_service','service_id='+serviceId,showMsg,'GET','JSON');
   }
 }
-

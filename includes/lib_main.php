@@ -1389,7 +1389,7 @@ function get_admin_tmp_list ($role = 0)
 {
     $sql = 'SELECT user_name,user_id,group_id,role_id FROM '.
         $GLOBALS['ecs']->table('admin_user').' WHERE status>0 AND stats>0';
-    if (!admin_priv('all', '', false) && $_SESSION['role_id']) {
+    if (!admin_priv('all', '', false) && $role && $_SESSION['role_id']) {
         $sql .= " AND role_id={$_SESSION['role_id']}";
     } else {
         $sql .= ' AND role_id IN ('.SALE.') ';
@@ -1661,7 +1661,7 @@ function admin_page_size($sql_count,$act,$condition)
     if (isset($_REQUEST['page_size']) && intval($_REQUEST['page_size']) > 0) {
         $filter['page_size'] = intval($_REQUEST['page_size']);
     } else {
-        $filter['page_size'] = 20; 
+        $filter['page_size'] = 20;
     }
 
     $filter['record_count'] = $GLOBALS['db']->getOne($sql_count);
@@ -1762,6 +1762,6 @@ function get_cat_list(){
     if ($cat_name) {
         $where = " WHERE cat_name LIKE '%$cat_name%'";
     }
-    $sql = 'SELECT cat_id,cat_name FROM '.$GLOBALS['ecs']->table('goods_cat').$where;
+    $sql = 'SELECT cat_id,cat_name FROM '.$GLOBALS['ecs']->table('component').$where;
     return $GLOBALS['db']->getAll($sql);
 }

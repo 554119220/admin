@@ -502,7 +502,7 @@ if ($_REQUEST['act'] == 'get_goods_list')
 elseif ($_REQUEST['act'] == 'edit_article'){
     $goods_cat_id = intval($_REQUEST['cat_id']);
     if ($goods_cat_id) {
-        $sql = 'SELECT cat_name FROM '.$GLOBALS['ecs']->table('goods_cat')." WHERE cat_id=$goods_cat_id";
+        $sql = 'SELECT cat_name FROM '.$GLOBALS['ecs']->table('component')." WHERE cat_id=$goods_cat_id";
         $smarty->assign('component',$GLOBALS['db']->getOne($sql));
 
         $where = " WHERE goods_cat_id=$goods_cat_id";
@@ -524,7 +524,7 @@ elseif ('edit_component' == $_REQUEST['act']) {
     $cat_id = intval($_REQUEST['cat_id']);
     $cat_name = trim(mysql_real_escape_string($_REQUEST['cat_name']));
     if (!empty($cat_name)) {
-        $sql_upd = 'UPDATE '.$GLOBALS['ecs']->table('goods_cat')
+        $sql_upd = 'UPDATE '.$GLOBALS['ecs']->table('component')
             ." SET cat_name='$cat_name' WHERE cat_id=$cat_id";
         $res['code'] = $GLOBALS['db']->query($sql_upd);
     }
@@ -533,12 +533,25 @@ elseif ('edit_component' == $_REQUEST['act']) {
     die($json->encode($res));
 }
 
-//获取产品成分
+//编辑产品详情
 elseif ('edit_goods_article' == $_REQUEST['act']) {
     $goods_sn = mysql_real_escape_string($_REQUEST['goods_sn']);
     $goods_name = mysql_real_escape_string($_REQUEST['goods_name']);
 
+    $goods_component = get_component($goods_sn);
+    $feature        = get_goods_feature($goods_sn);
     $cat_list   = get_cat_list();
+
+    if ($goods_component) {
+        foreach ($goods_component as $v) {
+            foreach ($cat_list as &$c) {
+                if ($v['cat_id'] == $c['cat_id']) {
+                    $c['ck'] = true;
+                }
+            }
+        }
+    }
+
     //整理格式
     $list = array();
     $length = count($cat_list);
@@ -549,6 +562,8 @@ elseif ('edit_goods_article' == $_REQUEST['act']) {
         $i +=6;
     }
 
+    $smarty->assign('goods_component',$goods_component);
+    $smarty->assign('feature',$feature);
     $smarty->assign('arr_list',$list);
     $smarty->assign('goods_name',$goods_name);
     $smarty->assign('goods_sn',$goods_sn);
@@ -578,18 +593,19 @@ elseif('edit_goods_detail' == $_REQUEST['act']){
         if ($pre_component) {
             $del_component = array_diff($pre_component,$component);
             if ($del_component) {
-                $del_component = implode(',',$del_component);
-                $sql_del = 'DELETE FROM '.$GLOBALS['ecs']->table('goods_component').$where." AND cat_id IN($del_component)";
+                $del = implode(',',$del_component);
+                $sql_del = 'DELETE FROM '.$GLOBALS['ecs']->table('goods_component').$where." AND cat_id IN($del)";
+                $GLOBALS['db']->query($sql_del);
             }
             $pre_component = array_diff($pre_component,$del_component);
             $component = array_diff($component,$pre_component);
         }
         if ($component) {
             //事务处理
-            $GLOBALS['db']->query('BEGIN');exit;
+            $GLOBALS['db']->query('BEGIN');
             foreach ($component as $v) {
                 $sql = 'INSERT INTO '.$GLOBALS['ecs']->table('goods_component')
-                    ."(cat_id,goods_sn)VALUES($v,'$godos_sn')";
+                    ."(cat_id,goods_sn)VALUES($v,'$goods_sn')";
                 $code = $GLOBALS['db']->query($sql);
                 if (!$code) {
                     $GLOBALS['db']->query('ROLLBACK');
@@ -597,7 +613,7 @@ elseif('edit_goods_detail' == $_REQUEST['act']){
                 }
             }
             $GLOBALS['db']->query('COMMIT');
-        }
+        }else $code = true;
 
         if ($feature) {
             $sql = 'SELECT article_id FROM '.$GLOBALS['ecs']->table('article').$where.' AND cat_id=5';
@@ -873,5 +889,24 @@ function upload_article_file($upload)
     {
         return false;
     }
+}
+
+//获取产品成分
+function get_component($goods_sn){
+    if ($goods_sn) {
+        $where = " AND g.goods_sn='$goods_sn'";
+    }
+    $sql = 'SELECT c.cat_id,c.cat_name FROM '.$GLOBALS['ecs']->table('goods_component')
+        .' g,'.$GLOBALS['ecs']->table('component').' c'." WHERE c.cat_id=g.cat_id $where";
+    return $GLOBALS['db']->getAll($sql);
+}
+
+//产品卖点
+function get_goods_feature($goods_sn){
+ if ($goods_sn) {
+        $where = " AND goods_sn='$goods_sn'";
+    }
+    $sql = 'SELECT content FROM '.$GLOBALS['ecs']->table('article')." WHERE cat_id=5 $where";
+    return $GLOBALS['db']->getOne($sql);
 }
 ?>
