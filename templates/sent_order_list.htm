@@ -86,7 +86,7 @@
                                 <col width="210px">
                             </colgroup>
                             <tr height="27px" bgcolor="#eee">
-                                <td align="center">操作</td>
+                                <td align="center" width='112px'>操作</td>
                                 <td height="20px" align="center">收货人</td>
                                 <td align="center">运单号</td>
                                 <td align="center">下单时间</td>
@@ -159,7 +159,7 @@
                                 {foreach from=$order_list item=val}
                                 <tr bgcolor="#FFFFFF" id="tr_2_{$val.order_id}"
                                     class="tr_list {if $val.pay_id eq 3}tr_bg_list{/if}">
-                                    <td align="center">
+                                    <td align="center" width="120px">
                                         <a href="order.php?act=order_lock&id={$val.order_id}" id="lock_{$val.order_id}" title="锁定后，只有锁定该订单的客服才可对该订单进行操作">
                                             {if $val.order_lock eq $admin_id}{if $val.order_lock}解锁{else}锁定{/if}{else}{$val.lock_status}{/if}
                                         </a>

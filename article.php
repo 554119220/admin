@@ -581,6 +581,19 @@ elseif($_REQUEST['act'] == 'view_article'){
     $smarty->display('knowlage.htm');
 }
 
+//预览产品详情
+elseif('view_goods_detail' == $_REQUEST['act']){
+    $goods_sn = intval($_REQUEST['goods_sn']);
+    $goods_name = mysql_real_escape_string($_REQUEST['goods_name']);
+    if ($goods_sn) {
+        $sql = 'SELECT content FROM '.$GLOBALS['ecs']->table('article')." WHERE cat_id=5 AND goods_sn=$goods_sn";
+        $feature = $GLOBALS['db']->getOne($sql);
+        $smarty->assign('feature',$feature);
+    }
+    $smarty->assign('full_page',true);
+    $smarty->display('knowlage.htm');
+}
+
 //编辑产品详情
 elseif('edit_goods_detail' == $_REQUEST['act']){
     $data = stripslashes($_REQUEST['JSON']);

@@ -279,16 +279,6 @@ function saveResp(res){
   }else return false;
 }
 
-//产品详细情
-function goodsArticle(obj,goodsSn){
-  $("#goods_relation").html(obj.parentNode.parentNode.cells[1].innerHTML);
-  Ajax.call('article.php?act=edit_goods_article','&goods_sn='+goodsSn,goodsArticleResp,'post','JSON');
-}
-
-function goodsArticleResp(res){
-  
-}
-
 //编辑产品详情
 function editGoodsDetail(){
   var arrChk = $("input[name='component_name[]']");

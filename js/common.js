@@ -248,10 +248,8 @@ function rand_str(prefix)
 }
 
 //通过部门选择员工
-function getRoleAdminList(role_id,target)
-{
-  if(role_id>0)
-  {
+function getRoleAdminList(role_id,target) {
+  if(role_id>0) {
     target = target=='' ? 'admin_id' : target;
     Ajax.call('system.php?act=get_role_admin','role_id='+role_id+'&target='+target,getRoleAdminListRes,'GET','JSON');
   }

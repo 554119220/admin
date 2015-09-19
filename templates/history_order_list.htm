@@ -56,7 +56,7 @@
                 <col width="100px">
               </colgroup>
               <tr bgcolor="#FFFFFF">
-                <td align="center">操作</td>
+                <td align="center" width="112px;">操作</td>
                 <td align="center">运单号</td>
                 <td height="20px" align="center">收货人</td>
                 <td align="center">旺旺/QQ</td>
@@ -111,7 +111,7 @@
               </colgroup>
               {foreach from=$order_list item=val}
               <tr bgcolor="#FFFFFF" id="tr_2_{$val.order_id}" class="tr_list">
-                <td align="center">
+                <td align="center" width="120px">
                   <font color="#666">【{$val.role_describe}】</font><a href="order.php?act=order_detail&id={$val.order_id}" title="订单详情">
                     查看
                   </a>

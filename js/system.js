@@ -562,7 +562,11 @@ function updateAdmin(obj) {
 
 function updAdmRes(res) {
   showMsg(res);
-  if (res.code) Document.getElementById('btn_submit_add').disabled = true;
+  if (res.code){
+    if (document.getElementById('btn_submit_add')) {
+      document.getElementById('btn_submit_add').disabled = true; 
+    }
+  }
 }
 
 //验证表单输入的数据格式
@@ -827,15 +831,15 @@ function fillSelect(res,obj){
  */
 function filterStaff(obj) {
   var role_id = obj.elements['role_id'].value;
-  var group_id = obj.elements['group_id'].value;
+  //var group_id = obj.elements['group_id'].value;
+  var user_name = obj.elements['user_name'].value;
 
-  Ajax.call('system.php', 'act=admin_by_role&role_id=' + role_id + '&group_id=' + group_id, filterStaffResp, 'POST', 'JSON');
+  Ajax.call('system.php', 'act=admin_by_role&role_id=' + role_id + '&user_name=' + user_name, filterStaffResp, 'POST', 'JSON');
   return false;
 }
 
 function filterStaffResp(res) {
   document.getElementById('resource').innerHTML = res.main;
-
   init();
 }
 

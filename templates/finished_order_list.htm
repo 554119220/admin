@@ -74,7 +74,7 @@
                                 <col width="250px">
                             </colgroup>
                             <tr height="27px" bgcolor="#eee">
-                                <td align="center">操作</td>
+                                <td align="center" width="112px">操作</td>
                                 <td height="20px" align="center">收货人</td>
                                 <td align="center">运单号</td>
                                 <td align="center">下单时间</td>
@@ -135,7 +135,7 @@
                                 {foreach from=$order_list item=val}
                                 <tr bgcolor="#FFFFFF" id="tr_2_{$val.order_id}"
                                     class="tr_list {if $val.pay_id eq 3}tr_bg_list{/if}">
-                                    <td align="center">
+                                    <td align="center" width="112px;">
                                         <font>【{$val.role_describe}】</font><a href="order.php?act=order_detail&id={$val.order_id}&{$act}=1" title="订单详情"><img src="images/add.gif" class="pt7 f_r"></a>
                                     </td>
                                     <td height="20" align="center">{$val.consignee}</td>

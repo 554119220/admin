@@ -530,7 +530,6 @@ elseif ($_REQUEST['act'] == 'first_trace')
 
     $days_three = time() -3*24*3600; // 三天前
     //$days_five  = $three_days -2*24*3600; // 五天前
-
     $sql = 'SELECT i.user_id,i.consignee,i.mobile,i.tel,i.receive_time,o.goods_name, '.
         ' i.receive_time+g.take_days*o.goods_number take_time,i.order_id,i.add_time,a.user_name add_admin, '.
         "IF(u.service_time>$days_three,u.service_time,'-') recently FROM ".$GLOBALS['ecs']->table('order_info').
@@ -721,11 +720,10 @@ elseif ($_REQUEST['act'] == 'user_detail') {
     //$return_list = get_return_list($user_id); // 获取顾客的退货记录
     $user_friends = get_user_friends($user_id);
 
-    $case = get_before_case();         //既往病例
+    //$case = get_before_case();         //既往病例
 
     //获取家长成员
-    if($user_info['family_id'] != 0)
-    {
+    if($user_info['family_id'] != 0) {
         $sql_select = 'SELECT u.user_id,u.user_name,u.mobile_phone,u.home_phone,g.grade_name,g.grade_id,f.family_name,m.input_time,m.real_parent FROM '.$GLOBALS['ecs']->table('user_family_member')
             .' AS m LEFT JOIN '.$GLOBALS['ecs']->table('users')
             .' AS u ON u.user_id=m.user_id LEFT JOIN '
@@ -750,7 +748,7 @@ elseif ($_REQUEST['act'] == 'user_detail') {
     }
 
     /* 会员充值和提现申请记录 */
-    include_once(ROOT_PATH . 'includes/lib_clips.php');
+    //include_once(ROOT_PATH . 'includes/lib_clips.php');
 
     $filter['page'] = empty($_REQUEST['page']) || (intval($_REQUEST['page'])<=0) ? 1 : intval($_REQUEST['page']);
     if (isset($_REQUEST['page_size']) && intval($_REQUEST['page_size']) > 0) {
@@ -798,46 +796,46 @@ elseif ($_REQUEST['act'] == 'user_detail') {
     );
 
     //获取剩余余额
-    $surplus_amount = get_user_surplus($user_id);
-    $sql = "SELECT SUM(user_money) FROM ".$GLOBALS['ecs']->table('account_log')." WHERE user_id='$user_id'";
+    //$surplus_amount = get_user_surplus($user_id);
+    //$sql = "SELECT SUM(user_money) FROM ".$GLOBALS['ecs']->table('account_log')." WHERE user_id='$user_id'";
 
-    if (empty($surplus_amount)) {
-        $surplus_amount = 0;
-    }
+    //if (empty($surplus_amount)) {
+    //    $surplus_amount = 0;
+    //}
 
     //获取会员帐号明细
-    $account_log = array();    //申请记录
-    $account_detail = array(); //账号明细
+    //$account_log = array();    //申请记录
+    //$account_detail = array(); //账号明细
 
-    $sql_select = "SELECT * FROM ".$ecs->table('account_log')." WHERE user_id='$user_id'".' ORDER BY log_id DESC LIMIT '
-        .($filter['start']-1)*$filter['page_size'].",{$filter['page_size']}";
-    $account_detail = $GLOBALS['db']->getAll($sql_select);
+    //$sql_select = "SELECT * FROM ".$ecs->table('account_log')." WHERE user_id='$user_id'".' ORDER BY log_id DESC LIMIT '
+    //    .($filter['start']-1)*$filter['page_size'].",{$filter['page_size']}";
+    //$account_detail = $GLOBALS['db']->getAll($sql_select);
 
-    foreach($account_detail AS &$val) {
-        $val['change_time']      = date('Y-m-d H:i:s',$val['change_time']);
-        $val['admin_note']       = nl2br(htmlspecialchars($val['admin_note']));
-        $val['short_admin_note'] = ($val['admin_note'] > '') ? sub_str($val['admin_note'], 30) : 'N/A';
-        $val['pay_status']       = ($val['is_paid'] == 0) ? $GLOBALS['_LANG']['un_confirm'] : $GLOBALS['_LANG']['is_confirm'];
-        $val['amount']           = price_format(abs($val['amount']), false);
-        $val['user_money']       = price_format(abs($val['user_money']), false);
+    //foreach($account_detail AS &$val) {
+    //    $val['change_time']      = date('Y-m-d H:i:s',$val['change_time']);
+    //    $val['admin_note']       = nl2br(htmlspecialchars($val['admin_note']));
+    //    $val['short_admin_note'] = ($val['admin_note'] > '') ? sub_str($val['admin_note'], 30) : 'N/A';
+    //    $val['pay_status']       = ($val['is_paid'] == 0) ? $GLOBALS['_LANG']['un_confirm'] : $GLOBALS['_LANG']['is_confirm'];
+    //    $val['amount']           = price_format(abs($val['amount']), false);
+    //    $val['user_money']       = price_format(abs($val['user_money']), false);
 
-        if ($val['process_type'] == 0) {
-            $val['type'] = $GLOBALS['_LANG']['surplus_type_0'];
-        } else {
-            $val['type'] = $GLOBALS['_LANG']['surplus_type_1'];
-        }
-    }
+    //    if ($val['process_type'] == 0) {
+    //        $val['type'] = $GLOBALS['_LANG']['surplus_type_0'];
+    //    } else {
+    //        $val['type'] = $GLOBALS['_LANG']['surplus_type_1'];
+    //    }
+    //}
 
-    $sql_select = "SELECT * FROM ".$GLOBALS['ecs']->table('user_account')." WHERE user_id=$user_id LIMIT ".
-        ($filter['start']-1) * $filter['page_size'].",{$filter['page_size']}";
+    //$sql_select = "SELECT * FROM ".$GLOBALS['ecs']->table('user_account')." WHERE user_id=$user_id LIMIT ".
+    //    ($filter['start']-1) * $filter['page_size'].",{$filter['page_size']}";
 
-    $account_log = $GLOBALS['db']->getAll($sql_select);
+    //$account_log = $GLOBALS['db']->getAll($sql_select);
 
-    lange_account($account_log);
+    //lange_account($account_log);
 
     //体检项目
-    $sql_select = 'SELECT * FROM '.$GLOBALS['ecs']->table('examination');
-    $smarty->assign('examination',$GLOBALS['db']->getAll($sql_select));
+    //$sql_select = 'SELECT * FROM '.$GLOBALS['ecs']->table('examination');
+    //$smarty->assign('examination',$GLOBALS['db']->getAll($sql_select));
 
     //模板赋值
     $smarty->assign('count_log',      $record_count);
@@ -884,10 +882,10 @@ elseif ($_REQUEST['act'] == 'user_detail') {
     $smarty->assign('bmi',get_user_bmi($user_id));
 
 
-    if (in_array($_SESSION['admin_id'],array(1,493,2,4,580))) {
+    if (in_array($_SESSION['admin_id'],array(1,493,2,4,580,359))) {
         $admin_list = get_admin_tmp_list();
         $smarty->assign('all_power',true);
-    }elseif(in_array($_SESSION['admin_id'],array(520,359))){
+    }elseif(in_array($_SESSION['admin_id'],array(520))){
         $sql = 'SELECT user_id,user_name FROM '.$GLOBALS['ecs']->table('admin_user')." WHERE role_id={$_SESSION['role_id']}";
         $admin_list = $GLOBALS['db']->getAll($sql);
         if ($admin_list === false) {
@@ -1103,7 +1101,7 @@ elseif ($_REQUEST['act'] == 'edit')
             $list = list_effects_common();
             break;
         case 'customer_type' :
-            if (in_array($_SESSION['role_id'],array(34,35,36,40))) {
+            if (in_array($_SESSION['role_id'],array(33,34,35,36,40))) {
                 $customer_where = ' type_id NOT IN (21) AND ';
             }
             $list = list_customer_type($customer_where);
@@ -1413,20 +1411,19 @@ elseif ($_REQUEST['act'] == 'insert_free')
 }
 
 //高级转移顾客
-elseif ($_REQUEST['act'] == 'advance_batch')
-{
-    $from_admin       = intval($_REQUEST['from_admin']);
-    $to_admin         = intval($_REQUEST['to_admin']);
-    $customer_type    = intval($_REQUEST['customer_type']);
-    $from_customer_type    = intval($_REQUEST['from_customer_type']);
-    $ser_startTime    = strtotime($_REQUEST['ser_startTime']);
-    $ser_endTime      = strtotime($_REQUEST['ser_endTime']);
-    $buy_startTime    = strtotime($_REQUEST['buy_startTime']);
-    $buy_endTime      = strtotime($_REQUEST['buy_endTime']);
-    $add_startTime    = strtotime($_REQUEST['add_startTime']);
-    $add_endTime      = strtotime($_REQUEST['add_startTime']);
-    $max_service_time = strtotime($_REQUEST['max_service_time']);
-    $adv_number       = intval($_REQUEST['adv_number']);
+elseif ($_REQUEST['act'] == 'advance_batch') {
+    $from_admin         = intval($_REQUEST['from_admin']);
+    $to_admin           = intval($_REQUEST['to_admin']);
+    $customer_type      = intval($_REQUEST['customer_type']);
+    $from_customer_type = intval($_REQUEST['from_customer_type']);
+    $ser_startTime      = strtotime($_REQUEST['ser_startTime']);
+    $ser_endTime        = strtotime($_REQUEST['ser_endTime']);
+    $buy_startTime      = strtotime($_REQUEST['buy_startTime']);
+    $buy_endTime        = strtotime($_REQUEST['buy_endTime']);
+    $add_startTime      = strtotime($_REQUEST['add_startTime']);
+    $add_endTime        = strtotime($_REQUEST['add_startTime']);
+    $max_service_time   = strtotime($_REQUEST['max_service_time']);
+    $adv_number         = intval($_REQUEST['adv_number']);
 
     $where = ' where 1 ';
     if(empty($to_admin)) {
@@ -2682,8 +2679,7 @@ elseif ($_REQUEST['act'] == 'fast_add')
 }
 
 /*批量分配顾客 */
-elseif ($_REQUEST['act'] == 'batch')
-{
+elseif ($_REQUEST['act'] == 'batch') {
     // 这里改成相应的权限，也需要改的： line 533
     if (admin_priv('all', '', false)) {
         $admin_list = get_admin_by_all();
@@ -6652,6 +6648,7 @@ function search_by_goods() {
     $sql_select = 'SELECT u.user_id,u.user_name,u.sex,u.member_cid,u.add_time,u.service_time,u.admin_name,u.assign_time,u.remarks FROM '.
         $GLOBALS['ecs']->table('users').' u,'.$GLOBALS['ecs']->table('order_info').' i,'.$GLOBALS['ecs']->table('order_goods').' g '.
         $where.' GROUP BY u.user_id LIMIT '.($filter['page'] -1)*$filter['page_size'].', '.$filter['page_size'];
+    echo $sql_select;exit;
     $result = $GLOBALS['db']->getAll($sql_select);
 
     foreach ($result as &$val){

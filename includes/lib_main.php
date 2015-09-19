@@ -1353,9 +1353,9 @@ function assoc_value ($arr, $key = 0)
 /**
  * 获取销售平台列表
  */
-function platform_list ($platform = array ())
-{
-    $sql_select = 'SELECT role_name,role_id,role_describe FROM '.$GLOBALS['ecs']->table('role')." WHERE role_type>0 ";
+function platform_list ($platform = array ()) {
+    $sql_select = 'SELECT role_name,role_id,role_describe FROM '.$GLOBALS['ecs']->table('role')
+        ." WHERE role_type>0 AND parent_id>=0";
     if (!admin_priv('all', '', false) && empty($platform)) {
         $action = explode(',', $_SESSION['action_list']);
         $action = implode("','", array_filter($action));
@@ -1402,8 +1402,11 @@ function get_admin_tmp_list ($role = 0)
 function get_admin_by_all(){
     $where = ' WHERE status>0 AND stats>0';
     if ($_SESSION['admin_id'] == 493) {
-        $where .= " AND role_id IN(34,35,36)";
-    }elseif(!empty($_SESSION['role_id'])) {
+        $where .= " AND role_id IN(".KEFU.")";
+    }elseif($_SESSION['admin_id'] == 359){
+        $where .= " AND role_id IN(".KEFU2.")";
+    }
+    elseif(!empty($_SESSION['role_id'])) {
         $where .= " AND role_id={$_SESSION['role_id']}";
     }
     $sql = 'SELECT user_id,user_name FROM '.$GLOBALS['ecs']->table('admin_user').$where.' ORDER BY convert(user_name using gbk) ASC'; 
@@ -1703,10 +1706,12 @@ function admin_page_size($sql_count,$act,$condition)
 function get_role_by_all(){
     $where = ' WHERE role_id>31';
     if ($_SESSION['admin_id'] == 493) {
-        $where .= " AND role_id IN(34,35,36,40)";
+        $where .= " AND role_id IN(".KEFU.")";
     }elseif($_SESSION['admin_id'] == 4){
         $where .= " AND role_id IN(36,37)";
-    }elseif (!empty($_SESSION['role_id'])) {
+    }elseif($_SESSION['admin_id'] == 359){
+        $where .= " AND role_id IN(".KEFU2.")";
+    } elseif (!empty($_SESSION['role_id'])) {
         $where .= " AND role_id={$_SESSION['role_id']}";
     }
     $sql = 'SELECT role_id,role_name FROM '.$GLOBALS['ecs']->table('role').$where.' ORDER BY convert(role_name using gbk) ASC';

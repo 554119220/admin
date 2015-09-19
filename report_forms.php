@@ -59,7 +59,12 @@ if ($_REQUEST['act'] == 'menu')
     die($smarty->fetch('left.htm'));
 }
 
-/* 统计订单数量及销量 */
+//统计部门订单数量及销量
+elseif($_REQUEST['role_order_sales']){
+    $platform_list = platform_list($trans_role_list);      // 销售平台
+}
+
+/* 统计小组订单数量及销量 */
 elseif ($_REQUEST['act'] == 'order_sales') {
     $res['switch_tag'] = true;
     $res['id'] = isset($_REQUEST['platform']) ? $_REQUEST['platform'] : 0;
@@ -299,7 +304,7 @@ elseif ($_REQUEST['act'] == 'rebuy_stats') {
 
     $admin = array ();
     if (admin_priv('rebuy_stats_all', '', false)) {
-        $platform = get_role_list(' WHERE role_id IN ('.OFFLINE_SALE.') ');
+        $platform = get_role_list(' WHERE role_id IN ('.OFFLINE_SALE.') AND parent_id>0 ');
         $platform_list = array ();
         foreach ($platform as $val) {
             $platform_list[$val['role_id']] = $val['role_name'];

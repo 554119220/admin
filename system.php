@@ -325,12 +325,10 @@ elseif ($_REQUEST['act'] == 'edit_admin_done')
             //$old_ec_salt= $db->getOne($sql);    //旧工号
 
             $old_ec_salt = true;
-            if(empty($old_ec_salt))
-            {
+            if(empty($old_ec_salt)) {
                 $old_ec_password=md5($pre_password);
             }
-            else
-            {
+            else {
                 //$old_ec_password=md5(md5($pre_password.$old_ec_salt));
             }
 
@@ -341,8 +339,7 @@ elseif ($_REQUEST['act'] == 'edit_admin_done')
             //}
 
             /* 比较新密码和确认密码是否相同 */
-            if ($password <> $pass)
-            {
+            if ($password <> $pass) {
                 $res['message'] = '两次输入的密码不正确';
                 die($res);
             }
@@ -359,8 +356,10 @@ elseif ($_REQUEST['act'] == 'edit_admin_done')
 
         if (!empty($role_id)) {
             $sql = 'SELECT action_list FROM '.$GLOBALS['ecs']->table('role')." WHERE role_id=$role_id";
+
             $row = $GLOBALS['db']->getRow($sql);
             $action_list = ', action_list = \''.$row['action_list'].'\'';
+
             $role_id = ' role_id = '.$role_id.' ';
         }
 
@@ -381,6 +380,7 @@ elseif ($_REQUEST['act'] == 'edit_admin_done')
             $sql_update = 'UPDATE ' .$ecs->table('admin_user'). ' SET '.
                 $role_id.
                 $action_list.
+                $ext.
                 ',mobile='."'$mobile'".
                 ',ec_salt='."'$number'".
                 " WHERE user_id=$user_id";
@@ -483,7 +483,8 @@ elseif ($_REQUEST['act'] == 'assign_authority_done')
 elseif ($_REQUEST['act'] == 'admin_by_role')
 {
     $role_id  = intval($_REQUEST['role_id']);
-    $group_id = intval($_REQUEST['group_id']);
+    $user_name = mysql_real_escape_string($_REQUEST['user_name']);
+    //$group_id = intval($_REQUEST['group_id']);
 
     // 分页
     $filter['page'] = empty($_REQUEST['page']) || (intval($_REQUEST['page'])<=0) ? 1 : intval($_REQUEST['page']);
@@ -493,19 +494,23 @@ elseif ($_REQUEST['act'] == 'admin_by_role')
         $filter['page_size'] = 20; 
     }
 
-    $where = $condition = '';
+    $where = ' WHERE 1 ';
+    $condition = '';
     if($role_id) {
-        $where     = " WHERE r.role_id=$role_id";
+        $where     .= " AND r.role_id=$role_id";
         $condition = "&role_id=$role_id";
     }
 
-    if ($group_id) {
-        $where     .= " AND group_id=$group_id";
-        $condition .= "&group_id=$group_id";
+    //if ($group_id) {
+    //    $where     .= " AND group_id=$group_id";
+    //    $condition .= "&group_id=$group_id";
+    //}
+    if ($user_name) {
+        $where     .= " AND user_name LIKE '%$user_name%'";
+        $condition .= "&user_name=$user_name";
     }
 
     $sql_select = 'SELECT COUNT(*) FROM '.$GLOBALS['ecs']->table('admin_user').' r '.$where;
-
     $filter['record_count'] = $GLOBALS['db']->getOne($sql_select);
     $filter['page_count']   = $filter['record_count']>0 ? ceil($filter['record_count']/$filter['page_size']) : 1;
 

@@ -75,7 +75,7 @@
                         <!-- 右上-BEGIN -->
                         <table height="100%" cellpadding="0" cellspacing="1">
                             <tr bgcolor="#eee" height="27px">
-                                <td align="center" width="85px">操作</td>
+                                <td align="center" width="112px">操作</td>
                                 <td align="center" width="123px">运单号</td>
                                 <td align="center" width="123px">会员卡号</td>
                                 <td align="center" width="153px">发货必看</td>
@@ -140,7 +140,7 @@
                             <table cellpadding="0" cellspacing="1" id="right_table" >
                                 {foreach from=$order_list item=val}
                                 <tr bgcolor="#FFFFFF" id="tr_2_{$val.order_id}" class="tr_list" height="25px">
-                                    <td width="90px" class="{if $val.pay_id eq 3}bg_pay{/if} b_r" align="center">
+                                    <td width="120px" class="{if $val.pay_id eq 3}bg_pay{/if} b_r" align="right">
                                         {if $shipping_act}<span class="{if $val.review}fav_start-y{else}fav_start-x{/if}" id="review_{$val.order_id}"{if $access} onclick="review({$val.order_id})"{/if}></span>{/if}
                                         <font>【{$val.role_describe}】</font><a class="mt1" href="order.php?act=order_detail&id={$val.order_id}&{$act}=1" title="订单详情" ><img src="images/add.gif" alt="查看" title="查看" align="absmiddle"></a>
                                     </td>
