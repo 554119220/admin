@@ -7,7 +7,7 @@
                 {foreach from=$platform_list item=val name=i}
                 {if !in_array($val.role_id,array(1,2,9,23,29,31))}
                 <li id="tag_{$val.role_id}" class="{if $val.role_id eq $platform}current-tab{else}last{/if}">
-                    <a href="order.php?act={$act}&platform={$val.role_id}">
+                <a href="order.php?act={$act}&platform={$val.role_id}&order_type={$order_type}">
                         {if $val.role_id}{$val.role_describe}-{/if}{$val.role_name}
                     </a>
                 </li>
@@ -73,7 +73,7 @@
                                 <col width="418px">
                             </colgroup>
                             <tr height="27px" bgcolor="#eee">
-                                <td align="center">操作</td>
+                                <td align="center" width="112px;">操作</td>
                                 <td height="20px" align="center">收货人</td>
                                 <td align="center">下单时间</td>
                                 <td align="center">总金额</td>
@@ -128,7 +128,7 @@
                                 {foreach from=$order_list item=val}
                                 <tr bgcolor="#FFFFFF" id="tr_2_{$val.order_id}"
                                     class="tr_list {if $val.pay_id eq 3}tr_bg_list{/if}">
-                                    <td align="center">
+                                    <td align="right" width="98px;">
                                         <!--a href="order.php?act=order_lock&id={$val.order_id}" id="lock_{$val.order_id}" title="锁定后，只有锁定该订单的客服才可对该订单进行操作">
                                         {if $val.order_lock eq $admin_id}{if $val.order_lock}解锁{else}锁定{/if}{else}{$val.lock_status}{/if}
                                         </a-->

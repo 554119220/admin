@@ -1266,20 +1266,20 @@ function get_area_taobao ($type = 1, $parent = '')
 }
 
 /**
- * 获取角色列表
+ * 获取部门列表
  */
-function get_role_list($type = '')
+function get_role_list($type = '',$fields='',$append='')
 {
-    $list = array();
-    if (!empty($type) && is_int($type))
-    {
-        $type = " WHERE role_type>=$type";
+    $where = ' WHERE 1 ';
+    if (!empty($type) && is_int($type)) {
+        $where .= " AND role_type>=$type";
     }
-    $sql  = 'SELECT role_id, role_name, action_list, compete, manager FROM '
-        .$GLOBALS['ecs']->table('role').$type.' ORDER BY convert(role_name using gbk) ASC';
-    $list = $GLOBALS['db']->getAll($sql);
-
-    return $list;
+    if (!empty($append)) {
+        $where .= $append;
+    }
+    $sql = empty($fields) ? 'role_id, role_name, action_list, compete, manager' : 'role_id,role_name';  
+    $sql  = "SELECT $fields FROM ".$GLOBALS['ecs']->table('role').$where.' ORDER BY convert(role_name using gbk) ASC';
+    return $GLOBALS['db']->getAll($sql);
 }
 
 /**
@@ -1703,8 +1703,9 @@ function admin_page_size($sql_count,$act,$condition)
     return $filter;
 }
 
+//获取部门
 function get_role_by_all(){
-    $where = ' WHERE role_id>31';
+    $where = ' WHERE role_id IN('.KEFU.','.KEFU2.')';
     if ($_SESSION['admin_id'] == 493) {
         $where .= " AND role_id IN(".KEFU.")";
     }elseif($_SESSION['admin_id'] == 4){

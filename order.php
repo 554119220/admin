@@ -516,7 +516,6 @@ elseif ($_REQUEST['act'] == 'order_detail') {
 
     // 读取订单详细信息
     $order_info     = get_order_detail($id, $order_table_name);
-
     if(!in_array($_SESSION['admin_id'],array(497,4,277,330,554))){
         $order_info['mobile'] = hideContact($order_info['mobile']);
         $order_info['tel'] = hideContact($order_info['tel']);
@@ -6333,7 +6332,7 @@ function jingdong_shiping_syn($order_id){
 
         if ($resp['error_response']['code']) {
             //return $resp['error_response']['zh_desc'].'【京东商城提示您】';
-           return $tracking_sn; 
+            return $tracking_sn; 
         }else return false;
     }else return $tracking_sn;
 }

@@ -79,7 +79,7 @@
                     </tr>
                     {foreach from=$val key=k item=v}
                     <tr height="30" onmouseover="hightLight('{$key}', this.rowIndex)"{if 0 && $k neq '合计' && $v.total_amount} onclick="getSalesDetail('{$k}','{$key}')"{/if}>
-                        <td align="center">{if $k eq '合计'}合计{else}{$temp[$k]}{/if}</td>
+                        <td align="right" style="padding-right:4px;">{if $k eq '合计'}合计{else}{$temp[$k]}{/if}</td>
                         <td class="first-cell pos" align="center">{if isset($v[4])}{$v[4].order_number}{else}-{/if}</td>
                         <td align="center">{if isset($v[4])}{$v[4].final_amount}{else}-{/if}</td>
                         <!--td class="first-cell pos" align="center">{if isset($v[1])}{$v[1].order_number}{else}-{/if}</td>
@@ -112,7 +112,7 @@
                     <tr height="30" onmouseover="hightLight('{$key}', this.rowIndex)">
                         <td class="first-cell pos" align="center">{if isset($v)}{$v.order_num}{else}-{/if}</td>
                         <td align="center">{if isset($v)}{$v.final_amount}{else}-{/if}</td>
-                        <td align="center">{if $k eq '合计'}合计{else}{$temp[$k]}{/if}</td>
+                        <td align="left" style="padding-left:5px;">{if $k eq '合计'}合计{else}{$temp[$k]}{/if}</td>
                     </tr>
                     {/foreach}
                 </table>

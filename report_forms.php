@@ -161,7 +161,8 @@ elseif ($_REQUEST['act'] == 'order_sales') {
 
     $temp = array();
     foreach ($platform_list as $val) {
-        $temp[$val['role_describe']] = preg_replace('/\d/', '', $val['role_name']);
+       //$temp[$val['role_describe']] = preg_replace('/\d/', '', $val['role_name']);
+       $temp[$val['role_describe']] = $val['role_name'];
     }
 
     $smarty->assign('temp', $temp);
