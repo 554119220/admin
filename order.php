@@ -2413,7 +2413,7 @@ elseif ($_REQUEST['act'] == 'shipping_done') {
             if (in_array($user['customer_type'], array(1,12,6,7,8,13,14,15,16,17))) {
                 // 将成交的顾客转到已购买顾客中
                 $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users').
-                    " SET customer_type=2 WHERE user_id={$user['user_iduser_id']}";
+                    " SET customer_type=2 WHERE user_id={$user['user_id']}";
                 $GLOBALS['db']->query($sql_update);
             }
 

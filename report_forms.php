@@ -60,8 +60,67 @@ if ($_REQUEST['act'] == 'menu')
 }
 
 //统计部门订单数量及销量
-elseif($_REQUEST['role_order_sales']){
-    $platform_list = platform_list($trans_role_list);      // 销售平台
+elseif($_REQUEST['act'] == 'role_order_sales' ){
+    $res['switch_tag'] = true;
+    $res['id'] = isset($_REQUEST['platform']) ? $_REQUEST['platform'] : 0;
+
+    $status = ' AND order_status IN (1,5) AND shipping_status<>3 ';
+    $refund_where = '';
+    $trans_role_list = '';
+
+    $role_list = get_role_list(1,true,' AND parent_id IN(0,-1)');      // 销售平台
+    if (!empty($res['id'])) {
+        $platform_list = $role_list;
+        $sql = 'SELECT parent_id FROM '.$GLOBALS['ecs']->table('role')." WHERE role_id={$res['id']}";
+        $parent_id = $GLOBALS['db']->getOne($sql);
+        if ($paren_id<1) {
+            $sql = 'SELECT role_id FROM '.$GLOBALS['ecs']->table('role')." WHERE parent_id={$res['id']}";
+            $stats_list = $GLOBALS['db']->getCol($sql);
+            if ($stats_list) {
+                $stats_list = implode(',',$stats_list);
+            }
+        }else{
+            $stats_list = $res['id'];
+        }
+    }else{
+        $stats_list = report_authority($status,$refund_where,$trans_role_list);
+        $platform_list = platform_list($trans_role_list);      // 销售平台
+        $_REQUEST['group_by'] = true;
+    }
+
+    if (!empty($stats_list)) {
+        $status .= " AND platform IN ($stats_list)";
+        $refund_where = " AND platform IN ($stats_list)";
+    }
+
+    $role_sales = get_role_list(1,true," AND role_id IN($stats_list)");      // 销售平台
+    if ($_REQUEST['group_by']) {
+        $result = platform_order_stats($refund_where,$status,$role_list);
+    }else{
+        $result = platform_order_stats($refund_where,$status,$role_sales);
+    }
+    extract($result);
+
+    $temp = array();
+    if ($_REQUEST['group_by']) {
+        foreach ($role_list as $val) {
+            $temp[$val['role_id']] = $val['role_name'];
+        }
+    }else{
+        foreach ($role_sales as $val) {
+            $temp[$val['role_describe']] = $val['role_name'];
+        }
+    }
+
+    $smarty->assign('platform_list', $role_list);
+    $smarty->assign('act',   $_REQUEST['act']);
+    $smarty->assign('stats', $stats);
+    $smarty->assign('temp', $temp);
+    $smarty->assign('return', $return);
+
+    $res['main'] = $smarty->fetch('order_sales.htm');
+
+    die($json->encode($res));
 }
 
 /* 统计小组订单数量及销量 */
@@ -72,41 +131,12 @@ elseif ($_REQUEST['act'] == 'order_sales') {
     $status = ' AND order_status IN (1,5) AND shipping_status<>3 ';
     $refund_where = '';
     $trans_role_list = '';
-    if (admin_priv('order_sales_all', '', false)) {
-    } elseif (admin_priv('order_sales_trans-part', '', false)) {
-        $trans_role_list = trans_part_list();
-        $stats_list = @implode(',', $trans_role_list);
-    } elseif (admin_priv('order_sales_part', '', false)) {
-        $platform_stats = platform_list();
-        foreach ($platform_stats as $val) {
-            $stats_list[] = $val['role_id'];
-        }
-        $stats_list = @implode(',', $stats_list);
-    } elseif (admin_priv('order_sales_branch','',false)) {
-        $sql_select = 'SELECT action FROM '.$GLOBALS['ecs']->table('role')." WHERE role_id={$_SESSION['role_id']}";
-        $action = $GLOBALS['db']->getOne($sql_select);
-        $sql_select = 'SELECT role_id FROM '.$GLOBALS['ecs']->table('role')." WHERE action='$action'";
-        $role_list = $GLOBALS['db']->getCol($sql_select);
-        $stats_list = implode(',', $role_list);
-    }
 
+    $stats_list = report_authority($status,$refund_where,$trans_role_list); 
     if (!empty($stats_list)) {
         $status .= " AND platform IN ($stats_list)";
         $refund_where = " AND platform IN ($stats_list)";
     }
-
-    $param = addslashes_deep($_REQUEST);
-
-    $platform_list = platform_list($trans_role_list);      // 销售平台
-    $smarty->assign('platform_list', $platform_list);
-
-    // 计算统计时间  月
-    $param['start_time'] = date('Y-m-01 00:00:00', $nowtime);
-    $param['end_time']   = date('Y-m-d 23:59:59', $nowtime);
-
-    $start_time = strtotime($param['start_time']);
-    $end_time   = strtotime($param['end_time']);
-    $end_month  = strtotime(date('Y-m-t 23:59:59', $nowtime));
 
     // 销售平台
     if (isset($_REQUEST['platform']) && $_REQUEST['platform'] >0) {
@@ -114,60 +144,23 @@ elseif ($_REQUEST['act'] == 'order_sales') {
         $refund_where .= ' AND platform='.intval($_REQUEST['platform']);
     }
 
-    $stats['month'] = stats_order($start_time,$end_month,$status);  // 当月销量
-    $stats['month'] = sort_by_sales($stats['month']);
+    $result = platform_order_stats($refund_where,$status);
+    extract($result);
 
-    // 计算昨日统计时间
-    $yesterday_end = strtotime(date('Y-m-d 00:00:00', $nowtime));
-    $yesterday_start = $yesterday_end -24*3600;
-    $stats['last_day'] = stats_order($yesterday_start,$yesterday_end,$status);  // 昨日销量
-    $stats['last_day'] = sort_by_sales($stats['last_day']);
-
-    // 计算今日统计时间
-    $today_end = strtotime(date('Y-m-d 23:59:59', $nowtime));
-    $today_start = $today_end -24*3600;
-    $stats['current'] = stats_order($today_start,$today_end,$status);  // 当日销量
-    $stats['current'] = sort_by_sales($stats['current']);
-
-    $stats = array_reverse($stats);
-
-    // 退货订单统计
-    //$status = $refund_where.' AND order_status=5 AND shipping_status=4 ';
-    //$stats['refund'] = stats_order($start_time,$end_time,$status);  // 退货订单数据
-
-    $group = ' GROUP BY platform ';
-
-    $status = " $refund_where AND r.return_time BETWEEN $today_start AND $today_end";
-    $result = stats_return_order($status, $group);
-    $return = array('current' => '', 'last_day' => '', 'month' => '');
-    foreach ($stats['current'] as $key=>$val){
-        @$return['current'][$key] = $result[$key] ? $result[$key] : '-';
-    }
-
-    $status = " $refund_where AND r.return_time>$yesterday_start AND r.return_time<$yesterday_end";
-    $result = stats_return_order($status, $group);
-    foreach ($stats['last_day'] as $key=>$val){
-        @$return['last_day'][$key] = $result[$key] ? $result[$key] : '-';
-    }
-
-    $status = " $refund_where AND r.return_time>$start_time AND r.return_time<$end_time";
-    $result = stats_return_order($status, $group); // 当月退货统计
-    foreach ($stats['month'] as $key=>$val){
-        @$return['month'][$key] = $result[$key] ? $result[$key] : '-';
-    }
+    $platform_list = platform_list($trans_role_list);      // 销售平台
+    $smarty->assign('platform_list', $platform_list);
 
     $smarty->assign('act',   $_REQUEST['act']);
     $smarty->assign('stats', $stats);
 
     $temp = array();
     foreach ($platform_list as $val) {
-       //$temp[$val['role_describe']] = preg_replace('/\d/', '', $val['role_name']);
-       $temp[$val['role_describe']] = $val['role_name'];
+        //$temp[$val['role_describe']] = preg_replace('/\d/', '', $val['role_name']);
+        $temp[$val['role_describe']] = $val['role_name'];
     }
 
     $smarty->assign('temp', $temp);
     $smarty->assign('return', $return);
-
     $res['main'] = $smarty->fetch('order_sales.htm');
 
     die($json->encode($res));
@@ -2171,19 +2164,26 @@ function sales_rank ($is_pagination = true) {
 /**
  * 统计销量
  */
-function stats_order ($start_time, $end_time, $status)
+function stats_order ($start_time, $end_time, $status,$platform_list = array())
 {
+    if ($_REQUEST['group_by']) {
+        $group_by = 'r.parent_id';
+        $key = 'parent_id';
+    }else{
+        $group_by = 'r.role_describe';
+        $key = 'role_describe';
+    }
     $result = array ();
-
     // 获取各平台的销售数据
-    $sql_select = 'SELECT r.role_describe,i.order_type,COUNT(*) order_number,SUM(i.final_amount) final_amount,'.
+    $sql_select = 'SELECT r.parent_id,r.role_describe,i.order_type,COUNT(*) order_number,SUM(i.final_amount) final_amount,'.
         'SUM(i.goods_amount) goods_amount,SUM(i.shipping_fee) shipping_fee FROM '.$GLOBALS['ecs']->table('order_info').' i, '.
         $GLOBALS['ecs']->table('role')." r WHERE add_time BETWEEN $start_time AND $end_time $status AND ".
-        'r.role_id=i.platform AND i.order_type NOT IN (1,2,8) GROUP BY r.role_describe,order_type ORDER BY final_amount DESC';
+        "r.role_id=i.platform AND i.order_type NOT IN (1,2,8) GROUP BY $group_by,order_type ORDER BY final_amount DESC";
     $result = $GLOBALS['db']->getAll($sql_select);
 
-    $platform_list = platform_list();
-
+    if (empty($platform_list)){
+        $platform_list = platform_list();
+    }
     $month_days    = date('t', $end_time);
     $month_now_day = date('j', time());
 
@@ -2192,9 +2192,9 @@ function stats_order ($start_time, $end_time, $status)
     $r = $result;
     $res = array ();
     foreach ($s as $k) {
-        @$res[$k['role_describe']][$k['order_type']] = $k;
-        @$res[$k['role_describe']]['total_number'] += $k['order_number'];
-        @$res[$k['role_describe']]['total_amount'] = bcadd($k['final_amount'],$res[$k['role_describe']]['total_amount'],2);
+        @$res[$k[$key]][$k['order_type']] = $k;
+        @$res[$k[$key]]['total_number'] += $k['order_number'];
+        @$res[$k[$key]]['total_amount'] = bcadd($k['final_amount'],$res[$k[$key]]['total_amount'],2);
     }
 
     // 合并活动个人订单、活动静默订单
@@ -2216,8 +2216,8 @@ function stats_order ($start_time, $end_time, $status)
 
     // 加入没有订单的平台
     foreach ($platform_list as $p) {
-        if(!array_key_exists($p['role_describe'], $res)){
-            $res[$p['role_describe']] = array();
+        if(!array_key_exists($p[$key], $res)){
+            $res[$p[$key]] = array();
         }
     }
 
@@ -4604,4 +4604,83 @@ function final_order_success($month,$last_month,$customer){
     $final['total']['admin_id'] = $final['total']['role_id'] = $final['total']['group_id'] = 'total';
     $final['total']['admin_name'] = '总计';
     return $final;   
+}
+
+//小组或平台销量统计报表
+function platform_order_stats($refund_where='',$status='',$platform_list=array()){
+    $param = addslashes_deep($_REQUEST);
+    global $nowtime;
+    // 计算统计时间  月
+    $param['start_time'] = date('Y-m-01 00:00:00', $nowtime);
+    $param['end_time']   = date('Y-m-d 23:59:59', $nowtime);
+
+    $start_time = strtotime($param['start_time']);
+    $end_time   = strtotime($param['end_time']);
+    $end_month  = strtotime(date('Y-m-t 23:59:59', $nowtime));
+
+    
+    $stats['month'] = stats_order($start_time,$end_month,$status,$platform_list);  // 当月销量
+    $stats['month'] = sort_by_sales($stats['month']);
+
+    // 计算昨日统计时间
+    $yesterday_end = strtotime(date('Y-m-d 00:00:00', $nowtime));
+    $yesterday_start = $yesterday_end -24*3600;
+    $stats['last_day'] = stats_order($yesterday_start,$yesterday_end,$status,$platform_list);  // 昨日销量
+    $stats['last_day'] = sort_by_sales($stats['last_day']);
+
+    // 计算今日统计时间
+    $today_end = strtotime(date('Y-m-d 23:59:59', $nowtime));
+    $today_start = $today_end -24*3600;
+    $stats['current'] = stats_order($today_start,$today_end,$status,$platform_list);  // 当日销量
+    $stats['current'] = sort_by_sales($stats['current']);
+    $stats = array_reverse($stats);
+
+    // 退货订单统计
+    //$status = $refund_where.' AND order_status=5 AND shipping_status=4 ';
+    //$stats['refund'] = stats_order($start_time,$end_time,$status);  // 退货订单数据
+
+    $group = ' GROUP BY platform ';
+    $status = " $refund_where AND r.return_time BETWEEN $today_start AND $today_end";
+    $result = stats_return_order($status, $group);
+    $return = array('current' => '', 'last_day' => '', 'month' => '');
+    foreach ($stats['current'] as $key=>$val){
+        @$return['current'][$key] = $result[$key] ? $result[$key] : '-';
+    }
+
+    $status = " $refund_where AND r.return_time>$yesterday_start AND r.return_time<$yesterday_end";
+    $result = stats_return_order($status, $group);
+    foreach ($stats['last_day'] as $key=>$val){
+        @$return['last_day'][$key] = $result[$key] ? $result[$key] : '-';
+    }
+
+    $status = " $refund_where AND r.return_time>$start_time AND r.return_time<$end_time";
+    $result = stats_return_order($status, $group); // 当月退货统计
+    foreach ($stats['month'] as $key=>$val){
+        @$return['month'][$key] = $result[$key] ? $result[$key] : '-';
+    }
+    return array('stats'=>$stats,'return'=>$return);
+}
+
+//销量统计报表的权限
+function report_authority(&$status,&$refund_where,&$trans_role_list){
+    if (admin_priv('order_sales_all', '', false)) {
+        $stats_list = SALE;
+    } elseif (admin_priv('order_sales_trans-part', '', false)) {
+        $trans_role_list = trans_part_list();
+        $stats_list = @implode(',', $trans_role_list);
+    } elseif (admin_priv('order_sales_part', '', false)) {
+        $platform_stats = platform_list();
+        foreach ($platform_stats as $val) {
+            $stats_list[] = $val['role_id'];
+        }
+        $stats_list = @implode(',', $stats_list);
+    } elseif (admin_priv('order_sales_branch','',false)) {
+        $sql_select = 'SELECT action FROM '.$GLOBALS['ecs']->table('role')." WHERE role_id={$_SESSION['role_id']}";
+        $action = $GLOBALS['db']->getOne($sql_select);
+        $sql_select = 'SELECT role_id FROM '.$GLOBALS['ecs']->table('role')." WHERE action='$action'";
+        $role_list = $GLOBALS['db']->getCol($sql_select);
+        $stats_list = implode(',', $role_list);
+    }
+
+    return $stats_list;
 }
