@@ -705,6 +705,9 @@ elseif ($_REQUEST['act'] == 'user_detail') {
     $res['response_action'] = 'detail';
     $smarty->assign('user_id',$res['id']);
 
+    $smarty->assign('admin_id',$_SESSION['admin_id']);
+    $smarty->assign('role_id',$_SESSION['role_id']);
+
     $order_list   = access_purchase_records($user_id); // 获取顾客购买记录（订单记录）
     $service_list = get_user_services($user_id);       // 获取顾客服务记录
     $addr_list    = get_addr_list($user_id);           // 顾客地址列表
@@ -896,7 +899,7 @@ elseif ($_REQUEST['act'] == 'user_detail') {
         $admin_list = get_admin_tmp_list(1);
     }
     $smarty->assign('admin_list',     $admin_list);
-    $smarty->assign('platform_list',  get_role_list(1));
+    $smarty->assign('platform_list',  get_role_list(1,true,' AND parent_id>0'));
 
     $smarty->assign('province_list',  get_regions(1, 1));
     $smarty->assign('city_list',      get_regions(2, $user_info['province_id']));
@@ -1460,7 +1463,7 @@ elseif ($_REQUEST['act'] == 'advance_batch') {
     if ($count) {
         $count = count($count);
     }
-    
+
     $admin_name = $GLOBALS['db']->getOne("SELECT user_name FROM".$GLOBALS['ecs']->table('admin_user')." WHERE user_id=$to_admin");
     $sql = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET customer_type=$customer_type,admin_id=$to_admin,admin_name='$admin_name',assign_time={$_SERVER['REQUEST_TIME']}" .$where.$limit;
 
@@ -2693,7 +2696,7 @@ elseif ($_REQUEST['act'] == 'batch') {
         $res = crm_msg('对不起，您还不能访问该页面！');
         die($json->encode($res));
     }
-    $smarty->assign('customer_type',get_customer_type('1,2,3,4,21,22'));
+    $smarty->assign('customer_type',get_customer_type('1,2,3,4,21,22,23'));
     $smarty->assign('effect',list_effects_common());
     $smarty->assign('admin_list', $admin_list);
     $smarty->assign('role_info',$role_info);
@@ -4806,7 +4809,7 @@ elseif($_REQUEST['act'] == 'recyle_user'){
     $role_id       = intval($_REQUEST['role_id']);
     $admin_id      = intval($_REQUEST['recyle_admin']);
     $customer_type = intval($_REQUEST['customer_type']);
-    if (in_array($role_id,array(33,34,35,36,37,40))) {
+    if (in_array($role_id,$CUSTOMER_NIXUS))) {
         $sql = 'SELECT role_id FROM '.$GLOBALS['ecs']->table('admin_user')." WHERE user_id=$admin_id";
         $to_role_id = $GLOBALS['db']->getOne($sql);
         $where = " WHERE role_id=$role_id AND customer_type=4";
@@ -6648,7 +6651,6 @@ function search_by_goods() {
     $sql_select = 'SELECT u.user_id,u.user_name,u.sex,u.member_cid,u.add_time,u.service_time,u.admin_name,u.assign_time,u.remarks FROM '.
         $GLOBALS['ecs']->table('users').' u,'.$GLOBALS['ecs']->table('order_info').' i,'.$GLOBALS['ecs']->table('order_goods').' g '.
         $where.' GROUP BY u.user_id LIMIT '.($filter['page'] -1)*$filter['page_size'].', '.$filter['page_size'];
-    echo $sql_select;exit;
     $result = $GLOBALS['db']->getAll($sql_select);
 
     foreach ($result as &$val){

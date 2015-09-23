@@ -10,7 +10,7 @@ if ($_REQUEST['act'] == 'admin_name') {
     $smarty->assign('field', 'admin_id');
 
     if (admin_priv('all','',false)) {
-        $role_list = get_role_list(' WHERE role_id>32 OR role_id=13');
+        $role_list = get_role(' role_id IN('.SALE.') AND role_type>0');
     }
 
     $seller_list = seller_list();

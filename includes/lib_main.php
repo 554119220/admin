@@ -1108,7 +1108,8 @@ function get_admin ($role_id = 0) {
  */
 function get_role($where='role_id NOT IN (3, 4, 5, 8)')
 {
-    $sql = 'SELECT role_name, role_id FROM '.$GLOBALS['ecs']->table('role')." WHERE 1 AND $where";
+    $sql = 'SELECT role_name, role_id FROM '.$GLOBALS['ecs']->table('role')
+        ." WHERE 1 AND $where ORDER BY convert(role_name using gbk) ASC";
     return $GLOBALS['db']->getAll($sql);
 }
 
@@ -1285,7 +1286,7 @@ function get_role_list($type = '',$fields='',$append='')
         //只能查看本部门的
     }
 
-    $fields = !$fields ? 'role_id, role_name, action_list, compete, manager' : 'role_id,role_name,role_describe';  
+    $fields = !$fields ? 'role_id, role_name, action_list, compete, manager,parent_id' : 'parent_id,role_id,role_name,role_describe';  
     $sql  = "SELECT $fields FROM ".$GLOBALS['ecs']->table('role').$where.' ORDER BY convert(role_name using gbk) ASC';
     
     return $GLOBALS['db']->getAll($sql);
@@ -1779,4 +1780,16 @@ function get_cat_list(){
     }
     $sql = 'SELECT cat_id,cat_name FROM '.$GLOBALS['ecs']->table('component').$where;
     return $GLOBALS['db']->getAll($sql);
+}
+
+//获取部门下的同级部门
+function get_parent_role($role_id){
+    $sql = 'SELECT role_id FROM '.$GLOBALS['ecs']->table('role');
+    $parent_id = $GLOBALS['db']->getOne($sql." WHERE role_id=$role_id");
+
+    if ($parent_id) {
+        $role_list = $GLOBALS['db']->getCol($sql." WHERE parent_id=$parent_id");
+    }
+
+    return $role_list;
 }

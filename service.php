@@ -87,9 +87,7 @@ elseif ($_REQUEST['act'] == 'records')
     $result = service_records(); // 服务记录
     if(admin_priv('all','',false)) {
         $customer_service = get_admin_tmp_list();
-        $rsql = 'select role_id,role_name FROM '.$GLOBALS['ecs']->table('role').
-            " WHERE role_id>32 ORDER BY convert(role_name using gbk) ASC";
-        $role_list = $GLOBALS['db']->getAll($rsql);
+        $role_list = get_role(' role_id IN('.OFFLINE_SALE.') AND role_type>0');
         $smarty->assign('role_list',$role_list);
     }else{
         $sql_select = 'SELECT user_name, user_id FROM '.$GLOBALS['ecs']->table('admin_user').

@@ -559,7 +559,7 @@
                 <select name="team">
                   <option value="0">购买平台</option>
                   {foreach from=$platform_list item=val}
-                  <option value="{$val.role_id}">{$val.role_name}</option>
+                  <option value="{$val.role_id}" {if $role_id eq $val.role_id}selected{/if}>{$val.role_name}</option>
                   {/foreach}
                   {if $user.role_id eq 23}
                   <option value="23">公司员工</option>
@@ -570,7 +570,7 @@
                 <select name="order_type">
                   <option value="">订单类型</option>
                   {foreach from=$order_type item=val}
-                  <option value="{$val.type_id}">{$val.type_name}</option>
+                  <option value="{$val.type_id}" {if $val.type_id eq 4}selected{/if}>{$val.type_name}</option>
                   {/foreach}
                 </select>
               </td>
@@ -578,7 +578,7 @@
                 <select name="admin_id">
                   <option value="0">订单归属</option>
                   {foreach from=$admin_list item=val}
-                  <option value="{$val.user_id}">{$val.user_name}</option>
+                  <option value="{$val.user_id}" {if $val.user_id eq $admin_id}selected{/if}>{$val.user_name}</option>
                   {/foreach}
                 </select>
               </td>

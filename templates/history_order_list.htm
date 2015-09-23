@@ -56,12 +56,12 @@
                 <col width="100px">
               </colgroup>
               <tr bgcolor="#FFFFFF">
-                <td align="center" width="112px;">操作</td>
+                <td align="center" width="112px">操作</td>
                 <td align="center">运单号</td>
                 <td height="20px" align="center">收货人</td>
                 <td align="center">旺旺/QQ</td>
                 <!--td align="center">平台</td-->
-                <td align="center">下单时间</td>
+                <td align="center" width="150px">下单时间</td>
                 <td align="center">总金额</td>
                 <td align="center">发货必看</td>
                 <td align="center">健康顾问</td>
@@ -120,7 +120,7 @@
                 <td height="20" align="center">{$val.consignee}</td>
                 <td align="center">{$val.aliww}{if $val.aliww && $val.qq}||{/if}{$val.qq}</td>
                 <!--td align="center">{$val.platform}</td-->
-                <td align="center">{$val.short_order_time}</td>
+                <td align="center" width="118px">{$val.short_order_time}</td>
                 <td align="center">{$val.formated_total_fee}</td>
                 <td align="center">{$val.remarks}</td>
                 <td align="center" title="{$val.admin_name}">{$val.admin_name|truncate:5}</td>

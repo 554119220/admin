@@ -57,10 +57,8 @@
                     <th colspan="2">今日通话</th>
                     <th colspan="2">今天</th>
                     <th colspan="2">昨天</th>
-                    <th colspan="3">本月销量<font color="red">(不含退货）</font></th>
-                    <th>退货总额</th>
+                    <th colspan="3">本月<font color="red">(不含退货）</font></th>
                     <th colspan="2">本月退货</th>
-                    <th colspan="2">上月下本月退</th>
                     <th colspan="4"> </th>
                 </tr>
                 <tr id="sortByThis">
@@ -70,8 +68,6 @@
                     <th>订单数量</th><th>订单金额</th>
                     <th>订单数量</th><th>订单金额</th>
                     <th>订单数量</th><th>订单金额</th><th>客单价</th>
-                    <th>订单金额</th>
-                    <th>订单数量</th><th>订单金额</th>
                     <th>订单数量</th><th>订单金额</th>
                     <th>目标销量</th>
                     <th>预计销量</th>
@@ -94,12 +90,9 @@
                     <th title="当月订单数量">{if $val.month_count}{$val.month_count}{elseif $smarty.foreach.i.last}{else}0{/if}</th>
                     <th title="当月订单金额">{if $val.month_amount}{$val.month_amount}{elseif $smarty.foreach.i.last}{else}0{/if}</th>
                     <th title="当月客单价"{if $smarty.foreach.i.last} id="pct"{/if}>{$val.PCT}</th>
-                    <th>总退货</th>
                     <th title="当月退货数量">{if $val.return_count}{$val.return_count}{elseif $smarty.foreach.i.last}{else}0{/if}</th>
                     <th title="当月退货金额">{if $val.return_amount}{$val.return_amount}{elseif $smarty.foreach.i.last}{else}0{/if}</th>
                     <th title="当月目标销量{if $val.target gt $val.month_amount}：未完成{else}：已完成{/if}"{if $val.target gt $val.month_amount}style="color:red"{/if}>{$val.target}</th>
-                    <th></th>
-                    <th></th>
                     <th title="预计当月销量">{if $val.forecast}{$val.forecast}{elseif $smarty.foreach.i.last}{else}0{/if}</th>
                     <!--th>{$val.progress}</th-->
                     <th title="当月剩余任务">{$val.remain_sales}</th>

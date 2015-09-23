@@ -1295,7 +1295,7 @@ elseif ($_REQUEST['act'] == 'add_new_order') {
         } elseif (empty($val['goods_number'])) {
             $res['message'] = '商品数量无效，请重新添加该商品！';
             die($json->encode($res));
-        } elseif ($order_info['order_type'] != 100 || !admin_priv('employee_order', '', false)) {
+        } elseif (!admin_priv('employee_order', '', false) || $order_info['order_type'] != 100) {
             if (verify_price($val, $order_info['team'])) {
                 $mem = new Memcache;
                 $mem->connect('127.0.0.1', 11211);

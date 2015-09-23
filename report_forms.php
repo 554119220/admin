@@ -1524,8 +1524,8 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
             $smarty->assign('min_date', $min_date);
         }
         // 部门列表
-        $trans_role_list = empty($trans_role_list) ? ' WHERE role_type IN (1,2) ' : " WHERE role_type IN (1,2) AND role_id IN ($trans_role_list) ";
-        $smarty->assign('role_list', get_role_list($trans_role_list));
+        $trans_role_list = empty($trans_role_list) ? ' AND role_type IN (1,2) ' : " AND role_type IN (1,2) AND role_id IN ($trans_role_list) ";
+        $smarty->assign('role_list', get_role_list(0,true,$trans_role_list.' AND parent_id>0'));
         $smarty->assign('curr_title', '个人销售统计');
         if (admin_priv('personal_stats_query', '', false)) {
             $smarty->assign('personal_stats_query', true);
@@ -2179,6 +2179,7 @@ function stats_order ($start_time, $end_time, $status,$platform_list = array())
         'SUM(i.goods_amount) goods_amount,SUM(i.shipping_fee) shipping_fee FROM '.$GLOBALS['ecs']->table('order_info').' i, '.
         $GLOBALS['ecs']->table('role')." r WHERE add_time BETWEEN $start_time AND $end_time $status AND ".
         "r.role_id=i.platform AND i.order_type NOT IN (1,2,8) GROUP BY $group_by,order_type ORDER BY final_amount DESC";
+
     $result = $GLOBALS['db']->getAll($sql_select);
 
     if (empty($platform_list)){
@@ -2215,9 +2216,11 @@ function stats_order ($start_time, $end_time, $status,$platform_list = array())
     }
 
     // 加入没有订单的平台
-    foreach ($platform_list as $p) {
-        if(!array_key_exists($p[$key], $res)){
-            $res[$p[$key]] = array();
+    if (!$_REQUEST['group_by']) {
+        foreach ($platform_list as $p) {
+            if(!array_key_exists($p[$key], $res)){
+                $res[$p[$key]] = array();
+            }
         }
     }
 
@@ -3588,15 +3591,17 @@ function user_buy_stats()
 function stats_return_order ($status, $group)
 {
     $where = ' WHERE i.order_status=5 AND i.shipping_status=4 AND i.order_id=r.order_id AND role.role_id=i.platform '.$status.$group;
-    $sql_select = 'SELECT COUNT(*) order_num, SUM(i.final_amount) final_amount, role.role_describe platform FROM '.
+    $sql_select = 'SELECT COUNT(*) order_num, SUM(i.final_amount) final_amount, role.role_describe platform,role.parent_id FROM '.
         $GLOBALS['ecs']->table('order_info').' i,'.$GLOBALS['ecs']->table('returns_order').' r, '.$GLOBALS['ecs']->table('role').' role'.$where;
     $result = $GLOBALS['db']->getAll($sql_select);
 
     $final = array();
-    $temp = array();
+    $temp  = array();
+    $key   = $_REQUEST['group_by'] ? 'parent_id' : 'platform';
+
     foreach ($result as $val){
-        @$final[$val['platform']]['order_num']    += $val['order_num'];
-        @$final[$val['platform']]['final_amount'] += $val['final_amount'];
+        @$final[$val[$key]]['order_num']    += $val['order_num'];
+        @$final[$val[$key]]['final_amount'] += $val['final_amount'];
 
         @$temp['合计']['order_num'] += $val['order_num'];
         @$temp['合计']['final_amount'] = bcadd($temp['合计']['final_amount'], $val['final_amount'], 2);
@@ -4639,7 +4644,8 @@ function platform_order_stats($refund_where='',$status='',$platform_list=array()
     //$status = $refund_where.' AND order_status=5 AND shipping_status=4 ';
     //$stats['refund'] = stats_order($start_time,$end_time,$status);  // 退货订单数据
 
-    $group = ' GROUP BY platform ';
+    $key = $_REQUEST['group_by'] ? 'parent_id' : 'platform';
+    $group = " GROUP BY $key  ";
     $status = " $refund_where AND r.return_time BETWEEN $today_start AND $today_end";
     $result = stats_return_order($status, $group);
     $return = array('current' => '', 'last_day' => '', 'month' => '');
@@ -4664,7 +4670,9 @@ function platform_order_stats($refund_where='',$status='',$platform_list=array()
 //销量统计报表的权限
 function report_authority(&$status,&$refund_where,&$trans_role_list){
     if (admin_priv('order_sales_all', '', false)) {
-        $stats_list = SALE;
+        $stats_list = explode(',',SALE.','.ONLINE_STORE);
+        $stats_list = array_unique($stats_list);
+        $stats_list = implode(',',$stats_list);
     } elseif (admin_priv('order_sales_trans-part', '', false)) {
         $trans_role_list = trans_part_list();
         $stats_list = @implode(',', $trans_role_list);
