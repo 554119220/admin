@@ -1400,7 +1400,8 @@ function get_admin_tmp_list ($role = 0)
     $sql = 'SELECT user_name,user_id,group_id,role_id FROM '.
         $GLOBALS['ecs']->table('admin_user').' WHERE status>0 AND stats>0';
     if (!admin_priv('all', '', false) && $role && $_SESSION['role_id']) {
-        $sql .= " AND role_id={$_SESSION['role_id']}";
+        $role_id =  get_depart_role($_SESSION['role_id']);
+        $sql .= " AND role_id IN($role_id)";
     } else {
         $sql .= ' AND role_id IN ('.SALE.') ';
     }
@@ -1794,6 +1795,25 @@ function get_department($where='',$change=false,$single=false){
             $arr[$v['depart_id']] = $v['depart_name'];
         }
         $list = $arr;
+    }
+
+    return $list;
+}
+
+//获取顶级部门下的下属部门
+//return string or array
+function get_depart_role($role_id,$type='string'){
+    $sql = 'SELECT depart_id FROM '.$GLOBALS['ecs']->table('role')." WHERE role_id=$role_id";
+    $depart_id = $GLOBALS['db']->getOne($sql);
+    if ($depart_id) {
+        $sql = ' SELECT role_id,role_name FROM '.$GLOBALS['ecs']->table('role')." WHERE depart_id=$depart_id";
+        $list = $GLOBALS['db']->getAll($sql);
+        if ($type == 'string') {
+            foreach ($list as $v) {
+                $str[] = $v['role_id'];
+            }
+            $list = implode(',',$str);
+        }
     }
 
     return $list;

@@ -1327,7 +1327,8 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
         if (admin_priv('personal_part_stats', '', false)) {
             $range = " r.role_id={$_SESSION['role_id']} AND a.stats>0";
             $admin_list = get_admin_tmp_list($_SESSION['role_id']);
-            $group_list = get_group_list($_SESSION['role_id']);
+            $trans_role_list  = get_depart_role($_SESSION['role_id']);
+            //$group_list = get_group_list($_SESSION['role_id']);
             $smarty->assign('group_list', $group_list);
         } elseif (admin_priv('personal_group_stats', '', false)) {
             $range = " a.group_id={$_SESSION['group_id']} AND a.stats=1 ";
@@ -1339,6 +1340,11 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
         $range = ' r.role_id IN ('.OFFLINE_SALE.') AND a.stats>0 ';
         $smarty->assign('part_all', true);
     }
+
+    // 部门列表
+    $trans_role_list = empty($trans_role_list) ? ' AND role_type IN (1,2) ' : " AND role_type IN (1,2) AND role_id IN ($trans_role_list) ";
+    $smarty->assign('role_list', get_role_list(0,true,$trans_role_list.' AND depart_id>0'));
+
     $role_list = array_merge(explode(',', OFFLINE_SALE), explode(',', FINANCE));
     if (empty($_SESSION['role_id']) || in_array($_SESSION['role_id'], $role_list)) {
         $sql_select = 'SELECT a.user_id,a.role_id,a.group_id,r.role_describe FROM '.
@@ -1520,9 +1526,7 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
             $min_date = 'minDate:\''.floor($final_month/12).'-'.($final_month%12).'-01 00:00:00\'';
             $smarty->assign('min_date', $min_date);
         }
-        // 部门列表
-        $trans_role_list = empty($trans_role_list) ? ' AND role_type IN (1,2) ' : " AND role_type IN (1,2) AND role_id IN ($trans_role_list) ";
-        $smarty->assign('role_list', get_role_list(0,true,$trans_role_list.' AND depart_id>0'));
+
         $smarty->assign('curr_title', '个人销售统计');
         if (admin_priv('personal_stats_query', '', false)) {
             $smarty->assign('personal_stats_query', true);
