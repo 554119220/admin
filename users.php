@@ -4809,7 +4809,7 @@ elseif($_REQUEST['act'] == 'recyle_user'){
     $role_id       = intval($_REQUEST['role_id']);
     $admin_id      = intval($_REQUEST['recyle_admin']);
     $customer_type = intval($_REQUEST['customer_type']);
-    if (in_array($role_id,$CUSTOMER_NIXUS))) {
+    if (in_array($role_id,$CUSTOMER_NIXUS)) {
         $sql = 'SELECT role_id FROM '.$GLOBALS['ecs']->table('admin_user')." WHERE user_id=$admin_id";
         $to_role_id = $GLOBALS['db']->getOne($sql);
         $where = " WHERE role_id=$role_id AND customer_type=4";

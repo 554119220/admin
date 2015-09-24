@@ -1286,7 +1286,7 @@ function get_role_list($type = '',$fields='',$append='')
         //只能查看本部门的
     }
 
-    $fields = !$fields ? 'role_id, role_name, action_list, compete, manager,parent_id' : 'parent_id,role_id,role_name,role_describe';  
+    $fields = !$fields ? 'role_id, role_name, action_list, compete, manager,depart_id' : 'depart_id,role_id,role_name,role_describe';  
     $sql  = "SELECT $fields FROM ".$GLOBALS['ecs']->table('role').$where.' ORDER BY convert(role_name using gbk) ASC';
     
     return $GLOBALS['db']->getAll($sql);
@@ -1365,7 +1365,7 @@ function assoc_value ($arr, $key = 0)
  */
 function platform_list ($platform = array ()) {
     $sql_select = 'SELECT role_name,role_id,role_describe FROM '.$GLOBALS['ecs']->table('role')
-        ." WHERE role_type>0 AND parent_id>=0";
+        ." WHERE role_type>0 AND depart_id>=0";
     if (!admin_priv('all', '', false) && empty($platform)) {
         $action = explode(',', $_SESSION['action_list']);
         $action = implode("','", array_filter($action));
@@ -1782,14 +1782,19 @@ function get_cat_list(){
     return $GLOBALS['db']->getAll($sql);
 }
 
-//获取部门下的同级部门
-function get_parent_role($role_id){
-    $sql = 'SELECT role_id FROM '.$GLOBALS['ecs']->table('role');
-    $parent_id = $GLOBALS['db']->getOne($sql." WHERE role_id=$role_id");
-
-    if ($parent_id) {
-        $role_list = $GLOBALS['db']->getCol($sql." WHERE parent_id=$parent_id");
+//获取顶级部门列表
+function get_department($where='',$change=false,$single=false){
+    $append = ' WHERE 1 ';
+    $field = $change ? 'depart_id role_id,depart_name role_name' : '*'; 
+    $sql = "SELECT $field FROM ".$GLOBALS['ecs']->table('department')." $append $where ";
+    $list = $GLOBALS['db']->getAll($sql);
+    if ($list && $single) {
+        $arr = array();
+        foreach ($list as $v) {
+            $arr[$v['depart_id']] = $v['depart_name'];
+        }
+        $list = $arr;
     }
 
-    return $role_list;
+    return $list;
 }

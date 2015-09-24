@@ -52,7 +52,7 @@
             <textarea name="feature">{$feature} </textarea>
           </div>
           <br />
-          <input type="submit" value="提交" style="float:right;"/>
+          <input type="submit" value="提交" class="b_submit" style="float:right;" />
         </form>
       </div>
     </div>
@@ -81,12 +81,30 @@
         }
         });
   }
+
+function searchComponent(){
+  var component = $("#keyword").val();
+  if (component) {
+    component = component.split('、');
+    for (var i = 0; i < component.length; i++) {
+      arrChk.each(function(){
+          if ($.trim(component[i]) == $(this).attr('text')) {
+          $(this).attr('checked',true);
+          $(this).parent().parent().css('background','#F7CC86');
+          var obj = document.getElementById('goods_cat_relation');
+          obj.style.display = '';
+          }
+      });
+    }
+  }
+}
+
 arrChk.each(function(){
     $(this).click(function(){
       if ($(this).prop('checked')) {
-        $(this).parent().parent().css('background','#F7CC86');
+      $(this).parent().parent().css('background','#F7CC86');
       }else{
-        $(this).parent().parent().css('background','transparent');
+      $(this).parent().parent().css('background','transparent');
       }
       });
     });
@@ -113,4 +131,5 @@ function editArticle() {
 function resp(res){
   document.body.innerHTML = res['main'];
 }
+
 </script>

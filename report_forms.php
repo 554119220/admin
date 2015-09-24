@@ -68,19 +68,16 @@ elseif($_REQUEST['act'] == 'role_order_sales' ){
     $refund_where = '';
     $trans_role_list = '';
 
-    $role_list = get_role_list(1,true,' AND parent_id IN(0,-1)');      // 销售平台
+    $department_list = get_department(' AND onsale=1',true);
+    //$role_list = get_role_list(1,true,' AND parent_id IN(0,-1)');      // 销售平台
     if (!empty($res['id'])) {
-        $platform_list = $role_list;
-        $sql = 'SELECT parent_id FROM '.$GLOBALS['ecs']->table('role')." WHERE role_id={$res['id']}";
-        $parent_id = $GLOBALS['db']->getOne($sql);
-        if ($paren_id<1) {
-            $sql = 'SELECT role_id FROM '.$GLOBALS['ecs']->table('role')." WHERE parent_id={$res['id']}";
-            $stats_list = $GLOBALS['db']->getCol($sql);
-            if ($stats_list) {
-                $stats_list = implode(',',$stats_list);
-            }
-        }else{
-            $stats_list = $res['id'];
+        //$platform_list = $role_list;
+        //$sql = 'SELECT depart_id FROM '.$GLOBALS['ecs']->table('role')." WHERE depart_id={$res['id']}";
+        //$depart_id = $GLOBALS['db']->getOne($sql);
+        $sql = 'SELECT role_id FROM '.$GLOBALS['ecs']->table('role')." WHERE depart_id={$res['id']}";
+        $stats_list = $GLOBALS['db']->getCol($sql);
+        if ($stats_list) {
+            $stats_list = implode(',',$stats_list);
         }
     }else{
         $stats_list = report_authority($status,$refund_where,$trans_role_list);
@@ -103,7 +100,7 @@ elseif($_REQUEST['act'] == 'role_order_sales' ){
 
     $temp = array();
     if ($_REQUEST['group_by']) {
-        foreach ($role_list as $val) {
+        foreach ($department_list as $val) {
             $temp[$val['role_id']] = $val['role_name'];
         }
     }else{
@@ -112,7 +109,7 @@ elseif($_REQUEST['act'] == 'role_order_sales' ){
         }
     }
 
-    $smarty->assign('platform_list', $role_list);
+    $smarty->assign('platform_list', $department_list);
     $smarty->assign('act',   $_REQUEST['act']);
     $smarty->assign('stats', $stats);
     $smarty->assign('temp', $temp);
@@ -298,7 +295,7 @@ elseif ($_REQUEST['act'] == 'rebuy_stats') {
 
     $admin = array ();
     if (admin_priv('rebuy_stats_all', '', false)) {
-        $platform = get_role_list(' WHERE role_id IN ('.OFFLINE_SALE.') AND parent_id>0 ');
+        $platform = get_role(' role_id IN ('.OFFLINE_SALE.') AND depart_id>0 ');
         $platform_list = array ();
         foreach ($platform as $val) {
             $platform_list[$val['role_id']] = $val['role_name'];
@@ -1525,7 +1522,7 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
         }
         // 部门列表
         $trans_role_list = empty($trans_role_list) ? ' AND role_type IN (1,2) ' : " AND role_type IN (1,2) AND role_id IN ($trans_role_list) ";
-        $smarty->assign('role_list', get_role_list(0,true,$trans_role_list.' AND parent_id>0'));
+        $smarty->assign('role_list', get_role_list(0,true,$trans_role_list.' AND depart_id>0'));
         $smarty->assign('curr_title', '个人销售统计');
         if (admin_priv('personal_stats_query', '', false)) {
             $smarty->assign('personal_stats_query', true);
@@ -2167,15 +2164,15 @@ function sales_rank ($is_pagination = true) {
 function stats_order ($start_time, $end_time, $status,$platform_list = array())
 {
     if ($_REQUEST['group_by']) {
-        $group_by = 'r.parent_id';
-        $key = 'parent_id';
+        $group_by = 'r.depart_id';
+        $key = 'depart_id';
     }else{
         $group_by = 'r.role_describe';
         $key = 'role_describe';
     }
     $result = array ();
     // 获取各平台的销售数据
-    $sql_select = 'SELECT r.parent_id,r.role_describe,i.order_type,COUNT(*) order_number,SUM(i.final_amount) final_amount,'.
+    $sql_select = 'SELECT r.depart_id,r.role_describe,i.order_type,COUNT(*) order_number,SUM(i.final_amount) final_amount,'.
         'SUM(i.goods_amount) goods_amount,SUM(i.shipping_fee) shipping_fee FROM '.$GLOBALS['ecs']->table('order_info').' i, '.
         $GLOBALS['ecs']->table('role')." r WHERE add_time BETWEEN $start_time AND $end_time $status AND ".
         "r.role_id=i.platform AND i.order_type NOT IN (1,2,8) GROUP BY $group_by,order_type ORDER BY final_amount DESC";
@@ -3591,13 +3588,13 @@ function user_buy_stats()
 function stats_return_order ($status, $group)
 {
     $where = ' WHERE i.order_status=5 AND i.shipping_status=4 AND i.order_id=r.order_id AND role.role_id=i.platform '.$status.$group;
-    $sql_select = 'SELECT COUNT(*) order_num, SUM(i.final_amount) final_amount, role.role_describe platform,role.parent_id FROM '.
+    $sql_select = 'SELECT COUNT(*) order_num, SUM(i.final_amount) final_amount, role.role_describe platform,role.depart_id FROM '.
         $GLOBALS['ecs']->table('order_info').' i,'.$GLOBALS['ecs']->table('returns_order').' r, '.$GLOBALS['ecs']->table('role').' role'.$where;
     $result = $GLOBALS['db']->getAll($sql_select);
 
     $final = array();
     $temp  = array();
-    $key   = $_REQUEST['group_by'] ? 'parent_id' : 'platform';
+    $key   = $_REQUEST['group_by'] ? 'depart_id' : 'platform';
 
     foreach ($result as $val){
         @$final[$val[$key]]['order_num']    += $val['order_num'];
@@ -4644,7 +4641,7 @@ function platform_order_stats($refund_where='',$status='',$platform_list=array()
     //$status = $refund_where.' AND order_status=5 AND shipping_status=4 ';
     //$stats['refund'] = stats_order($start_time,$end_time,$status);  // 退货订单数据
 
-    $key = $_REQUEST['group_by'] ? 'parent_id' : 'platform';
+    $key = $_REQUEST['group_by'] ? 'depart_id' : 'platform';
     $group = " GROUP BY $key  ";
     $status = " $refund_where AND r.return_time BETWEEN $today_start AND $today_end";
     $result = stats_return_order($status, $group);
