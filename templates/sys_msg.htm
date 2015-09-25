@@ -1,6 +1,6 @@
 <br/><div>
   <div class="finder-title">消息中心</div>
-  <div class="list_panel" style="width:50%;">
+  <div class="list_panel" style="width:100%;">
     <form name="schServiceForm" action="javascript:void(0)" onsubmit="searchMsg(this)" >
       <span> 起始 
         <input name="startTime" id="startTime" type="text" maxlength="12" onClick="WdatePicker({dateFmt:'yyyy-M-d'})"/>
@@ -19,7 +19,7 @@
         <option value="0" {if $status eq 0}selected{/if}>未读</option>
         <option value="1" {if $status eq 1}selected{/if}>已读</option>
       </select>
-      <input type="submit" class="input_submits" value="搜索" />
+      <input type="submit" class="b_submit" value="搜索" />
     </form>
   </div>
   <div id="resource">

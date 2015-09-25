@@ -3678,6 +3678,27 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
         $res['main'] = $smarty->fetch('deal_flush_order.htm');
         die($json->encode($res));
         break;
+    case 'mark':
+        $order_sn_list = trim(mysql_real_escape_string($_REQUEST['orderlist']));
+        if ($order_sn_list) {
+            $order_sn_list = str_replace('\n','',$order_sn_list);
+            //$order_sn_list = preg_replace('/#+/',',',$order_sn_list);
+            $order_sn_list = preg_split('/#+/',$order_sn_list);
+            $order_sn_list = array_filter($order_sn_list);
+            $limit = count($order_sn_list);
+            $order_sn_list = implode(',',$order_sn_list);
+            $sql = 'UPDATE '.$GLOBALS['ecs']->table('ordersyn_info');
+            $sql_upd_type = $sql." SET order_type=1 WHERE admin_id=185 OR order_sn IN($order_sn_list) AND platform=10";
+            $code = $GLOBALS['db']->query($sql_upd_type);
+            $sql_upd_status = $sql." SET status=0,shipping_status=0 WHERE tracking_sn='' AND order_sn IN($order_sn_list) AND platform=10 LIMIT $limit";
+            if ($code) {
+                $res = crm_msg('标记成功');
+            }else{
+                $res = crm_msg('标记失败');
+            }
+            die($json->encode($res));
+        }
+        break;
     }
 }
 

@@ -1,24 +1,27 @@
 <br />
 <h3>批量确认刷单</h3>
 <br />
-<div style="width:40%;" class="white_bg">
+<div style="width:38%;" class="white_bg">
   <form action="javascript:void(0)" onsubmit="dealFlushOrder(this)">
     <table class="form_table" style="width:100%;">
       <tr>
-        <th></th>
+        <th style="width:10%"></th>
         <td>
           订单编号和快递单号要严格按照：  订单编号--递单号  的格式填写
           <br />示例： 10035314094--720003657638
         </td>
       </tr>
       <tr>
-        <th>订单号和快递单号列：</th>
+        <th><span style="width:12px;display:block;float:right;">
+          订单号和快递单号列
+        </span>
+        </th>
         <td>
           <textarea name="order_sn_list" style="width:236px;height:343px;resize:vertical;" placeholder="10035314094--720003657638"></textarea>
         </td>
       </tr>
       <tr>
-        <th>请选择快递:</th>
+        <th>快递:</th>
         <td>
           <select name="shipping_id" id="shipping_id">
             {foreach from=$shipping_list item=v}
@@ -29,6 +32,14 @@
           <input type="submit" value="确认" class="input_submit"/>
         </td>
       </tr>
+      <tr>
+        <td colspan="2">
+          <div>说明：此按钮只是将订单标记为【刷单】，并不做同步出库发货处理,只需填写订单编号并以“##”分隔，例10145144688##</div>
+          <input type="button" value="标记刷单" onclick="markFlushOrder(this.form)" class="input_submit" 
+          style="float:right;margin-top:-25px;"/>
+        </td>
+      </tr>
+
     </table>
   </form>
 </div>

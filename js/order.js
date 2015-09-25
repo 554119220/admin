@@ -115,3 +115,11 @@ function dealFlushOrder(obj){
     Ajax.call('order.php?act=deal_flush_order&behave=deal','&orderlist='+orderlist+'&shipping_id='+shipping_id,showMsg,'POST','JSON');
   }
 }
+
+//批量西游记刷单
+function markFlushOrder(obj){
+  var orderlist = obj.elements['order_sn_list'].value;
+  if (orderlist) {
+    Ajax.call('order.php?act=deal_flush_order&behave=mark','&orderlist='+orderlist,showMsg,'POST','JSON');
+  }
+}
