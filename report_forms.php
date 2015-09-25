@@ -1325,9 +1325,9 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
         $range = "r.role_id IN ($trans_role_list) AND a.stats>0";
     } elseif (!admin_priv('all', '',false) && !admin_priv('finance', '', false)) {
         if (admin_priv('personal_part_stats', '', false)) {
-            $range = " r.role_id={$_SESSION['role_id']} AND a.stats>0";
             $admin_list = get_admin_tmp_list($_SESSION['role_id']);
             $trans_role_list  = get_depart_role($_SESSION['role_id']);
+            $range = " r.role_id IN($trans_role_list) AND a.stats>0";
             //$group_list = get_group_list($_SESSION['role_id']);
             $smarty->assign('group_list', $group_list);
         } elseif (admin_priv('personal_group_stats', '', false)) {
@@ -1951,7 +1951,7 @@ elseif ($_REQUEST['act'] == 'service_stats') {
 
     $final = final_report($today,$yesterday,$month,$last_month);
     $smarty->assign('final', $final);
-    $smarty->assign('role_list', get_role_customer(' AND role_id IN(33,34,35,36,37,40)'));
+    $smarty->assign('role_list', get_role_customer(" AND role_id IN($CUSOMDER_NIXUS)"));
     $smarty->assign('curr_title', '通话统计');
     $res['main'] = $smarty->fetch('service_stats.htm');
     die($json->encode($res));
@@ -1972,7 +1972,7 @@ elseif('phone_connect_stats' == $_REQUEST['act']){
 
     $final = call_final_report($today,$yesterday,$month,$last_month);
     $smarty->assign('final', $final);
-    $smarty->assign('role_list', get_role_customer(' AND role_id IN(33,34,35,36,37,40)'));
+    $smarty->assign('role_list', get_role_customer(' AND role_id IN('.$CUSTOMER_NIXUS.')'));
     $smarty->assign('curr_title', '电话接通率');
     $res['main'] = $smarty->fetch('connect_stats.htm');
     die($json->encode($res));

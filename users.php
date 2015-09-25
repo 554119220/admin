@@ -898,8 +898,9 @@ elseif ($_REQUEST['act'] == 'user_detail') {
     }else{
         $admin_list = get_admin_tmp_list(1);
     }
+
     $smarty->assign('admin_list',     $admin_list);
-    $smarty->assign('platform_list',  get_role_list(1,true,' AND parent_id>0'));
+    $smarty->assign('platform_list',  get_role_list(1,true,' AND depart_id>0'));
 
     $smarty->assign('province_list',  get_regions(1, 1));
     $smarty->assign('city_list',      get_regions(2, $user_info['province_id']));
