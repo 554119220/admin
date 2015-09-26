@@ -372,6 +372,10 @@ elseif ($_REQUEST['act'] == 'flush_order')
         $smarty->assign('platform', $platform);
     }
 
+    if (isset($_REQUEST['old_user'])) {
+        $smarty->assign('old_user', $_REQUEST['old_user']);
+    }
+
     $smarty->assign('act',           $_REQUEST['act']);
     $smarty->assign('order_list',    $order_list['orders']);
 
@@ -3080,15 +3084,15 @@ elseif ($_REQUEST['act'] == 'rand_order') {
     if ($_REQUEST['a'] == 'verify') {
         $table = 'ordersyn_info';
         if (isset($_REQUEST['order_type']) && $_REQUEST['order_type'] == 1) {
-            $where = ' AND ((order_type=1 AND admin_id=0) OR admin_id=185) ';
+            $where = ' AND order_type=1 AND admin_id IN(0,185) ';
             $smarty->assign('order_type',1);
             $smarty->assign('act', 'flush_order');
-            //$template = 'flush_order_list.htm';
+            $template = 'flush_order_list.htm';
         }else{
             $where = ' AND admin_id=0 AND order_type<>1 ';
             $smarty->assign('act', 'temp_order');
         }
-        $template = 'order_list.htm';
+        $template = isset($_REQUEST['order_type']) ? 'flush_order_list.htm' : 'order_list.htm';
         $where_select = ' WHERE order_status=0 AND shipping_status=0 '.$where;
         $where_update = " WHERE order_status=0 AND shipping_status=0 AND operator IN (0,185) $where AND (order_lock IN (0,{$_SESSION['admin_id']}) OR lock_timeout<$now_time)";
         if (intval($_REQUEST['platform'])) {
@@ -3686,11 +3690,21 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
             $order_sn_list = preg_split('/#+/',$order_sn_list);
             $order_sn_list = array_filter($order_sn_list);
             $limit = count($order_sn_list);
+            $arr_sn = $order_sn_list;
             $order_sn_list = implode(',',$order_sn_list);
+            //已经进入发货流程
+            $sql_select = 'SELECT order_sn FROM '.$GLOBALS['ecs']->table('order_info')." WHERE order_sn IN($order_sn_list)";
+            $vertify = $GLOBALS['db']->getCol($sql_select);
+            if ($vertify) {
+                $order_sn_list = array_diff($arr_sn,$vertify);
+                $order_sn_list = implode(',',$order_sn_list);
+            }
+
             $sql = 'UPDATE '.$GLOBALS['ecs']->table('ordersyn_info');
             $sql_upd_type = $sql." SET order_type=1 WHERE admin_id=185 OR order_sn IN($order_sn_list) AND platform=10";
             $code = $GLOBALS['db']->query($sql_upd_type);
-            $sql_upd_status = $sql." SET status=0,shipping_status=0 WHERE tracking_sn='' AND order_sn IN($order_sn_list) AND platform=10 LIMIT $limit";
+            $sql_upd_status = $sql." SET order_status=0,shipping_status=0 WHERE tracking_sn='' AND order_sn IN($order_sn_list) AND platform=10 LIMIT $limit";
+            $code = $GLOBALS['db']->query($sql_upd_status);
             if ($code) {
                 $res = crm_msg('标记成功');
             }else{
@@ -3919,8 +3933,9 @@ function order_list()
         break;
     case 'flush_order' :
         $table_order = 'ordersyn_info';
-        $table_user  = 'userssyn';
-        $where       = ' AND o.order_status=0 AND (o.order_type=1 OR o.admin_id=185)';
+        $table_user  = $_REQUEST['old_user'] ? 'users' : 'userssyn';
+
+        $where       = ' AND o.order_status=0 AND o.order_type=1 ';
         $temp_fields = " ,o.order_lock, IF(lock_timeout<$now_time,'锁定','已锁定') lock_status";
         $sort_by = ' o.add_time ASC ';
         break;
@@ -3960,6 +3975,7 @@ function order_list()
         $filter['pay_id']      = empty($_REQUEST['pay_id'])      ? 0  : intval($_REQUEST['pay_id']);
         $filter['platform']    = empty($_REQUEST['platform'])    ? 0  : intval($_REQUEST['platform']);
         $filter['tracking_sn'] = empty($_REQUEST['tracking_sn']) ? '' : trim($_REQUEST['tracking_sn']);
+        $filter['old_user'] = empty($_REQUEST['old_user']) ? 0 : intval($_REQUEST['old_user']);
 
         $filter['shipping_feed_id'] = empty($_REQUEST['shipping_feed_id']) ? 0 : intval($_REQUEST['shipping_feed_id']);
 

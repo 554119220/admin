@@ -7,7 +7,7 @@
                     {foreach from=$platform_list item=val name=i}
                     {if !in_array($val.role_id,array(1,2,9,23,29))}
                     <li id="tag_{$val.role_id}" class="{if $val.role_id eq $platform}current-tab{else}last{/if}">
-                    <a href="order.php?act={$act}&platform={$val.role_id}">
+                    <a href="order.php?act={$act}&platform={$val.role_id}&old_user={$old_user}">
                          {if $val.role_id}{$val.role_describe}-{/if}{$val.role_name}
                     </a>
                     </li>
@@ -39,6 +39,7 @@
           </div>
           <button value="order.php?act={$act}&platform={$platform}" onclick="searchOrder(this)" class="b_submit" style="margin:2px 0 0 5px">搜索</button>
           <button value="order.php?act=rand_order&a=verify&platform={$platform}&order_type=1" onclick="giveMeOrder(this)" class="b_submit">获取订单</button>
+          <a href="order.php?act=flush_order&old_user=true" class="b_submit" style="padding:5px;">用老顾客信息刷单</a>
      </div>
 
      <!-- 订单列表 -->
