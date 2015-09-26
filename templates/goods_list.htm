@@ -93,9 +93,9 @@
         <th width="3%">重量</th>
         <th width="5%">保质期至<label title="较早一批没有卖完的产品的保质期">？</label></th>
         <th width="5%">商品分类</th>
-        <th width="3%">类型</th>
+        <!--<th width="3%">类型</th>-->
         {if $power_turn_on eq 'able'}
-        <th width="3%">操作</th>
+        <th width="6%">操作</th>
         <th width="6%">状态</th>
         {/if}
         <th width="5%">备注</th>
@@ -129,7 +129,7 @@
           {/if}
         </td>
         <td>{$v.goods_effect}{if $power_turn_on eq 'able'}<button class="2B" value="storage.php?act=goods_effect&info=goods_effect&id={$v.goods_id}&type=select" onclick="sendEditInfo(this)"><img src="images/edit.gif"/></button>{/if}</td>
-        <td>{$v.goods_type}</td>
+        <!--<td>{$v.goods_type}</td>-->
         {if $power_turn_on eq 'able'}
         <td>
           <!--<a href="storage.php?act=edit_goods&goods_id={$v.goods_id}"><img src="images/edit.gif"></a>-->
@@ -138,6 +138,7 @@
           {else}
           <button class="btn_new" onclick="isOnsale(1,{$v.goods_id},this)">上架</button>
           {/if}
+          <button class="btn_new" onclick="editGoodsInfo({$v.goods_id})">编辑</button>
         </td>
         {/if}
         <td>

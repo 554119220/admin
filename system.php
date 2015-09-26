@@ -97,9 +97,15 @@ elseif($_REQUEST['act'] == 'disable')
 {
     $uid   = intval($_REQUEST['uid']);
     $field = mysql_real_escape_string($_REQUEST['field']);
+    $upd = '';
+    if ('status' == $field) {
+        $sql = 'SELECT status FROM '.$GLOBALS['ecs']->table('admin_user')." WHERE user_id=$uid";
+        $status = $GLOBALS['db']->getOne($sql);
+        $status && $upd = ",ext='',user_name=concat(user_name,'(离职)')";
+    }
 
     //更新状态
-    $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('admin_user')." SET $field=IF($field, 0, 1) WHERE user_id=$uid";
+    $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('admin_user')." SET $field=IF($field, 0, 1) $upd WHERE user_id=$uid";
     $GLOBALS['db']->query($sql_update);
 
     $sql = "SELECT $field FROM ".$GLOBALS['ecs']->table('admin_user')." WHERE user_id=$uid";
@@ -302,8 +308,10 @@ elseif ($_REQUEST['act'] == 'edit_admin')
 //编辑管理员信息操作
 elseif ($_REQUEST['act'] == 'edit_admin_done')
 {
-    if(admin_priv('edit_admin_done','',false))
-    {
+    if(admin_priv('edit_admin_done','',false)) {
+        foreach ($_REQUEST as &$v) {
+            $v = trim($v);
+        }
         $user_id      = intval($_REQUEST['user_id']);
         $number       = mysql_real_escape_string($_REQUEST['user_id']);
         $pre_password = mysql_real_escape_string($_REQUEST['pre_password']);
@@ -312,11 +320,12 @@ elseif ($_REQUEST['act'] == 'edit_admin_done')
         $mobile       = mysql_real_escape_string($_REQUEST['mobile']);
         $name         = mysql_real_escape_string($_REQUEST['name']);
         $role_id      = intval($_REQUEST['role_id']);
-        $ext          = intval($_REQUEST['ext']);
+        $ext          = mysql_real_escape_string($_REQUEST['ext']);
+
+        $upd = ' assign=0';
 
         //判断是否修改密码
-        if(!empty($password))
-        {
+        if(!empty($password)) {
             /* 查询旧密码并与输入的旧密码比较是否相同 */
             //$sql = 'SELECT password FROM '.$GLOBALS['ecs']->table('admin_user')." WHERE user_id = $user_id";
             //$old_password = $GLOBALS['db']->getOne($sql);
@@ -342,54 +351,34 @@ elseif ($_REQUEST['act'] == 'edit_admin_done')
             if ($password <> $pass) {
                 $res['message'] = '两次输入的密码不正确';
                 die($res);
-            }
-            else
-            {
-                $pwd_modified = true;
-                $password = ',password=\''.md5($password).'\'';
+            } else {
+                $upd .= ",ec_salt='',password='".md5($password)."'";
             }
         }
 
-        if ($ext) {
-            $ext = ' ,ext='.$ext;
-        }else $ext = '';
+        if (!empty($ext)) {
+            $upd .= ' ,ext='.$ext;
+        }
 
         if (!empty($role_id)) {
-            $sql = 'SELECT action_list FROM '.$GLOBALS['ecs']->table('role')." WHERE role_id=$role_id";
-
-            $row = $GLOBALS['db']->getRow($sql);
-            $action_list = ', action_list = \''.$row['action_list'].'\'';
-
-            $role_id = ' role_id = '.$role_id.' ';
+            $sql = 'SELECT role_id FROM '.$GLOBALS['ecs']->table('admin_user')." WHERE user_id=$user_id";
+            $pre_role_id = $GLOBALS['db']->getOne($sql);
+            if ($pre_role_id<>$role_id) {
+                $sql = 'SELECT action_list FROM '.$GLOBALS['ecs']->table('role')." WHERE role_id=$role_id";
+                $row = $GLOBALS['db']->getRow($sql);
+                $upd .= ",action_list='".$row['action_list']."',role_id=$role_id,";
+            }
         }
 
         //更新管理员信息
-        if($pwd_modified)
-        {
-            $sql_update = 'UPDATE '.$ecs->table('admin_user'). ' SET '.
-                $role_id.
-                $action_list.
-                $password.
-                $ext.
-                ',mobile='."'$mobile'".
-                ',ec_salt='."''".
-                " WHERE user_id=$user_id";
-        }
-        else
-        {
-            $sql_update = 'UPDATE ' .$ecs->table('admin_user'). ' SET '.
-                $role_id.
-                $action_list.
-                $ext.
-                ',mobile='."'$mobile'".
-                ',ec_salt='."'$number'".
-                " WHERE user_id=$user_id";
-        }
+        $sql_update = 'UPDATE '.$ecs->table('admin_user'). " SET $upd WHERE user_id=$user_id";
         $code = $GLOBALS['db']->query($sql_update);
+
         if($code)
             $res = crm_msg('修改成功',$code);
         elseif($code)
             $res = crm_msg('修改失败',$code);
+
         die($json->encode($res));
     }
 }

@@ -3762,7 +3762,7 @@ function order_list()
         }
         if ($_REQUEST['a'] == 'verify') {
             $table_order = 'ordersyn_info';
-            $table_user  = 'userssyn';
+            $table_user  = $_REQUEST['old_user'] ? 'users' : 'userssyn';
             $where       = " AND order_status=0 AND o.order_lock={$_SESSION['admin_id']} AND o.lock_timeout>$now_time $order_type";
             $temp_fields = " ,o.order_lock, IF(lock_timeout<$now_time,'锁定','已锁定') lock_status";
             $sort_by = ' o.pay_id DESC, o.add_time ASC ';
@@ -3975,7 +3975,7 @@ function order_list()
         $filter['pay_id']      = empty($_REQUEST['pay_id'])      ? 0  : intval($_REQUEST['pay_id']);
         $filter['platform']    = empty($_REQUEST['platform'])    ? 0  : intval($_REQUEST['platform']);
         $filter['tracking_sn'] = empty($_REQUEST['tracking_sn']) ? '' : trim($_REQUEST['tracking_sn']);
-        $filter['old_user'] = empty($_REQUEST['old_user']) ? 0 : intval($_REQUEST['old_user']);
+        $filter['old_user']    = empty($_REQUEST['old_user']) ? 0 : intval($_REQUEST['old_user']);
 
         $filter['shipping_feed_id'] = empty($_REQUEST['shipping_feed_id']) ? 0 : intval($_REQUEST['shipping_feed_id']);
 

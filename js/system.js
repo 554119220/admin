@@ -523,20 +523,12 @@ function edit_user(res) {
 
 //编辑管理员信息
 function editAdminInfo(user_id) {
-  Ajax.call('system.php?act=edit_admin&', 'user_id=' + user_id, editAdminInfoRes, 'GET', 'JSON');
-}
-
-function editAdminInfoRes(res) {
-  main.innerHTML = res.main;
+  Ajax.call('system.php?act=edit_admin&', 'user_id=' + user_id,imMain, 'GET', 'JSON');
 }
 
 //添加管理员
 function addAdminTemp() {
-  Ajax.call('system.php?act=addadmin', '', addAdminRes, 'POST', 'JSON');
-}
-
-function addAdminRes(res) {
-  main.innerHTML = res.main;
+  Ajax.call('system.php?act=addadmin', '',inMain, 'POST', 'JSON');
 }
 
 //编辑管理员
@@ -597,15 +589,14 @@ function checkInputValue(username, password, pass, mobile) {
     showMsg(msg);
     return false;
   }
-
   return true;
 }
 
 //分派权限
 function assignAuthority(obj) {
-  var obj = obj.form;
-  var user_id = obj.elements['user_id'].value;
-  var role_id = obj.elements['role_id'].value;
+  var obj         = obj.form;
+  var user_id     = obj.elements['user_id'].value;
+  var role_id     = obj.elements['role_id'].value;
   var action_list = '';
 
   for (var i = 0; i < obj.elements.length; i++) {
@@ -614,11 +605,7 @@ function assignAuthority(obj) {
     }
   }
 
-  Ajax.call('system.php?act=assign_authority_done&', 'user_id=' + user_id + '&role_id=' + role_id + '&action_list=' + action_list, assignAuthorityRes, 'GET', 'JSON')
-}
-
-function assignAuthorityRes(res) {
-  showMsg(res);
+  Ajax.call('system.php?act=assign_authority_done&', 'user_id=' + user_id + '&role_id=' + role_id + '&action_list=' + action_list, showMsg, 'GET', 'JSON')
 }
 
 //选择上级权限

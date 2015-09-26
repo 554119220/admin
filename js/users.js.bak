@@ -1364,18 +1364,15 @@ function cancelPhoneAuthorize(obj){
 
 //查找推荐人；
 function searchReferrer(obj) {
-  var defaultValue = '介绍人联系方式';
+  var defaultValue = '介绍人ID';
   var info = obj.value;
   if (info = info.replace(/^\s*|\s*$/, '')) { // && info != defaultValue)
     Ajax.call('users.php?act=find_referrer', 'keywords=' + info, searchReferrerResponse, 'POST', 'JSON');
   }
   else {
     obj.value = defaultValue;
-    if (document.forms['theForms'].elements['parent_id']) {
-      var slt = document.forms['theForms'].elements['parent_id'];
-      slt.innerHTML = '<option value="0">请先查找</option>';
-      //slt.parentNode.removeChild(slt);
-    }
+    var slt = document.forms['theForms'].elements['parent_id'];
+    slt.parentNode.removeChild(slt);
   }
 }
 

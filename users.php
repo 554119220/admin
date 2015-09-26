@@ -2997,12 +2997,19 @@ elseif ($_REQUEST['act'] == 'calendar')
 /* 查找顾客 */
 elseif ($_REQUEST['act'] == 'find_referrer')
 {
-    $user_id = intval($_REQUEST['keywords']);
-    $sql = 'SELECT DISTINCT user_id,user_name FROM '.$GLOBALS['ecs']->table('users')." WHERE user_id=$user_id";
+    $keyword = intval($_REQUEST['keywords']);
+    $sql = 'SELECT user_id,user_name FROM '.$GLOBALS['ecs']->table('users')
+        ." WHERE home_phone='$keyword' OR mobile_phone='$keyword'";
     if ($_SESSION['role_id'] > 0) {
         $sql .= " AND role_id={$_SESSION['role_id']} ";
     }
     $res = $GLOBALS['db']->getAll($sql);
+    if (!$res) {
+        $sql = 'SELECT user_id,user_name FROM '.$GLOBALS['ecs']->table('users').' u LEFT JOIN '
+            .$GLOBALS['ecs']->table('user_contact')
+            .' c ON u.user_id=c.user_id '." WHERE contact_value='$keyword'";
+        $res = $GLOBALS['db']->getAll($sql);
+    }
     die($json->encode($res));
 }
 
@@ -5103,7 +5110,7 @@ function user_list() {
                 }
             }
         } else {
-            $ex_where .= " AND u.admin_id={$_SESSION['admin_id']}";
+            $ex_where .= " AND u.admin_id={$_SESSION['admin_id']} AND customer_type NOT IN(4,5,6)";
         }
 
         // 区

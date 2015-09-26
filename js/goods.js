@@ -299,3 +299,8 @@ function editGoodsDetail(){
     Ajax.call('article.php?act=edit_goods_detail',data,showMsg,'POST','JSON');
   }
 }
+
+//修改产品基本信息
+function editGoodsInfo(goodsSn){
+  
+}
