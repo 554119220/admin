@@ -1482,6 +1482,7 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
                 $tmp_sales['remain_sales'] = bcsub($tmp_sales['forecast'],$tmp_sales['target'],2);
             }
         }
+
         //排序
         foreach ($sales_list as $key=>$val) {
             $sort_key[$key] = $val['month_amount'];
@@ -1490,7 +1491,9 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
             array_multisort($sort_key, SORT_DESC,$sales_list);
         }
         unset($key,$val);
-        $sales_list[] = $tmp_sales;
+        if (admin_priv('all','',false)) {
+            $sales_list[] = $tmp_sales;
+        }
 
         $smarty->assign('sales_list', $sales_list);
 
@@ -1935,6 +1938,7 @@ elseif ($_REQUEST['act'] == 'service_stats') {
     $today      = service_stats($today_start_time, $today_end_time); // 当日
     $yesterday  = service_stats($yesterday_start_time, $yesterday_end_time); // 昨日
     $month      = service_stats($month_start_time, $month_end_time); // 当月
+
     if ($_REQUEST['start_time'] && $_REQUEST['end_time']) {
         $start_time = strtotime(date('Y-m-d 00:00:00',strtotime($_REQUEST['start_time'])));
         $end_time = strtotime(date('Y-m-d 23:59:59',strtotime($_REQUEST['end_time'])));
@@ -1972,7 +1976,8 @@ elseif('phone_connect_stats' == $_REQUEST['act']){
 
     $final = call_final_report($today,$yesterday,$month,$last_month);
     $smarty->assign('final', $final);
-    $smarty->assign('role_list', get_role_customer(' AND role_id IN('.$CUSTOMER_NIXUS.')'));
+
+    $smarty->assign('role_list', get_role_customer(' AND role_id IN('.MEMBER_SALE.')'));
     $smarty->assign('curr_title', '电话接通率');
     $res['main'] = $smarty->fetch('connect_stats.htm');
     die($json->encode($res));

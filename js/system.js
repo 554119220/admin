@@ -523,7 +523,7 @@ function edit_user(res) {
 
 //编辑管理员信息
 function editAdminInfo(user_id) {
-  Ajax.call('system.php?act=edit_admin&', 'user_id=' + user_id,imMain, 'GET', 'JSON');
+  Ajax.call('system.php?act=edit_admin&', 'user_id=' + user_id,inMain, 'GET', 'JSON');
 }
 
 //添加管理员

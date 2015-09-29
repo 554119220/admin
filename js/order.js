@@ -112,8 +112,12 @@ function dealFlushOrder(obj){
   var orderlist = obj.elements['order_sn_list'].value;
   var shipping_id = obj.elements['shipping_id'].value;
   if (orderlist) {
-    Ajax.call('order.php?act=deal_flush_order&behave=deal','&orderlist='+orderlist+'&shipping_id='+shipping_id,showMsg,'POST','JSON');
+    Ajax.call('order.php?act=deal_flush_order&behave=deal','&orderlist='+orderlist+'&shipping_id='+shipping_id,dealFlushOrderRes,'POST','JSON');
   }
+}
+
+function dealFlushOrderRes(res){
+ $('#error_div').html(res); 
 }
 
 //批量西游记刷单

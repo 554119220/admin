@@ -325,12 +325,6 @@ elseif($_REQUEST['act'] == 'book_service_list'){
         $filter['page_size'] = 20; 
     }
 
-    if (isset($_REQUEST['page_size']) && intval($_REQUEST['page_size']) > 0) {
-        $filter['page_size'] = intval($_REQUEST['page_size']);
-    } else {
-        $filter['page_size'] = 20; 
-    }
-
     $sql_select   = 'SELECT COUNT(*) FROM '.$GLOBALS['ecs']->table('appointments').$where;
 
     $filter['record_count'] = $GLOBALS['db']->getOne($sql_select);
@@ -3549,29 +3543,48 @@ elseif('miss_call' == $_REQUEST['act']){
 }
 //系统消息中心
 elseif('sys_msg' == $_REQUEST['act']){
-    $admin_id = $_SESSION['admin_id'];
-    $status   = intval($_REQUEST['status']);
+    $admin_id            = $_SESSION['admin_id'];
+    $status              = intval($_REQUEST['status']);
+    $filter['current_page'] = empty($_REQUEST['page']) || (intval($_REQUEST['page'])<=0) ? 1 : intval($_REQUEST['page']);
+    if (isset($_REQUEST['page_size']) && intval($_REQUEST['page_size']) > 0) {
+        $filter['page_size'] = intval($_REQUEST['page_size']);
+    } else{
+        $filter['page_size'] = 20; 
+    }
+
     $where = ' WHERE notice_type NOT IN(4,5) ';
     if ($status && $status != 3) {
         $where .= " AND status=$status ";
+        $condtion .= "&status=$status";
     }
     $smarty->assign('status',$status);
     if (!admin_priv('all','',false)) {
         $role_id  = intval($_SESSION['role_id']);
         $where .= " AND role_id=$role_id AND admin_id=$admin_id";
-        $where_role = " WHERE role_id=$role_id";
+        $where_role = " role_id=$role_id";
     }else{
         $role_id  = intval($_REQUEST['role_id']);
         if (!empty($role_id)) {
             $where .= " AND role_id=$role_id";
+            $condition ="&role_id=$role_id";
         }
-        $where_role = ' WHERE role_id>31';
+        $where_role = ' role_id IN('.MEMBER_SALE.')';
     }
-    $sql = 'select role_id,role_name FROM '.$GLOBALS['ecs']->table('role')."$where_role ORDER BY convert(role_name using gbk) ASC";
-    $role_list = $GLOBALS['db']->getAll($sql);
+    $role_list = get_role($where_role);
+
+    $sql = 'SELECT COUNT(*) FROM '.$GLOBALS['ecs']->table('public_notice').$where;
+    $total = $GLOBALS['db']->getOne($sql);
+
+    $page = break_pages($total, $filter['page_size'], $filter['current_page']);
+    $page['dst_script'] = 'service';
+    $page['condition'] = $condition;
+    $page['act'] = 'sys_msg';
+    foreach ($page as $k=>$v) {
+        $smarty->assign($k,$v);
+    }
 
     $sql = 'SELECT notice_id,content,status,issue_time,title,notice_type FROM '.$GLOBALS['ecs']->table('public_notice')
-        ."$where ORDER BY issue_time DESC";
+        ."$where ORDER BY issue_time DESC LIMIT ".($page['page']-1).",{$page['page_size']}";
     $msg_list = $GLOBALS['db']->getAll($sql);
     if ($msg_list) {
         foreach($msg_list as &$v){
@@ -3581,6 +3594,7 @@ elseif('sys_msg' == $_REQUEST['act']){
     $smarty->assign('role_list',$role_list);
     $smarty->assign('msg_list',$msg_list);
 
+    $smarty->assign('page_div',$smarty->fetch('page.htm'));
     $res['main'] = $smarty->fetch('sys_msg.htm');
     die($json->encode($res));
 }
@@ -3616,7 +3630,7 @@ elseif($_REQUEST['act'] == 'del_service'){
     if ($service_id) {
         $sql = 'UPDATE '.$GLOBALS['ecs']->table('service').' SET show_sev=0 WHERE service_id='.$service_id;
         $code = $GLOBALS['db']->query($sql);
-       $res = $code ? crm_msg('删除成功') :crm_msg('删除失败');
+        $res = $code ? crm_msg('删除成功') :crm_msg('删除失败');
     }else{
         $res = crm_msg('删除失败');
     }
@@ -3654,7 +3668,7 @@ elseif($_REQUEST['act'] == 'knowlage_list'){
     $cat_list   = get_cat_list();
     $smarty->assign('cat_list',$cat_list);
     $smarty->assign('goods_list',$goods_list);
-    
+
     $smarty->assign('knowlage_div',$smarty->fetch('knowlage_div.htm'));
     $res['main'] = $smarty->fetch('knowlage_list.htm');
     die($json->encode($res));

@@ -3600,7 +3600,6 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
         $order_sn_list = trim(mysql_real_escape_string($_REQUEST['orderlist']));
         $shipping_id = intval($_REQUEST['shipping_id']);
         if ($order_sn_list && $shipping_id) {
-
             $sql = 'SELECT shipping_code,shipping_name FROM '.$GLOBALS['ecs']->table('shipping')." WHERE shipping_id=$shipping_id";
             $shipping_info = $GLOBALS['db']->getRow($sql);
 
@@ -3649,31 +3648,33 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
                         $record_sql .= "$sql;";
                     }
                 }
+            }else{
+               $msg = $_LANG['unsyn_order'].'：'.$order_str; 
             }
+
             if ($error_sn) {
                 $error_sn = array_filter($error_sn);
             }
             record_operate($record_sql, 'ordersyn_info');// 记录确认操作
             if ($unsyn) {
-                $msg = '还没有同步到系统的订单:'.implode(',',$unsyn);
+                //$msg = $_LANG['unsyn_order']'还没有同步到系统的订单:'.implode(',',$unsyn);
+                $msg = $_LANG['unsyn_order'].'：'.implode(',',$unsyn);
             }
             if ($error_sn) {
-                $msg .= '<br/> 还没有同步到系统的订单:'.implode(',',$error_sn);
+                $msg .= '<br/>'.$_LANG['syn_shipping_error'].implode(',',$error_sn);
             }
 
             if ($error_shiping) {
-                $msg .= '<br/>快递单号错误:'.implode(',',$error_shiping);
+                $msg .= '<br/>'.$_LANG['shipping_no_error'].implode(',',$error_shiping);
             }
 
-            if ($msg) {
-                $res = crm_msg($msg,true,20000);
-            }else{
-                $res = crm_msg('全部同步发货');
+            if (!$msg) {
+                $msg = $_LANG['syn_success'];
             }
         }else{
-            $res = crm_msg('确认失败');
+            $msg = $_LANG['verify_error'];
         }
-        die($json->encode($res));
+        die($json->encode($msg));
         //$shippig_code_list = trim($_REQUEST['shipping_code_list']);
         //$plarform = intval($_REQUEST['platform']);
         break;
@@ -3706,9 +3707,9 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
             $sql_upd_status = $sql." SET order_status=0,shipping_status=0 WHERE tracking_sn='' AND order_sn IN($order_sn_list) AND platform=10 LIMIT $limit";
             $code = $GLOBALS['db']->query($sql_upd_status);
             if ($code) {
-                $res = crm_msg('标记成功');
+                $res = crm_msg($_LANG['mark_success']);
             }else{
-                $res = crm_msg('标记失败');
+                $res = crm_msg($_LANG['mark_error']);
             }
             die($json->encode($res));
         }

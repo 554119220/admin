@@ -1288,7 +1288,7 @@ function get_role_list($type = '',$fields='',$append='')
 
     $fields = !$fields ? 'role_id, role_name, action_list, compete, manager,depart_id' : 'depart_id,role_id,role_name,role_describe';  
     $sql  = "SELECT $fields FROM ".$GLOBALS['ecs']->table('role').$where.' ORDER BY convert(role_name using gbk) ASC';
-    
+
     return $GLOBALS['db']->getAll($sql);
 }
 
@@ -1520,6 +1520,7 @@ function get_admin_list_by_group($group_id)
 function break_pages($record_count, $page_size, $current_page)
 {
     $page['page_count'] = $record_count>0 ? ceil($record_count/$page_size) : 1;
+    $page['page'] = $current_page;
 
     // 设置分页
     $page['page_set'] = array (1,2,3,4,5,6,7);
@@ -1541,7 +1542,8 @@ function break_pages($record_count, $page_size, $current_page)
 
     $page['start'] = ($current_page - 1)*$page_size +1;
     $page['end']   = $current_page*$page_size;
-
+    $page['page_size'] = $page_size;
+    //$page['dst_script'] = substr($_SERVER['PHP_SELF'],strrpos($_SERVER['PHP_SELF'],'/')+1);
     return $page;
 }
 
@@ -1625,15 +1627,15 @@ function hideContact($val){
     $status = $GLOBALS['db']->getOne($sql);
     if ($status && !in_array($_SESSION['role_id'],array(13,20))) {
         if ($val) {
-        $val = substr_replace($val,'****',3,4);
+            $val = substr_replace($val,'****',3,4);
         }
     }
     return $val;
 }
 
 /**
-* curl拨号
-*/
+ * curl拨号
+ */
 function curlPhone($phone, $exten) {
     $ch = curl_init();
     $url =  'http://192.168.1.240/call.php';
@@ -1648,8 +1650,8 @@ function curlPhone($phone, $exten) {
     return $result;
 }
 /**
-* 验证号码及是否为市话
-*/
+ * 验证号码及是否为市话
+ */
 function isLocalPhone($phone) {
     // 判断号码是固话还是手机
     if (preg_match('/^01[34578]{1}\d{9}$/', $phone)) {

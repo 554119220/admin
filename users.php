@@ -2682,7 +2682,7 @@ elseif ($_REQUEST['act'] == 'fast_add')
 
 }
 
-/*批量分配顾客 */
+/*批量分配,转移顾客 */
 elseif ($_REQUEST['act'] == 'batch') {
     // 这里改成相应的权限，也需要改的： line 533
     if (admin_priv('all', '', false)) {
@@ -4823,7 +4823,7 @@ elseif($_REQUEST['act'] == 'recyle_user'){
         $where = " WHERE role_id=$role_id AND customer_type=4";
         $sql = 'SELECT COUNT(*) FROM '.$GLOBALS['ecs']->table('users').$where;
         $count = $GLOBALS['db']->getOne($sql);
-        $sql = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET admin_id=$admin_id,role_id=$to_role_id,customer_type=$customer_type"
+        $sql = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET admin_id=$admin_id,role_id=$to_role_id,customer_type=$customer_type,admin_name='陈友华'"
             .",assign_time={$_SERVER['REQUEST_TIME']} $where";
         $code = $GLOBALS['db']->query($sql);
         if ($code) {
@@ -5079,39 +5079,39 @@ function user_list() {
         $sql = 'SELECT COUNT(*) FROM '.$GLOBALS['ecs']->table('users').' u ';
 
         // 客服
-        if (admin_priv('all', '', false) && empty($filter['admin_id'])) {
+        if (admin_priv('all', '', false)) {
             $ex_where .= ' AND u.admin_id>0';
-        } elseif ($filter['admin_id']) {
-            if (admin_priv('all', '',false)) {
+            $filter['admin_id']>0 && $ex_where .= " AND u.admin_id={$filter['admin_id']} ";
+        } elseif (admin_priv('user_trans-part_view', '', false) || admin_priv('user_part_view', '', false)) {
+            if ($filter['admin_id']) {
                 $ex_where .= " AND u.admin_id={$filter['admin_id']} ";
-
-            } elseif (admin_priv('user_trans-part_view', '', false)) {
-                $trans_role_list = implode(',', trans_part_list());
-                $sql_select_admin = 'SELECT user_id FROM '.$GLOBALS['ecs']->table('admin_user').
-                    " WHERE user_id={$filter['admin_id']} AND role_id IN ($trans_role_list)";
-                $admin_id = $GLOBALS['db']->getOne($sql_select_admin);
-
-                if ($admin_id) {
-                    $ex_where .= " AND u.admin_id={$filter['admin_id']} ";
-                }
-            } elseif (admin_priv('user_part_view', '', false)) {
-                $sql_select_admin = 'SELECT user_id FROM '.$GLOBALS['ecs']->table('admin_user').
-                    " WHERE user_id={$filter['admin_id']} AND role_id={$_SESSION['role_id']}";
-                $admin_id = $GLOBALS['db']->getOne($sql_select_admin);
-
-                if ($admin_id) {
-                    $ex_where .= " AND u.admin_id={$filter['admin_id']} ";
-                }
-            } elseif (admin_priv('user_group_view', '', false)) {
-                //$ex_where .= " AND u.group_id={$_SESSION['group_id']}";
-                $ex_where .= " AND u.role_id={$_SESSION['role_id']}";
-                if ($filter['admin_id']) {
-                    $ex_where .= " AND u.admin_id={$filter['admin_id']} ";
-                }
+            }elseif(in_array($filter['keyfields'],array('user_name','home_phone','mobile_phone'))&&!empty($filter['keywords'])){
+                $ex_where .= " AND u.role_id={$_SESSION['role_id']} ";
+            }else{
+                $ex_where .= " AND u.admin_id={$_SESSION['admin_id']} ";
             }
-        } else {
-            $ex_where .= " AND u.admin_id={$_SESSION['admin_id']} AND customer_type NOT IN(4,5,6)";
+            //if (admin_priv('user_trans-part_view', '', false) || admin_priv('user_part_view', '', false)) {
+            //    $trans_role_list = implode(',', trans_part_list());
+            //$sql_select_admin = 'SELECT user_id FROM '.$GLOBALS['ecs']->table('admin_user').
+            //    " WHERE user_id={$filter['admin_id']} AND role_id IN ($trans_role_list)";
+            //$power = $GLOBALS['db']->getOne($sql_select_admin);
+            //} elseif (admin_priv('user_part_view', '', false)) {
+            //$sql_select_admin = 'SELECT user_id FROM '.$GLOBALS['ecs']->table('admin_user').
+            //    " WHERE user_id={$filter['admin_id']} AND role_id={$_SESSION['role_id']}";
+            //$power = $GLOBALS['db']->getOne($sql_select_admin);
+            //}
+            //elseif (admin_priv('user_group_view', '', false)) {
+            //    //$ex_where .= " AND u.group_id={$_SESSION['group_id']}";
+            //    $ex_where .= " AND u.role_id={$_SESSION['role_id']}";
+            //    if ($filter['admin_id']) {
+            //        $ex_where .= " AND u.admin_id={$filter['admin_id']} ";
+            //    }
+            //}
+
+        }else{
+            $ex_where .= " AND u.admin_id={$_SESSION['admin_id']} ";
         }
+        $ex_where .= " AND customer_type NOT IN(4,5,6)";
 
         // 区
         if ($filter['district']) {
@@ -5817,6 +5817,7 @@ function access_purchase_records ($id)
         $GLOBALS['ecs']->table('role').' r WHERE  o.add_admin_id=a.user_id AND '.
         " r.role_id=o.team AND o.user_id=$id $where GROUP BY o.order_id ORDER BY o.add_time ASC ";
 
+    echo $sql_select;exit;
     $order_list = $GLOBALS['db']->getAll($sql_select);
 
     //o.order_status=5 AND o.shipping_status IN (1,2) AND

@@ -2,7 +2,7 @@
     <p>共{$record_count}条记录,当前页:{$page_start}-{$page_end}条，每页<input type="text" name="page_size" value="" size="4" onkeyup="sendPageValue(this)"></p>
 </div>
 <div class="tip_center">
-    <span><a href="{$dst_script}.php?act={$act}{$condition}&page_size={$page_size}&page_no=1" id="page_link"><<</a></span>
+    <span><a href="{$dst_script}.php?act={$act}{$condition}&page_size={$page_size}&page_no=1" id="page_link">&lt;&lt;</a></span>
     {foreach from=$page_list item=v}
     <span{if $v eq $page} class="cur"{/if}>{if $v eq $page}{$v}{else}<a href="{$dst_script}.php?act={$act}{$condition}&page_size={$page_size}&page_no={$v}">{$v}</a>{/if}</span>
     {/foreach}
