@@ -23,7 +23,7 @@ if (!defined('IN_ECS'))
  */
 function list_nav ()
 {
-    $sql = 'SELECT * FROM '.$GLOBALS['ecs']->table('admin_action');
+    $sql = 'SELECT action_id,parent_id,action_code,label,action_level FROM '.$GLOBALS['ecs']->table('admin_action');
 
     if ($_SESSION['action_list'] != 'all')
     {

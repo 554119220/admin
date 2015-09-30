@@ -5817,7 +5817,6 @@ function access_purchase_records ($id)
         $GLOBALS['ecs']->table('role').' r WHERE  o.add_admin_id=a.user_id AND '.
         " r.role_id=o.team AND o.user_id=$id $where GROUP BY o.order_id ORDER BY o.add_time ASC ";
 
-    echo $sql_select;exit;
     $order_list = $GLOBALS['db']->getAll($sql_select);
 
     //o.order_status=5 AND o.shipping_status IN (1,2) AND
@@ -6070,13 +6069,12 @@ function list_customer_type ($where='')
  * */
 function get_integral_log($user_id)
 {
-    $sql_select = 'SELECT ui.*,u.user_name,r.rank_name,a.user_name as admin_name,i.integral_title,(ui.pre_points+ui.exchange_points) as cur_integral,o.goods_amount FROM '.$GLOBALS['ecs']->table('user_integral').
+    $sql_select = 'SELECT ui.exchange_points,ui.validity,ui.receive_time,ui.confirm_time,u.user_name,r.rank_name,u.admin_name,i.integral_title,(ui.pre_points+ui.exchange_points) as cur_integral,o.goods_amount FROM '.$GLOBALS['ecs']->table('user_integral').
         ' AS ui LEFT JOIN '.$GLOBALS['ecs']->table('users').
-        ' AS u ON ui.user_id=u.user_id LEFT JOIN '.$GLOBALS['ecs']->table('admin_user').
-        ' AS a ON u.admin_id=a.user_id LEFT JOIN '.$GLOBALS['ecs']->table('integral').
+        ' AS u ON ui.user_id=u.user_id LEFT JOIN '.$GLOBALS['ecs']->table('integral').
         ' AS i ON ui.integral_id=i.integral_id LEFT JOIN '.$GLOBALS['ecs']->table('order_info').
         ' AS o ON ui.source_id=o.order_id LEFT JOIN '.$GLOBALS['ecs']->table('user_rank').
-        " AS r ON u.user_rank=r.rank_id WHERE u.user_id=$user_id ORDER BY confirm_time,receive_time DESC";
+        " AS r ON u.user_rank=r.rank_id WHERE ui.user_id=$user_id ORDER BY confirm_time,receive_time DESC";
 
     $result = $GLOBALS['db']->getAll($sql_select);
     foreach($result as &$val)

@@ -365,7 +365,8 @@ elseif ($_REQUEST['act'] == 'flush_order')
     $order_list    = order_list();        // 获取订单列表
     $platform_list = platform_list();      // 销售平台
     if (admin_priv('order_list_all', '', false)) {
-        array_unshift($platform_list, array('role_name'=>'全部','role_id'=>0));
+        $platform_list = array(array('role_name'=>'全部','role_id'=>0));      // 销售平台
+        //array_unshift($platform_list, array('role_name'=>'全部','role_id'=>0));
     }
 
     if (isset($_REQUEST['platform'])) {
@@ -1226,8 +1227,10 @@ elseif ($_REQUEST['act'] == 'search_goods')
         $order_id = intval($_REQUEST['order_id']);
     }
 
-    $sale_platform = $_SESSION['role_id'] == 39?2:1;
-    $where = " AND g.sale_platform=$sale_platform ";
+    if (!in_array($_SESSION['role_id'],array(8,0))) {
+        $sale_platform = $_SESSION['role_id'] == 39?2:1;
+        $where = " AND g.sale_platform=$sale_platform ";
+    }
 
     $sql_select = 'SELECT CONCAT(g.goods_name,"  【库存：",SUM(s.quantity),"】") goods_name,g.goods_sn goods_id,SUM(s.quantity) quantity FROM '.
         $GLOBALS['ecs']->table('goods').' g,'.$GLOBALS['ecs']->table('stock_goods').
@@ -3087,12 +3090,12 @@ elseif ($_REQUEST['act'] == 'rand_order') {
             $where = ' AND order_type=1 AND admin_id IN(0,185) ';
             $smarty->assign('order_type',1);
             $smarty->assign('act', 'flush_order');
-            $template = 'flush_order_list.htm';
+            //$template = 'flush_order_list.htm';
         }else{
             $where = ' AND admin_id=0 AND order_type<>1 ';
             $smarty->assign('act', 'temp_order');
         }
-        $template = isset($_REQUEST['order_type']) ? 'flush_order_list.htm' : 'order_list.htm';
+        $template = isset($_REQUEST['order_type'])&&$_REQUEST['order_type']? 'flush_order_list.htm' : 'order_list.htm';
         $where_select = ' WHERE order_status=0 AND shipping_status=0 '.$where;
         $where_update = " WHERE order_status=0 AND shipping_status=0 AND operator IN (0,185) $where AND (order_lock IN (0,{$_SESSION['admin_id']}) OR lock_timeout<$now_time)";
         if (intval($_REQUEST['platform'])) {
@@ -3102,7 +3105,7 @@ elseif ($_REQUEST['act'] == 'rand_order') {
 
         $platform_list = platform_list();      // 销售平台
 
-        $smarty->assign('curr_title',    isset($_REQUEST['order_type']) ? '刷单列表' : '新顾客订单');
+        $smarty->assign('curr_title',    isset($_REQUEST['order_type'])&&$_REQUEST['order_type'] ? '刷单列表' : '新顾客订单');
 
         if (admin_priv('order_list_all', '', false)) {
             array_unshift($platform_list, array('role_name'=>'全部','role_id'=>0));
@@ -3604,13 +3607,13 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
             $shipping_info = $GLOBALS['db']->getRow($sql);
 
             // 验证运单号与快递公司是否一致
-            if ($shipping_id==99) {
-                $regexp = '/^(5011|5014|7020)\d{10}$/';
-                $shipping_info = array('shipping_code'=>'huitong','shipping_name'=>'汇通');
-            }else{
-                $sql_select = 'SELECT code_regexp FROM '.$GLOBALS['ecs']->table('shipping')." WHERE shipping_id=$shipping_id";
-                $regexp = $GLOBALS['db']->getOne($sql_select);
-            }
+            //if ($shipping_id==99) {
+            //    $regexp = '/^[57]\d{13}$/';
+            //    $shipping_info = array('shipping_code'=>'huitong','shipping_name'=>'汇通');
+            //}else{
+            $sql_select = 'SELECT code_regexp FROM '.$GLOBALS['ecs']->table('shipping')." WHERE shipping_id=$shipping_id";
+            $regexp = $GLOBALS['db']->getOne($sql_select);
+            //}
             $order_sn_list = explode('\n',$order_sn_list);
             $order_sn_list = array_filter($order_sn_list);
             foreach ($order_sn_list as $v) {
@@ -3649,7 +3652,7 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
                     }
                 }
             }else{
-               $msg = $_LANG['unsyn_order'].'：'.$order_str; 
+                $msg = $_LANG['unsyn_order'].'：'.$order_str; 
             }
 
             if ($error_sn) {
@@ -3684,6 +3687,7 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
         die($json->encode($res));
         break;
     case 'mark':
+        //标记刷单->删除商品->进入发货流程
         $order_sn_list = trim(mysql_real_escape_string($_REQUEST['orderlist']));
         if ($order_sn_list) {
             $order_sn_list = str_replace('\n','',$order_sn_list);
@@ -3693,28 +3697,45 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
             $limit = count($order_sn_list);
             $arr_sn = $order_sn_list;
             $order_sn_list = implode(',',$order_sn_list);
-            //已经进入发货流程
+            //已经进入发货流程，不做处理
             $sql_select = 'SELECT order_sn FROM '.$GLOBALS['ecs']->table('order_info')." WHERE order_sn IN($order_sn_list)";
-            $vertify = $GLOBALS['db']->getCol($sql_select);
-            if ($vertify) {
-                $order_sn_list = array_diff($arr_sn,$vertify);
+            $verify = $GLOBALS['db']->getCol($sql_select);
+            if ($verify) {
+                $order_sn_list = array_diff($arr_sn,$verify);
+                $arr_sn        = $order_sn_list;
                 $order_sn_list = implode(',',$order_sn_list);
             }
 
-            $sql = 'UPDATE '.$GLOBALS['ecs']->table('ordersyn_info');
-            $sql_upd_type = $sql." SET order_type=1 WHERE admin_id=185 OR order_sn IN($order_sn_list) AND platform=10";
-            $code = $GLOBALS['db']->query($sql_upd_type);
-            $sql_upd_status = $sql." SET order_status=0,shipping_status=0 WHERE tracking_sn='' AND order_sn IN($order_sn_list) AND platform=10 LIMIT $limit";
-            $code = $GLOBALS['db']->query($sql_upd_status);
-            if ($code) {
-                $res = crm_msg($_LANG['mark_success']);
+            //已经同步的订单
+            $sql_select = 'SELECT order_sn FROM '.$GLOBALS['ecs']->table('ordersyn_info')." WHERE order_sn IN($order_sn_list)";
+            $had_sync = $GLOBALS['db']->getCol($sql_select);
+            if ($had_sync) {
+                $unsync = array_diff($arr_sn,$had_sync);
+                $error_sn = array();    //记录标记失败的订单编号
+                //$order_sn_list = explode(',',$had_sync);
+                //循环执行订单确认操作（主要为了让确认更精确）
+                foreach ($had_sync as $v) {
+                    $sql = 'UPDATE '.$GLOBALS['ecs']->table('ordersyn_info')
+                        ." SET order_status=-1,order_type=1,final_amount=0,goods_amount=0 WHERE order_sn='$v'";
+                    if (!$GLOBALS['db']->query($sql)) {
+                        $order_sn[] = $v;
+                        continue;
+                    }else{
+                        if (!flush_order_vertify($v)) {
+                            $error_sn[] = $v;
+                            continue;
+                        }
+                    }
+                }
+                $res = $error_sn ? $_LANG['mark_error'].' ：'.implode(',',$error_sn) : $_LANG['mark_success'];
             }else{
-                $res = crm_msg($_LANG['mark_error']);
+                $res = $_LANG['unsyn_order'].'：'.implode('',$arr);
             }
-            die($json->encode($res));
         }
-        break;
+
+        die($json->encode($res));
     }
+    break;
 }
 
 //协助完成订单操作 , 在添加订单的时候判断并执行
@@ -6085,7 +6106,8 @@ function assign_user($order_id) {
             $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET admin_id=520 WHERE user_id={$order_amount['user_id']} ".
                 ' AND role_id NOT IN ('.OFFLINE_SALE.',8,23) LIMIT 1';
         } else {
-            $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET admin_id=520 WHERE user_id={$order_amount['user_id']}".
+            //新顾客订单金额在800以上的顾客转到钟文英的账号下
+            $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET admin_id=605 WHERE user_id={$order_amount['user_id']}".
                 ' AND role_id NOT IN ('.OFFLINE_SALE.',8,23) LIMIT 1';
         }
     }
@@ -6373,4 +6395,38 @@ function jingdong_shiping_syn($order_id){
             return $tracking_sn; 
         }else return false;
     }else return $tracking_sn;
+}
+
+//批量确认刷单订单
+function flush_order_vertify($order_sn){
+    $sql_insert = 'INSERT INTO '.$GLOBALS['ecs']->table('order_info').
+        '(order_sn,user_id,order_status,pay_status,consignee,country,province,city,district,address,zipcode,
+        tel,mobile,best_time,shipping_id,shipping_name,shipping_code,pay_id,pay_name,remarks,to_seller,inv_payee,
+        goods_amount,final_amount,shipping_fee,pay_fee,money_paid,add_time,confirm_time,pay_time,shipping_time,is_package,
+        inv_no,inv_type,inv_title,add_admin_id,admin_id,group_id,admin_name,team,syn_time,platform,platform_type,operator,
+        confirmor,order_type,discount_amount,discount_explain) SELECT order_sn,user_id,order_status,pay_status,
+        consignee,country,province,city,district,address,zipcode,tel,mobile,best_time,shipping_id,shipping_name,
+        shipping_code,pay_id,pay_name,remarks,to_seller,inv_payee,goods_amount,final_amount,shipping_fee,pay_fee,
+        money_paid,add_time,confirm_time,pay_time,shipping_time,is_package,inv_no,inv_type,inv_title,add_admin_id,admin_id,
+        group_id,admin_name,team,syn_time,platform,platform_type,operator,confirmor,order_type,discount_amount,discount_explain
+        FROM '.$GLOBALS['ecs']->table('ordersyn_info')." WHERE order_sn='$order_sn' LIMIT 1";
+    if ($GLOBALS['db']->query($sql_insert)) {
+        $id = $GLOBALS['db']->insert_id();
+        $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('order_info').
+            " SET order_status=1, pay_status=1,goods_number=1,goods_kind=237 WHERE order_id=$id";
+        $sql = 'SELECT * FROM '.$GLOBALS['ecs']->table('order_goods')." WHERE rec_id=458332 LIMIT 1";
+        $goods_info = $GLOBALS['db']->getRow($sql);
+        unset($goods_info['rec_id']);
+
+        $goods_info['order_id'] = $id;
+        $goods_info['order_sn'] = $order_sn;
+        $keys                   = array_keys($goods_info);
+        $keys                   = implode(',',$keys);
+        $values                 = array_values($goods_info);
+        $values                 = implode("','",$values);
+
+        $sql_insert = 'INSERT INTO '.$GLOBALS['db']->table('order_goods')."($keys)VALUES('$values')";
+        $GLOBALS['db']->query($sql_insert);
+        return true;
+    }else return false;
 }

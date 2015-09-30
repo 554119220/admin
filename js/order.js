@@ -120,10 +120,10 @@ function dealFlushOrderRes(res){
  $('#error_div').html(res); 
 }
 
-//批量西游记刷单
+//批量标记刷单
 function markFlushOrder(obj){
   var orderlist = obj.elements['order_sn_list'].value;
   if (orderlist) {
-    Ajax.call('order.php?act=deal_flush_order&behave=mark','&orderlist='+orderlist,showMsg,'POST','JSON');
+    Ajax.call('order.php?act=deal_flush_order&behave=mark','&orderlist='+orderlist,dealFlushOrderRes,'POST','JSON');
   }
 }
