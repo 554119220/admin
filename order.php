@@ -3710,13 +3710,22 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
             $sql_select = 'SELECT order_sn FROM '.$GLOBALS['ecs']->table('ordersyn_info')." WHERE order_sn IN($order_sn_list)";
             $had_sync = $GLOBALS['db']->getCol($sql_select);
             if ($had_sync) {
-                $unsync = array_diff($arr_sn,$had_sync);
-                $error_sn = array();    //记录标记失败的订单编号
+                $unsync      = array_diff($arr_sn,$had_sync);
+                $error_sn    = array();    //记录标记失败的订单编号
+                $shipping_id = intval($_REQUEST['shipping_id']);
+                $sql = 'SELECT shipping_code,shipping_name FROM '.$GLOBALS['ecs']->table('shipping')
+                    ." WHERE shipping_id=$shipping_id";
+                $shipping_info = $GLOBALS['db']->getRow($sql);
+                extract($shipping_info,EXTR_OVERWRITE);
+                //list($shipping_code,$shipping_name) = $shipping_info;
                 //$order_sn_list = explode(',',$had_sync);
                 //循环执行订单确认操作（主要为了让确认更精确）
                 foreach ($had_sync as $v) {
                     $sql = 'UPDATE '.$GLOBALS['ecs']->table('ordersyn_info')
-                        ." SET order_status=-1,order_type=1,final_amount=0,goods_amount=0 WHERE order_sn='$v'";
+                        ." SET order_status=-1,order_type=1,final_amount=0,goods_amount=0
+                        ,shipping_id=$shipping_id,shipping_code='$shipping_code',shipping_name='$shipping_name' 
+                        WHERE order_sn='$v'";
+
                     if (!$GLOBALS['db']->query($sql)) {
                         $order_sn[] = $v;
                         continue;
@@ -3729,7 +3738,7 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
                 }
                 $res = $error_sn ? $_LANG['mark_error'].' ：'.implode(',',$error_sn) : $_LANG['mark_success'];
             }else{
-                $res = $_LANG['unsyn_order'].'：'.implode('',$arr);
+                $res = $_LANG['unsyn_order'].'：'.implode('',$arr_sn);
             }
         }
 
@@ -6413,7 +6422,9 @@ function flush_order_vertify($order_sn){
     if ($GLOBALS['db']->query($sql_insert)) {
         $id = $GLOBALS['db']->insert_id();
         $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('order_info').
-            " SET order_status=1, pay_status=1,goods_number=1,goods_kind=237 WHERE order_id=$id";
+            " SET order_status=1,add_admin_id=185,pay_status=1,goods_num=1,goods_kind=237 WHERE order_id=$id";
+        $GLOBALS['db']->query($sql_update);
+
         $sql = 'SELECT * FROM '.$GLOBALS['ecs']->table('order_goods')." WHERE rec_id=458332 LIMIT 1";
         $goods_info = $GLOBALS['db']->getRow($sql);
         unset($goods_info['rec_id']);
@@ -6425,7 +6436,7 @@ function flush_order_vertify($order_sn){
         $values                 = array_values($goods_info);
         $values                 = implode("','",$values);
 
-        $sql_insert = 'INSERT INTO '.$GLOBALS['db']->table('order_goods')."($keys)VALUES('$values')";
+        $sql_insert = 'INSERT INTO '.$GLOBALS['ecs']->table('order_goods')."($keys)VALUES('$values')";
         $GLOBALS['db']->query($sql_insert);
         return true;
     }else return false;
