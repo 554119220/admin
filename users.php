@@ -535,7 +535,7 @@ elseif ($_REQUEST['act'] == 'first_trace')
         "IF(u.service_time>$days_three,u.service_time,'-') recently FROM ".$GLOBALS['ecs']->table('order_info').
         ' i,'.$GLOBALS['ecs']->table('admin_user').' a,'.$GLOBALS['ecs']->table('order_goods').' o,'.
         $GLOBALS['ecs']->table('goods').' g,'. $GLOBALS['ecs']->table('users').
-        ' u WHERE i.add_admin_id=a.user_id AND u.customer_type<>5 AND i.user_id=u.user_id AND o.goods_id=g.goods_id AND i.order_id=o.order_id';
+        ' u WHERE i.add_admin_id=a.user_id AND u.customer_type NOT IN(5,6) AND i.user_id=u.user_id AND o.goods_id=g.goods_id AND i.order_id=o.order_id';
 
     if (!admin_priv('all', '', false)) {
         $sql .= " AND u.admin_id={$_SESSION['admin_id']} ";

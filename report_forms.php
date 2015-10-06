@@ -129,7 +129,7 @@ elseif ($_REQUEST['act'] == 'order_sales') {
     $refund_where = '';
     $trans_role_list = '';
 
-    $stats_list = report_authority($status,$refund_where,$trans_role_list); 
+    $stats_list = report_authority($status,$refund_where,$trans_role_list);
     if (!empty($stats_list)) {
         $status .= " AND platform IN ($stats_list)";
         $refund_where = " AND platform IN ($stats_list)";
@@ -926,12 +926,14 @@ elseif ($_REQUEST['act'] == 'pre_sales') {
 
     $x = '<>';
     // 各售前客服总销量
-    $ex_where = "i.order_type IN (3,4,5,7) AND a.role_id=13 AND i.shipping_status{$x}3";
+    // $ex_where = "i.order_type IN (3,4,5,7) AND a.role_id=13 AND i.shipping_status{$x}3"; 包含静默订单
+    $ex_where = "i.order_type IN (4,5) AND a.role_id=13 AND i.shipping_status{$x}3"; //不包含静默订单
     $total_order_stats = stats_order_amount($ex_where, $ex_group); // 计算个人销量
     $total['total_order_stats'] = stats_order_amount($ex_where); // 计算平台总销量
 
     // 统计每位客服的货到付款订单
-    $ex_where = " i.order_type IN (3,4,5,7) AND a.role_id=13 AND i.pay_id=3 AND i.shipping_status{$x}3";
+    // $ex_where = " i.order_type IN (3,4,5,7) AND a.role_id=13 AND i.pay_id=3 AND i.shipping_status{$x}3"; 包含静默订单
+    $ex_where = " i.order_type IN (4,5) AND a.role_id=13 AND i.pay_id=3 AND i.shipping_status{$x}3"; // 不包含静默订单
     $cod_order_stats = stats_order_amount($ex_where, $ex_group); // 计算个人销量
     $total['cod_order_stats'] = stats_order_amount($ex_where); // 计算平台总销量
 
@@ -962,7 +964,8 @@ elseif ($_REQUEST['act'] == 'pre_sales') {
 
     // 统计每位客服的退货订单
     $left_join = 'LEFT JOIN '.$GLOBALS['ecs']->table('returns_order').' r ON r.order_id=i.order_id ';
-    $ex_where = 'i.order_type IN (3,4,5,7) AND a.role_id=13 AND i.shipping_status=4';
+    // $ex_where = 'i.order_type IN (3,4,5,7) AND a.role_id=13 AND i.shipping_status=4'; 包含静默订单的退货销量
+    $ex_where = 'i.order_type IN (4,5) AND a.role_id=13 AND i.shipping_status=4';
     if (isset($_REQUEST['admin_id'])) {
         $ex_group = ' GROUP BY DATE_FORMAT(FROM_UNIXTIME(r.return_time), "%Y-%m-%d"),i.admin_id';
     }
@@ -2308,7 +2311,8 @@ function nature_stats ()
         case 'platform_stats':
             $fields = 'r.role_name role_name,';
             $k = 'platform';
-            $sql_platform = ','.$GLOBALS['ecs']->table('role')." r $sql_where AND r.role_id=i.platform GROUP BY DT,r.role_describe ";
+            $sql_platform = ','.$GLOBALS['ecs']->table('role')
+                ." r $sql_where AND r.role_id=i.platform GROUP BY DT,r.depart_desc ";
             break;
         case 'self_stats':
             $fields = ' role_name,';
@@ -2332,7 +2336,7 @@ function nature_stats ()
         $sql_platform = " $sql_where AND admin_id={$_SESSION['admin_id']} GROUP BY DT ";
     }
 
-    $sql_select = "SELECT r.role_describe platform,i.admin_id,i.admin_name, $fields COUNT(*) order_num,".
+    $sql_select = "SELECT r.depart_desc platform,i.admin_id,i.admin_name, $fields COUNT(*) order_num,".
         ' SUM(final_amount) order_amount,DATE_FORMAT(FROM_UNIXTIME(add_time),'."'$fmt') DT FROM ".
         $GLOBALS['ecs']->table('order_info')." i $sql_platform ORDER BY add_time DESC";
     $res = $GLOBALS['db']->getAll($sql_select);
@@ -2381,7 +2385,7 @@ function stats_all ()
         switch ($_REQUEST['target']) {
         case 'platform_stats':
             $k = 'platform';
-            $sql_platform = ' GROUP BY r.role_describe ';
+            $sql_platform = ' GROUP BY r.depart_desc ';
             break;
         case 'self_stats':
             $k = 'admin_id';
@@ -2401,7 +2405,7 @@ function stats_all ()
         $sql_platform = " AND i.admin_id={$_SESSION['admin_id']} GROUP BY i.admin_id";
     }
 
-    $sql_select = 'SELECT COUNT(*) order_num,SUM(i.final_amount) order_amount,r.role_describe platform,i.admin_id,i.admin_name FROM '.
+    $sql_select = 'SELECT COUNT(*) order_num,SUM(i.final_amount) order_amount,r.depart_desc platform,i.admin_id,i.admin_name FROM '.
         $GLOBALS['ecs']->table('order_info').' i,'.$GLOBALS['ecs']->table('role').
         " r WHERE i.order_status IN (1,5) AND i.shipping_status<>3 AND i.platform=r.role_id AND i.add_time BETWEEN $start AND $end $sql_platform";
     $res = $GLOBALS['db']->getAll($sql_select);
@@ -2468,7 +2472,7 @@ function stats_all_return ()
         $sql_platform = " AND i.admin_id={$_SESSION['admin_id']} GROUP BY i.admin_id";
     }
 
-    $sql_select = 'SELECT COUNT(*) order_num,SUM(i.final_amount) order_amount,role.role_describe platform,i.admin_id,i.admin_name FROM '.
+    $sql_select = 'SELECT COUNT(*) order_num,SUM(i.final_amount) order_amount,role.depart_desc platform,i.admin_id,i.admin_name FROM '.
         $GLOBALS['ecs']->table('order_info').' i,'.$GLOBALS['ecs']->table('returns_order').' r, '.$GLOBALS['ecs']->table('role').
         ' role WHERE i.order_status IN (1,5) AND i.shipping_status=4 AND r.order_id=i.order_id AND role.role_id=i.platform AND '.
         " r.return_time BETWEEN $start AND $end $sql_platform";
@@ -4629,7 +4633,7 @@ function platform_order_stats($refund_where='',$status='',$platform_list=array()
     $end_time   = strtotime($param['end_time']);
     $end_month  = strtotime(date('Y-m-t 23:59:59', $nowtime));
 
-    
+
     $stats['month'] = stats_order($start_time,$end_month,$status,$platform_list);  // 当月销量
     $stats['month'] = sort_by_sales($stats['month']);
 
