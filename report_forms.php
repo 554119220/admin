@@ -1240,6 +1240,11 @@ elseif ($_REQUEST['act'] == 'stats_saler_month') {
     $month_start = strtotime($_REQUEST['start'].' 00:00:00');
     $month_end   = strtotime($_REQUEST['end'].' 23:59:59');
 
+    if ($_REQUEST['r_start'] && $_REQUEST['r_end']) {
+        $month_start = strtotime($_REQUEST['r_start'].' 00:00:00');
+        $month_end   = strtotime($_REQUEST['r_end'].' 23:59:59');
+    }
+
     // 权限控制
     if (!admin_priv('everyone_sales', '',false) && !admin_priv('personal_trans-part_stats', '', false)) {
         $role_id = $_SESSION['role_id'];
@@ -1310,6 +1315,8 @@ elseif ($_REQUEST['act'] == 'stats_saler_month') {
 
     $smarty->assign('start_time',  $_REQUEST['start']);
     $smarty->assign('end_time',    $_REQUEST['end']);
+    $smarty->assign('r_start_time',  $_REQUEST['r_start']);
+    $smarty->assign('r_end_time',    $_REQUEST['r_end']);
     $smarty->assign('sales_list',  $res);
     $smarty->assign('total',       $total);
 
@@ -1450,7 +1457,8 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
             $sales_list[$val['admin_id']]['admin_name']       = $val['admin_name'];
         }
         $tmp_sales = array ();
-        if (admin_priv('personal_stats_total', '', false)) {
+        //if (admin_priv('personal_stats_total', '', false)) {
+        if (admin_priv('all', '', false)) {
             foreach ($sales_list as $val) {
                 // 月度总销量
                 @$tmp_sales['month_amount'] = bcadd($tmp_sales['month_amount'], $val['month_amount'], 2);
@@ -1494,9 +1502,9 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
             array_multisort($sort_key, SORT_DESC,$sales_list);
         }
         unset($key,$val);
-        if (admin_priv('all','',false)) {
-            $sales_list[] = $tmp_sales;
-        }
+        //if (admin_priv('all','',false)) {
+        $sales_list[] = $tmp_sales;
+        //}
 
         $smarty->assign('sales_list', $sales_list);
 

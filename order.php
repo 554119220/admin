@@ -776,7 +776,7 @@ elseif ($_REQUEST['act'] == 'ordersyn_verify') {
         $user_admin_id = intval($_REQUEST['user_admin_id']);
         $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('userssyn').' us, '.
             $GLOBALS['ecs']->table('admin_user')." a SET us.admin_name=a.user_name, ".
-            " us.admin_id=$user_admin_id,us.eff_id=$eff_id,us.customer_type=2 ".
+            " us.admin_id=$user_admin_id,us.eff_id=$eff_id,us.customer_type=IF(us.customer_type<>1,2,1) ".
             " WHERE us.user_id={$order_info['user_id']} AND a.user_id=$user_admin_id";
         $GLOBALS['db']->query($sql_update);
         // 将顾客从临时顾客表转存至正式顾客表中
@@ -2420,8 +2420,9 @@ elseif ($_REQUEST['act'] == 'shipping_done') {
             if (in_array($user['customer_type'], array(1,12,6,7,8,13,14,15,16,17))) {
                 // 将成交的顾客转到已购买顾客中
                 $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users').
-                    " SET customer_type=2 WHERE user_id={$user['user_id']}";
+                    " SET customer_type=IF(customer_type<>1,2,1) WHERE user_id={$user['user_id']}";
                 $GLOBALS['db']->query($sql_update);
+                file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'成交顾客转到已购'.PHP_EOL.$sql.PHP_EOL,FILE_APPEND);
             }
 
             $res['timeout'] = 2000;
@@ -2515,8 +2516,9 @@ elseif ($_REQUEST['act'] == 'do_returns') {
                 " WHERE user_id=$user_id AND order_status=5 AND shipping_status=2";
             $deal_order_number = $GLOBALS['db']->getOne($sql_select);
             if ($deal_order_number <= 0) {
-                $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET customer_type=1 WHERE user_id=$user_id";
+                $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET customer_type=IF(customer_type<>1,2,1) WHERE user_id=$user_id";
                 $GLOBALS['db']->query($sql_update);
+                file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'申请退货'.PHP_EOL.$sql.PHP_EOL,FILE_APPEND);
             }
         } else {
             $res['message'] = '申请退货失败，请稍后再试！';
@@ -3652,7 +3654,7 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
                     }
                 }
             }else{
-                $msg = $_LANG['unsyn_order'].'：'.$order_str; 
+               $msg = $_LANG['unsyn_order'].'：'.$order_str; 
             }
 
             if ($error_sn) {

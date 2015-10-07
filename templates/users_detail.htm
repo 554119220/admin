@@ -95,7 +95,26 @@
             <span>{$user.address}<button value="users.php?act=edit&info=address&id={$user.user_id}&type=text" title="修改地址" onclick="sendEditInfo(this)"></button></span>
           </td>
         </tr>
-
+        <tr>
+          <th>微信：</th>
+          <td>
+            <button value="users.php?act=edit&info=wechat&id={$user.user_id}&type=text" title="修改QQ" onclick="sendEditInfo(this)">{$user.wechat}</button>
+            </td>
+          <th>QQ：</th>
+          <td>
+            {if $user.qq neq ''}
+            <a href="tencent://message/?uin=554119220{$user.qq}" title="" name="msg">
+              <img alt="{$user.qq}" src="http://wpa.qq.com/pa?p=1:{$user.qq}:17">
+            </a>
+            {/if}
+            <button value="users.php?act=edit&info=qq&id={$user.user_id}&type=text" title="修改QQ" onclick="sendEditInfo(this)"></button>
+            </td>
+          <th>旺旺：</th>
+          <td>
+            {if $user.aliww}<a target="_blank" href="http://www.taobao.com/webww/ww.php?ver=3&touid={$user.aliww}&siteid=cntaobao&status=2&charset=utf-8" title="{$user.aliww}"><img border="0" src="http://amos.alicdn.com/realonline.aw?v=2&uid={$user.aliww}&site=cntaobao&s=2&charset=utf-8" alt="{$user.aliww}" /></a>{/if}
+            <button value="users.php?act=edit&info=aliww&id={$user.user_id}&type=text" title="修改旺旺" onclick="sendEditInfo(this)"></button>
+            </td>
+        </tr>
         <!--tr>
         <th>备注：</th>
         <td colspan="5">{$user.remarks}<button value="users.php?act=edit&info=remarks&id={$user.user_id}&type=text" title="修改备注" onclick="sendEditInfo(this)"></button></td>

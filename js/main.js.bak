@@ -1970,7 +1970,7 @@ function querySales (obj) {
   var r_start = obj.elements['r_start_time'].value;
   var r_end = obj.elements['r_end_time'].value;
 
-  Ajax.call('report_forms.php', 'act=stats_saler_month&start='+start+'&end='+end+'&r_start='+r_start+'&r_end='+r_end, querySalesResp, 'POST', 'JSON');
+  Ajax.call('report_forms.php', 'act=stats_saler_month&start='+start+'&end='+end+'&r_start='+r_start+'&r_end='+return_end, querySalesResp, 'POST', 'JSON');
   return false;
 }
 

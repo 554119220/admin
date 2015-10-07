@@ -23,6 +23,9 @@
                 销售日期：
                 <input class="Wdate" name="start_time" type="text"value="{$start_time}" size="13px" onClick="WdatePicker({dateFmt:'yyyy-MM-dd',{$min_date}})">
                 <input class="Wdate" name="end_time" type="text" value="{$end_time}" size="13px" onClick="WdatePicker({dateFmt:'yyyy-MM-dd',{$min_date}})">
+                退货日期：
+                <input class="Wdate" name="r_start_time" type="text" value="{$_start_time}" size="13px" onClick="WdatePicker({dateFmt:'yyyy-MM-dd',{$min_date}})">
+                <input class="Wdate" name="r_end_time" type="text" value="{$r_end_time}" size="13px" onClick="WdatePicker({dateFmt:'yyyy-MM-dd',{$min_date}})">
                 <input type="submit" value="查询" class="b_submit">
             </form>
             {/if}

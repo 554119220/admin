@@ -1181,7 +1181,8 @@ elseif ($_REQUEST['act'] == 'save')
 
     // 验证联系方式是否已存在
     if ('text' == $request['type'] && !in_array($_REQUEST['info'], array('district','user_name','address'))) {
-        $sql_select = "SELECT COUNT(*) FROM ".$GLOBALS['ecs']->table('users')." WHERE {$request['info']}='{$request['value']}'";
+        $sql_select = "SELECT COUNT(*) FROM ".$GLOBALS['ecs']->table('users')
+            ." WHERE {$request['info']}='{$request['value']}' AND user_id<>$user_id";
         $is_exist = $GLOBALS['db']->getOne($sql_select);
         if ($is_exist) {
             $msg = array ('req_msg'=>true,'timeout'=>2000,'message'=>'已有相同信息存在，请认真核对！');
@@ -1461,15 +1462,14 @@ elseif ($_REQUEST['act'] == 'advance_batch') {
 
     $sql = ' SELECT user_id FROM '.$GLOBALS['ecs']->table('users').$where.$limit;
     $count = $GLOBALS['db']->getCol($sql);
-    if ($count) {
-        $count = count($count);
-    }
+    $count = count($count);
 
     $admin_name = $GLOBALS['db']->getOne("SELECT user_name FROM".$GLOBALS['ecs']->table('admin_user')." WHERE user_id=$to_admin");
     $sql = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET customer_type=$customer_type,admin_id=$to_admin,admin_name='$admin_name',assign_time={$_SERVER['REQUEST_TIME']}" .$where.$limit;
 
     $code = $GLOBALS['db']->query($sql);
     if ($code) {
+        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'高级转移'.PHP_EOL.$sql.PHP_EOL,FILE_APPEND);
         $res = crm_msg("成功转了{$count}个顾客。",$code);
     }else{
         $res = crm_msg('操作失败');
@@ -2347,6 +2347,7 @@ elseif ($_REQUEST['act'] == 'give_up')
             "u.group_id=a.group_id WHERE u.user_id=$user_id AND a.user_id=$to_id";
         $GLOBALS['db']->query($sql_update);
 
+        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'顾客转赠成功'.PHP_EOL.$sql_update.PHP_EOL,FILE_APPEND);
         $res['message'] = '顾客转赠成功！';
         $res['code'] = 1;
         die($json->encode($res));
@@ -2795,6 +2796,7 @@ elseif($_REQUEST['act'] == 'from_to')
     }
 
     if($db->query($sql)) {
+        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'转顾客操作'.PHP_EOL.$sql.PHP_EOL,FILE_APPEND);
         $res = array (
             'req_msg' => true,
             'timeout' => 2000,
@@ -2999,15 +3001,15 @@ elseif ($_REQUEST['act'] == 'find_referrer')
 {
     $keyword = intval($_REQUEST['keywords']);
     $sql = 'SELECT user_id,user_name FROM '.$GLOBALS['ecs']->table('users')
-        ." WHERE home_phone='$keyword' OR mobile_phone='$keyword'";
+        ." WHERE home_phone LIKE '%$keyword%' OR mobile_phone='$keyword'";
     if ($_SESSION['role_id'] > 0) {
         $sql .= " AND role_id={$_SESSION['role_id']} ";
     }
     $res = $GLOBALS['db']->getAll($sql);
     if (!$res) {
-        $sql = 'SELECT user_id,user_name FROM '.$GLOBALS['ecs']->table('users').' u LEFT JOIN '
+        $sql = 'SELECT u.user_id,user_name FROM '.$GLOBALS['ecs']->table('users').' u LEFT JOIN '
             .$GLOBALS['ecs']->table('user_contact')
-            .' c ON u.user_id=c.user_id '." WHERE contact_value='$keyword'";
+            .' c ON u.user_id=c.user_id '." WHERE contact_value LIKE '%$keyword%'";
         $res = $GLOBALS['db']->getAll($sql);
     }
     die($json->encode($res));
@@ -3775,6 +3777,8 @@ elseif ($_REQUEST['act'] == 'send_users') {
     $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET admin_id=$send_to,admin_name='{$admin_info['user_name']}',".
         "group_id={$admin_info['group_id']}, role_id={$admin_info['role_id']}, assign_time=UNIX_TIMESTAMP() WHERE user_id IN ($user_list) LIMIT $user_number";
     $GLOBALS['db']->query($sql_update);
+
+    file_put_contents('../batch_user.log',date('Y-m-d H:i:s').' send user '.PHP_EOL.$sql_update.PHP_EOL,FILE_APPEND);
 
     $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('admin_user')." SET counter=counter+$user_number WHERE user_id=$send_to LIMIT 1";
     $GLOBALS['db']->query($sql_update);
@@ -4879,7 +4883,9 @@ elseif($_REQUEST['act'] == 'onekey_classify_user'){
     $admin_id = intval($_REQUEST['admin_id']);
     if ($admin_id) {
         $sql_p = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET customer_type=%d WHERE admin_id=$admin_id";
+        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'修改顾客分类'.PHP_EOL.$sql.PHP_EOL,FILE_APPEND);
         //先将一般顾客全部转到临时分类
+        $res = crm_msg("成功转了{$count}个顾客。",$code);
         //$sql = sprintf($sql_p.' AND customer_type NOT IN(1,4,5,6)',24);
         $sql = sprintf($sql_p.' AND customer_type=2',24);
         $r = $GLOBALS['db']->query($sql);
@@ -5718,7 +5724,7 @@ function get_address ($id)
  */
 function get_user_info ($id)
 {
-    $field = 'u.wechat,u.mobile_phone,u.home_phone,u.aliww,';
+    $field = 'u.wechat,u.mobile_phone,u.home_phone,u.aliww,u.qq,';
     $mem = new Memcache();
     $mem->connect('127.0.0.1',11211);
 
@@ -5812,7 +5818,7 @@ function access_purchase_records ($id)
     }
     // Get user to buy records 获取顾客购买记录
     $sql_select = 'SELECT o.order_id,o.platform_order_sn,o.order_sn p_order_sn,o.consignee,o.order_status,o.shipping_status,o.add_time,'.
-        'o.shipping_name,o.pay_name,o.final_amount,o.tracking_sn express_number,a.user_name operator,o.receive_time,o.shipping_code, '.
+        'o.shipping_name,o.pay_name,o.final_amount,o.tracking_sn express_number,o.admin_name operator,o.receive_time,o.shipping_code, '.
         ' r.role_describe platform FROM '.$GLOBALS['ecs']->table('order_info').' o,'.$GLOBALS['ecs']->table('admin_user').' a, '.
         $GLOBALS['ecs']->table('role').' r WHERE  o.add_admin_id=a.user_id AND '.
         " r.role_id=o.team AND o.user_id=$id $where GROUP BY o.order_id ORDER BY o.add_time ASC ";
