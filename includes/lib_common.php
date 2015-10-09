@@ -90,10 +90,16 @@ function filter_page($sql_one,$sql_select,$act){
 }
 
 /*获取品牌名*/
-function get_brand_id_name()
-{
-    $sql_select = 'SELECT brand_name FROM '.$GLOBALS['ecs']->table('brand')." WHERE is_show=1";
+function get_brand_id_name($single=false) {
+    $sql_select = 'SELECT brand_id,brand_name FROM '.$GLOBALS['ecs']->table('brand')." WHERE is_show=1";
     $brand = $GLOBALS['db']->getAll($sql_select);
+    if ($single && $brand) {
+        $arr = array();
+        foreach ($brand as $v) {
+            $arr[$v['brand_id']] = $v['brand_name'];
+        }
+        $brand = $arr;
+    }
     return $brand;
 }
 

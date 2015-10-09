@@ -22,6 +22,11 @@
         <div class="nav-search">
             时间：<input class="Wdate" id="start_time" type="text" value="{$start_time}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',{$min_date}})">
             至<input class="Wdate" id="end_time" type="text" value="{$end_time}" onclick="WdatePicker({dateFmt:'yyyy-MM-dd',{$max_date}})">
+
+            品牌 <select id="brand_id">
+              <option value="0">全部</option>
+              {html_options options=$brand_list selected=$brand_id}
+            </select>
             <button value="report_forms.php?act={$act}&platform={$platform}" onclick="salesStats(this)" class="b_submit">单品</button>
             <button value="report_forms.php?act={$act}&platform={$platform}&package=1" onclick="salesStats(this)" class="b_submit">套餐</button>
         </div>
@@ -29,7 +34,7 @@
 
     <div id="goods_num">
         {/if}
-        <table border="0" id="person_style" cellpadding="0" cellspacing="0" class="all_table_list w830 mt10 border c_b">
+        <table border="0" id="person_style" cellpadding="0" cellspacing="0" class="wu_table_list wu_rb_border w830 mt10 border c_b">
             <thead>
                 <tr>
                     <th>序号</th>
@@ -48,7 +53,7 @@
             <tr{if $package_struct}{/if}>
                 <td>{$v.index}</td>
                 <td>{$v.goods_sn}</td>
-                <td>{$v.goods_name}</td>
+                <td style="text-align:left">{$v.goods_name}</td>
                 <td>{$v.goods_num}</td>
                 <td>{$v.package_num}</td>
                 <td>{$v.promotion_num}</td>

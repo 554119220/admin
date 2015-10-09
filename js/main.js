@@ -1761,10 +1761,13 @@ function submitReceiveDateResponse (res)
 /**
  * 销售统计
  */
-function salesStats (obj)
-{
+function salesStats (obj) {
   var start_time = document.getElementById('start_time').value;
   var end_time   = document.getElementById('end_time').value;
+  var brand_id    = 0;
+  if ($("#brand_id")) {
+    brand_id = $("#brand_id").val();
+  }
 
   if (!start_time || !end_time)
   {
@@ -1780,7 +1783,7 @@ function salesStats (obj)
   var pattern = new RegExp(/act=(\w+)&?/);
   action  = pattern.exec(obj.value);
   action  = action[1];
-  Ajax.call(obj.value, 'start_time='+start_time+'&end_time='+end_time, salesStatsResponse, 'GET', 'JSON');
+  Ajax.call(obj.value, 'start_time='+start_time+'&end_time='+end_time+'&brand_id='+brand_id, salesStatsResponse, 'GET', 'JSON');
 }
 
 /**

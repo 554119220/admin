@@ -110,14 +110,9 @@ arrChk.each(function(){
     });
 
 function showHideComponent(myself){
-  var obj = document.getElementById('goods_cat_relation');
-  if (obj.style.display == '') {
-    obj.style.display = 'none';
-    myself.innerHTML = '显示';
-  }else{
-    obj.style.display = '';
-    myself.innerHTML = '隐藏';
-  }
+  var obj = $("#goods_cat_relation");
+  obj.toggle();
+  myself.innerHTML = obj.css('display') == 'none' ? '显示':'隐藏';
 }
 
 var goodsFeature = CKEDITOR.replace('feature');

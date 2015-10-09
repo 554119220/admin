@@ -734,6 +734,7 @@ elseif ($_REQUEST['act'] == 'user_detail') {
             .' AS g ON m.grade_id=g.grade_id LEFT JOIN '
             .$GLOBALS['ecs']->table('user_family').' AS f ON u.family_id=f.family_id '
             .'WHERE m.family_id='.$user_info['family_id'].' AND m.status=0 AND g.type=0';
+        echo $sql_select;exit;
 
         $family_users = $GLOBALS['db']->getAll($sql_select);
         $family = array('family_name'=>$family_users[0]['family_name'],'family_total'=>count($family_users));
@@ -849,8 +850,8 @@ elseif ($_REQUEST['act'] == 'user_detail') {
     $smarty->assign('action',         'account_log');
     $smarty->assign('filter',         $filter);
 
-    $sql_select = 'SELECT * FROM '.$GLOBALS['ecs']->table('user_rank').' WHERE role_id=(SELECT role_id FROM '.
-        $GLOBALS['ecs']->table('users')." WHERE user_id=$user_id) OR role_id = 0";
+    $sql_select = 'SELECT * FROM '.$GLOBALS['ecs']->table('user_rank').' WHERE role_id IN((SELECT role_id FROM '.
+        $GLOBALS['ecs']->table('users')." WHERE user_id=$user_id),0)";
     $smarty->assign('user_rank',$GLOBALS['db']->getAll($sql_select));
 
     // 订单类型
@@ -6688,14 +6689,15 @@ function search_by_goods() {
 
 //get user's bmi
 function get_user_bmi($user_id){
-    $sql = 'SELECT weight,height,bmi FROM '.$GLOBALS['ecs']->table('examination_test')." WHERE user_id=$user_id GROUP BY user_id ORDER BY add_time DESC";
+    $sql = 'SELECT weight,height,bmi FROM '.$GLOBALS['ecs']->table('examination_test')
+        ." WHERE user_id=$user_id GROUP BY user_id ORDER BY add_time DESC";
     $bmi = $GLOBALS['db']->getRow($sql);
     return $bmi;
 }
 
 //产品资料
 function goods_introduce(&$order_list){
-    $sql_select = 'SELECT id,good_sn,classid FROM cz_ecms_goods';
+    $sql_select = 'SELECT id,good_sn,classid FROM '.$GLOBALS['ecs']->table('ecms_goods');
     $ecms_goods = $GLOBALS['db']->getAll($sql_select);
     foreach ($order_list as &$o) {
         foreach ($o['goods_list'] as $k=>&$g) {

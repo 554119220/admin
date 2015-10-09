@@ -165,6 +165,7 @@ elseif ($_REQUEST['act'] == 'order_sales') {
 
 /* 产品销售排行 */
 elseif ($_REQUEST['act'] == 'goods_num') {
+    $brand_list = get_brand_id_name(true);
     // 单品销量
     $sales_rank = sales_rank();
 
@@ -225,6 +226,8 @@ elseif ($_REQUEST['act'] == 'goods_num') {
         $smarty->assign('max_date', $max_date);
     }
 
+    $smarty->assign('brand_id',$_REQUEST['brand_id']);
+    $smarty->assign('brand_list',$brand_list);
     $res['act'] = $_REQUEST['act'];
     $res['main'] = $smarty->fetch('sales_rank.htm');
     die($json->encode($res));
@@ -420,7 +423,6 @@ elseif ($_REQUEST['act'] == 'platform_brand') {
 
     $stats_brand = stats_brand();
     //print_r($stats_brand);
-
     $sql_select = 'SELECT brand_name,brand_id FROM '.$GLOBALS['ecs']->table('brand');
     $brand = $GLOBALS['db']->getAll($sql_select);
     $brand_list = array ();
@@ -1240,11 +1242,6 @@ elseif ($_REQUEST['act'] == 'stats_saler_month') {
     $month_start = strtotime($_REQUEST['start'].' 00:00:00');
     $month_end   = strtotime($_REQUEST['end'].' 23:59:59');
 
-    if ($_REQUEST['r_start'] && $_REQUEST['r_end']) {
-        $month_start = strtotime($_REQUEST['r_start'].' 00:00:00');
-        $month_end   = strtotime($_REQUEST['r_end'].' 23:59:59');
-    }
-
     // 权限控制
     if (!admin_priv('everyone_sales', '',false) && !admin_priv('personal_trans-part_stats', '', false)) {
         $role_id = $_SESSION['role_id'];
@@ -1275,6 +1272,12 @@ elseif ($_REQUEST['act'] == 'stats_saler_month') {
         'i.shipping_status<>3 AND i.order_type IN (4,5,6) AND i.platform=r.role_id AND i.add_time BETWEEN '.
         " $month_start AND $month_end AND i.admin_id IN ($admin_list) GROUP BY admin_id ORDER BY final_amount DESC";
     $res = $GLOBALS['db']->getAll($sql_select);
+
+    //如果选择了退货时间选项
+    if ($_REQUEST['r_start'] && $_REQUEST['r_end']) {
+        $month_start = strtotime($_REQUEST['r_start'].' 00:00:00');
+        $month_end   = strtotime($_REQUEST['r_end'].' 23:59:59');
+    }
 
     $sql_select = 'SELECT COUNT(*) order_num,SUM(i.final_amount) final_amount,i.admin_name,i.admin_id FROM '.
         $GLOBALS['ecs']->table('order_info').' i LEFT JOIN '.$GLOBALS['ecs']->table('returns_order').
@@ -2084,6 +2087,7 @@ function sales_rank ($is_pagination = true) {
 
     $filter['end_time']   = empty($_REQUEST['end_time'])   ? '' : $_REQUEST['end_time'];
     $filter['start_time'] = empty($_REQUEST['start_time']) ? '' : $_REQUEST['start_time'];
+    $filter['brand_id'] = empty($_REQUEST['brand_id']) ? '' : intval($_REQUEST['brand_id']);
 
     $filter['sort_by']    = empty($_REQUEST['sort_by'])    ? 'goods_num' : trim($_REQUEST['sort_by']);
     $filter['sort_order'] = empty($_REQUEST['sort_order']) ? 'DESC'      : trim($_REQUEST['sort_order']);
@@ -2125,10 +2129,12 @@ function sales_rank ($is_pagination = true) {
         $where .= " AND oi.admin_id={$_SESSION['admin_id']} ";
     }
 
+
     if (isset($_REQUEST['package'])) {
         $order_type = ' AND og.goods_sn LIKE "%\_%" ';
     } else {
         $order_type = ' AND CONCAT("", og.goods_sn *1)=og.goods_sn ';
+        !empty($filter['brand_id']) && $order_type .= " AND og.brand_id={$filter['brand_id']} ";
     }
 
     $sql = 'SELECT og.goods_id,og.goods_sn,og.goods_name,oi.order_status,SUM(og.goods_number) goods_num,'.

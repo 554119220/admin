@@ -17,7 +17,7 @@
         <tbody>
             <tr>
                 <!-- <td style="width:100px"> </td> -->
-                <td colspan="4" style="width:310px"> {if $order.secrecy eq 0}{$company_name}{/if} </td>
+                <td colspan="4" style="width:310px"> {if $order.secrecy eq 0}{$company_name} 7189672{/if} </td>
                 <td style="width:30px"> </td>
                 <td style="width:100px"> {$order.consignee} </td>
                 <td colspan="3" style="width:210px"> </td>
@@ -37,9 +37,6 @@
                 <td colspan="4"> {$order.address} </td>
             </tr>
             <tr>
-                <td colspan="9"> &nbsp; </td>
-            </tr>
-            <tr>
                 <!-- 寄件人 -->
                 <td colspan="2"> {$kjrs_tel} </td>
                 <td colspan="2"> </td>
@@ -52,7 +49,7 @@
                 <td colspan="9"> &nbsp; </td>
             </tr>
             <tr>
-                <td colspan="9"> &nbsp; </td>
+                <td colspan="9"> &nbsp;  </td>
             </tr>
             <!-- 托运货物信息 -->
             <tr>
@@ -101,14 +98,12 @@
                 <td colspan="4">
                     <br>
                     <br>
-                    {if $shipping_code eq 'sto_express'}
                     货到付款 {$order.order_sn}
-                    {/if}
                     {$notice}
                 </td>
             </tr>
         </tbody>
     </table>
-    <div style="position:absolute; left:120px; top:80px; font-weight:bold">6929593</div>
+    <!--<div style="position:absolute; left:120px; top:80px; font-weight:bold">7189672</div>-->
 </body>
 </html>

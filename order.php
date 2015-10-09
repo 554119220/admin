@@ -2422,7 +2422,7 @@ elseif ($_REQUEST['act'] == 'shipping_done') {
                 $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users').
                     " SET customer_type=IF(customer_type<>1,2,1) WHERE user_id={$user['user_id']}";
                 $GLOBALS['db']->query($sql_update);
-                file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'成交顾客转到已购'.PHP_EOL.$sql.PHP_EOL,FILE_APPEND);
+                file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'成交顾客转到已购'.PHP_EOL.$sql_update.PHP_EOL,FILE_APPEND);
             }
 
             $res['timeout'] = 2000;

@@ -30,7 +30,9 @@
                   <li>{$kjrs_address}</li>
                   <li>{if $order.secrecy eq 0}{$company_name}{/if}</li>
                   <li>{$kjrs_tel}</li>
-                  {if $region_id} <li>{$identity_card}</li> {/if}
+                  {if $region_id}
+                  <li>{$identity_card}</li>
+                  {/if}
                   <li style="font-size:9px">保健食品</li>
             </ul>
       </div>
