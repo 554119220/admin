@@ -426,13 +426,13 @@
           </thead>
           <tbody>
             {if $order_list}
-            {foreach from=$order_list key=k item=order}
+            {foreach from=$order_list key=k item=order name=i}
             <tr {$order.tr}>
               <td>{$order.index}</td>
               <td valign="top">{$order.add_time}</td>
               <td valign="top">{if $order.final_amount eq 9.9}36.00{else}{$order.final_amount}{/if}</td>
               <td align="left" style="text-align:left">
-                <details {if $order.goods_kind lt 3}open{/if}>
+                <details {if $order.goods_kind lt 3 && $smarty.foreach.i.first}open{/if}>
                 <summary>
                 {$order.platform}：
                 {if $order.shipping_status neq 2}
@@ -454,6 +454,7 @@
                 <strong>{$o.goods_name}</strong>
                 {/if}
                 <wbr>（数量：{$o.goods_number}）
+                {$g.office_url}
                 </p>
                 {/foreach}
                 </details>
@@ -467,6 +468,7 @@
                   <strong>{$g.goods_name}</strong>
                 {/if}
                 {$g.goods_number}×￥{$g.goods_price}
+                {$g.office_url}
                 </p>
                 {/if}
                 {/foreach}

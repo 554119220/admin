@@ -580,79 +580,68 @@ elseif($_REQUEST['act'] == 'check_stock_batch')
 }
 
 /*--- 添加商品 ---*/
-else if($_REQUEST['act'] == 'add_goods')
-{
+else if($_REQUEST['act'] == 'add_goods') {
+
     $res = array ();
-    if (isset($_REQUEST['ext']))
-    {
-        $file = basename($_SERVER['PHP_SELF'], '.php');
-        $nav = list_nav();
-        $smarty->assign('nav_2nd', $nav[1][$file]);
-        $smarty->assign('nav_3rd', $nav[2]);
-        $smarty->assign('file_name', $file);
-        $res['left'] = $smarty->fetch('left.htm');
-    }
-
-    $is_add = $_REQUEST['act'] == 'add'; // 添加还是编辑的标识
-    $is_copy = $_REQUEST['act'] == 'copy'; //是否复制
-    $code = empty($_REQUEST['extension_code']) ? '' : trim($_REQUEST['extension_code']);
-    $code=$code=='virual_card' ? 'virual_card': '';
-
-    /* 取得商品信息 */
-    /* 默认值 */
-    $last_choose = array(0, 0);
-    if (!empty($_COOKIE['ECSCP']['last_choose']))
-    {
-        $last_choose = explode('|', $_COOKIE['ECSCP']['last_choose']);
-    }
-
-    $goods = array(
-        'goods_id'           => 0,
-        'goods_desc'         => '',
-        'cat_id'             => $last_choose[0],
-        'brand_id'           => $last_choose[1],
-        'is_on_sale'         => '1',
-        'is_alone_sale'      => '1',
-        'is_shipping'        => '0',
-        //'other_cat'          => array(), // 扩展分类
-        'goods_type'         => 0,       // 商品类型
-        'shop_price'         => 0,
-        //'promote_price'      => 0,
-        //'market_price'       => 0,
-        //'integral'           => 0,
-        'goods_number'       => $_CFG['default_storage'],
-        'warn_number'        => 1,
-        //'promote_start_date' => local_date('Y-m-d'),
-        //'promote_end_date'   => local_date('Y-m-d', local_strtotime('+1 month')),
-        'goods_weight'       => 0,
-        //'give_integral'      => -1,
-        //'rank_integral'      => -1,
-        'shelflife'          => 24,
-        'per_number'         => 100,
-        'every_num'          => 3,
-        'everyday_use'       => 3,
-        'every_num_units'    => '粒',
-        'per_number_units'   => '粒'
-    );
+    $is_add = $_REQUEST['behave'] == 'add'; // 添加还是编辑的标识
+    $is_edit = $_REQUEST['behave'] == 'edit'; //是否编辑
 
     /* 模板赋值 */
-    $smarty->assign('code',    $code);
     $smarty->assign('cat_list', eff_list());
     $smarty->assign('brand_list', get_brand_id());
+    $smarty->assign('goods_type',array('赠品','蓝帽','普通食品','进口食品'));
+    $smarty->assign('sale_platform',array(1=>'其它',2=>'徽商'));
+    $smarty->assign('per_number_units',array('粒','克','片','粉','件'));
+    $smarty->assign('everyday_use',rand(1,4));
+
+    if ($is_edit && isset($_REQUEST['goods_id']) && !empty($_REQUEST['goods_id'])) {
+        $goods_id = intval($_REQUEST['goods_id']);
+        $sql = 'SELECT * FROM '.$GLOBALS['ecs']->table('goods')." WHERE goods_id=$goods_id";
+        $goods = $GLOBALS['db']->getRow($sql,true);
+        $smarty->assign('goods',$goods);
+        $smarty->assign('title',$_LANG['edit_goods']);
+    }else{
+        assign_query_info();
+        $smarty->assign('title',$_LANG['add_products']);
+        $res['main'] = $smarty->fetch('add_goods.htm');
+    }
+    // else{
+    //    $goods = array(
+    //        'goods_id'           => 0,
+    //        'goods_desc'         => '',
+    //        'cat_id'             => $last_choose[0],
+    //        'brand_id'           => $last_choose[1],
+    //        'is_on_sale'         => '1',
+    //        'is_alone_sale'      => '1',
+    //        'is_shipping'        => '0',
+    //        //'other_cat'          => array(), // 扩展分类
+    //        'goods_type'         => 0,       // 商品类型
+    //        'shop_price'         => 0,
+    //        //'promote_price'      => 0,
+    //        //'market_price'       => 0,
+    //        //'integral'           => 0,
+    //        'goods_number'       => $_CFG['default_storage'],
+    //        'warn_number'        => 1,
+    //        //'promote_start_date' => local_date('Y-m-d'),
+    //        //'promote_end_date'   => local_date('Y-m-d', local_strtotime('+1 month')),
+    //        'goods_weight'       => 0,
+    //        //'give_integral'      => -1,
+    //        //'rank_integral'      => -1,
+    //        'shelflife'          => 24,
+    //        'per_number'         => 100,
+    //        'every_num'          => 3,
+    //        'everyday_use'       => 3,
+    //        'every_num_units'    => '粒',
+    //        'per_number_units'   => '粒'
+    //    );
+    //}
+
     //$smarty->assign('unit_list', get_unit_list());
     //$smarty->assign('user_rank_list', get_user_rank_list());
-    $smarty->assign('weight_unit', $is_add ? ($goods['goods_weight'] >= 1 ? '1' : '0.001') : '1');
-    $smarty->assign('cfg', $_CFG);
-    $smarty->assign('form_act', $is_add ? 'insert' : ($_REQUEST['act'] == 'edit' ? 'update' : 'insert'));
-
-    if ($_REQUEST['act'] == 'add' || $_REQUEST['act'] == 'edit') {
-        $smarty->assign('is_add', true);
-    }
+    //$smarty->assign('weight_unit', $is_add ? ($goods['goods_weight'] >= 1 ? '1' : '0.001') : '1');
+    //$smarty->assign('form_act', $is_add ? 'insert' : ($_REQUEST['behave'] == 'edit' ? 'update' : 'insert'));
 
     /* 显示商品信息页面 */
-    assign_query_info();
-    $res['main'] = $smarty->fetch('add_goods.htm');
-
     die($json->encode($res));
 }
 
@@ -660,10 +649,10 @@ else if($_REQUEST['act'] == 'add_goods')
 elseif($_REQUEST['act'] == 'add_goods_submit')
 {
     //接收数据
-    $_REQUEST = addslashes_deep($_REQUEST);
+    $_REQUEST             = addslashes_deep($_REQUEST);
     $_REQUEST['add_time'] = $_SERVER['REQUEST_TIME'];
-
     $_REQUEST['goods_sn'] = generate_goods_sn_crm();
+
     unset($_REQUEST['act'], $_REQUEST['run']);
 
     if($_REQUEST['goods_name'] == '' || $_REQUEST['goods_sn'] == '')// || $shop_price == '')
@@ -673,8 +662,7 @@ elseif($_REQUEST['act'] == 'add_goods_submit')
     }
 
     // 计算服用天数
-    if (!isset($_REQUEST['every_num'], $_REQUEST['everyday_use']) || $_REQUEST['every_num'] == 0)
-    {
+    if (!isset($_REQUEST['every_num'], $_REQUEST['everyday_use']) || $_REQUEST['every_num'] == 0) {
         $res = crm_msg('请务必填选每次服用量与每天服用次数');
         die($json->encode($res));
     }
@@ -2880,7 +2868,6 @@ function stats_shipping_goods ()
         $sql_select = $sql_append." WHERE $ex_where AND "
             .' i.order_status IN (1,5) AND shipping_status IN (1,2,4) AND g.goods_sn LIKE "%\_%" GROUP BY g.goods_sn';
         $package_goods = $GLOBALS['db']->getAll($sql_select);
-        echo $sql_select;exit;
 
         $package_sn = array();
         foreach ($package_goods as $v){

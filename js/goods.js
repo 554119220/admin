@@ -301,6 +301,14 @@ function editGoodsDetail(){
 }
 
 //修改产品基本信息
-function editGoodsInfo(goodsSn){
-  
+function editGoodsInfo(goodsId){
+  if (goodsId) {
+    Ajax.call('storage.php?act=edit','goods_id='+goodsId,editGoodsInfoResp,'GET','JSON');
+  }
+}
+
+function editGoodsInfoResp(){
+  $("#div_pop_ups").show('slow');
+  $("#fade").show();
+  $("#pop_ups").html(res.main);
 }

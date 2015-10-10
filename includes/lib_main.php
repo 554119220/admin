@@ -1278,6 +1278,7 @@ function get_role_list($type = '',$fields='',$append='')
     if (!empty($append)) {
         $where .= $append;
     }
+
     //权限判断
     if (admin_priv('order_sales_all', '', false)) {
     } elseif (admin_priv('order_sales_trans-part', '', false)) {

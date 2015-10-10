@@ -3959,7 +3959,11 @@ function order_list()
     case 'order_before_transfer' :
         $table_order = 'order_info';
         $table_user  = 'users';
-        $order_status = " AND u.admin_id=a.user_id AND o.order_status=5 AND o.shipping_status IN (1,2) AND u.admin_id={$_SESSION['admin_id']}";
+        if ($_SESSION['admin_id'] == 164) {
+            $order_status = " AND u.admin_id=a.user_id AND o.order_status=5 AND o.shipping_status IN (1,2) AND o.admin_id={$_SESSION['admin_id']}";
+        }else{
+            $order_status = " AND u.admin_id=a.user_id AND o.order_status=5 AND o.shipping_status IN (1,2) AND u.admin_id={$_SESSION['admin_id']}";
+        }
         $table_admin = ','.$GLOBALS['ecs']->table('admin_user').' a ';
         $temp_fields = ',o.review,a.user_name add_admin';
         $sort_by = ' o.shipping_time DESC';
@@ -3974,6 +3978,8 @@ function order_list()
         break;
     }
 
+    echo $order_status;exit;
+
     // 如果是中老年事业部，只列出本部门订单
     if (!admin_priv('all', '', false) && !admin_priv('order_list_all', '', false) && admin_priv('zhln', '', false)) {
         if (admin_priv('order_part_view', '', false)) {
@@ -3985,6 +3991,7 @@ function order_list()
     } elseif (!admin_priv('order_list_all', '', false)) {
         $order_status .= " AND o.platform IN ($role_list_str) ";
     }
+
 
     $result = get_filter();
     if ($result === false) {

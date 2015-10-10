@@ -927,7 +927,7 @@ function goods_list($is_delete, $real_goods=1)
         $sql = 'SELECT COUNT(*) FROM '.$GLOBALS['ecs']->table('goods')." AS g WHERE g.is_delete='$is_delete' $where";
         $filter['record_count'] = $GLOBALS['db']->getOne($sql);
 
-        $sql = 'SELECT g.goods_id,g.goods_name,g.goods_type,g.goods_sn,g.shop_price,g.integral,g.shelflife,g.bar_code,g.warn_number,g.cost_price,e.eff_name goods_effect,'.
+        $sql = 'SELECT g.goods_id,g.goods_name,g.office_url,g.goods_type,g.goods_sn,g.shop_price,g.integral,g.shelflife,g.bar_code,g.warn_number,g.cost_price,e.eff_name goods_effect,'.
             'g.min_price,g.promote_price,g.is_on_sale,s.status,g.goods_weight,IF(SUM(quantity),SUM(quantity),0) goods_number,COUNT(quantity) stock_times FROM '
             .$GLOBALS['ecs']->table('goods').' g LEFT JOIN '.$GLOBALS['ecs']->table('stock_goods').' s ON g.goods_sn=s.goods_sn'
             .' LEFT JOIN '.$GLOBALS['ecs']->table('effects')." e ON e.eff_id=g.goods_effect WHERE g.is_delete='$is_delete' $where "

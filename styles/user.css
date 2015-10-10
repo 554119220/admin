@@ -48,9 +48,12 @@
 .wu_button{ background:#8ab923; background-color:#9dcc4a; background-image:-moz-linear-gradient(top,#adda4d,#86b846); background-image:-ms-linear-gradient(top,#adda4d,#86b846); background-image:-webkit-gradient(linear,0 0,0 100%,from(#adda4d),to(#86b846)); background-image:-webkit-linear-gradient(top,#adda4d,#86b846); background-image:-o-linear-gradient(top,#adda4d,#86b846); background-image:linear-gradient(top,#adda4d,#86b846); background-repeat:repeat-x; height:22px; filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#adda4d', endColorstr='#86b846', GradientType=0); text-shadow:0 1px 0 rgba(255,255,255,.3); border:1px solid #6d8f29; color:#3e5e00!important; min-width:56px; width:auto; _width:56px; box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 1px 0 rgba(0,0,0,.2) }
 .wu_button_vist{ font-size:12px; text-decoration:none!important; vertical-align:middle; display:inline-block; _display:inline!important; text-align:center; padding:2px 5px !important; cursor:pointer; border-radius:3px; white-space:nowrap }
 .a_sort a:link{ color:#192E32 }
+
 .wu_table_form{ margin-bottom:8px }
-.wu_table_form th{ text-align:right }
-.wu_table_form th td{ border-bottom:1px dashed !important }
+.wu_table_form caption{ border-bottom:1px solid #ccc;padding-bottom:5px;}
+.wu_table_form th{text-align:right;padding:5px;}
+.wu_table_form td{padding:5px;}
+.wu_table_form th,.wu_table_form td{ border-bottom:1px solid #ccc;}
 /*固定DIV*/
 .online_close { width:33px; height:169px; position:fixed; right:0; /*
   top:30%; */

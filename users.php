@@ -734,7 +734,6 @@ elseif ($_REQUEST['act'] == 'user_detail') {
             .' AS g ON m.grade_id=g.grade_id LEFT JOIN '
             .$GLOBALS['ecs']->table('user_family').' AS f ON u.family_id=f.family_id '
             .'WHERE m.family_id='.$user_info['family_id'].' AND m.status=0 AND g.type=0';
-        echo $sql_select;exit;
 
         $family_users = $GLOBALS['db']->getAll($sql_select);
         $family = array('family_name'=>$family_users[0]['family_name'],'family_total'=>count($family_users));
@@ -5872,7 +5871,6 @@ function access_purchase_records ($id)
         }
 
     }
-
     //产品介绍
     goods_introduce($order_list);
     return $order_list;
@@ -6699,13 +6697,32 @@ function get_user_bmi($user_id){
 function goods_introduce(&$order_list){
     $sql_select = 'SELECT id,good_sn,classid FROM '.$GLOBALS['ecs']->table('ecms_goods');
     $ecms_goods = $GLOBALS['db']->getAll($sql_select);
+    $goods_sn   = array();
     foreach ($order_list as &$o) {
         foreach ($o['goods_list'] as $k=>&$g) {
+            $goods_sn[] = &$g['goods_sn'];
             foreach ($ecms_goods as $eg) {
                 if ($eg['good_sn'] == $g['goods_sn']) {
                     $g['classid'] = $eg['classid'];
                     $g['id'] = $eg['id'];
                     $g['knowlage_url'] = "http://192.168.1.217/zhishi/e/action/ShowInfo.php?classid={$eg['classid']}&id={$eg['id']}";
+                }
+            }
+        }
+    }
+    $goods_sn = array_unique($goods_sn);
+    if ($goods_sn) {
+        $str_goods = implode("','",$goods_sn);
+        $sql = 'SELECT goods_sn,office_url FROM '.$GLOBALS['ecs']->table('goods')
+            ." WHERE goods_sn IN('$str_goods') AND office_url<>''";
+        $urls = $GLOBALS['db']->getAll($sql);
+        unset($g);
+        foreach ($order_list as &$o) {
+            foreach ($o['goods_list'] as $k=>&$g) {
+                foreach ($urls as $v) {
+                    if ($v['goods_sn'] == $g['goods_sn']) {
+                        $g['office_url'] = ' <a href="'.$v['office_url'].'" target="_blank">官网</a>';
+                    }
                 }
             }
         }

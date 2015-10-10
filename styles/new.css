@@ -160,10 +160,10 @@ input {height:18px; padding:2px 0 2px 5px; border:1px solid #d0d0d0; background:
 .form-table th {margin-right:10px;float:left}
 .spread_area {float:left;padding-top:30px}
 .no_border {border:0 !important}
-//.table_form td, .table_form th {border-bottom:1px solid #eee !important;border-right:0 !important}
-//.table_form tr {background:none !important}
+.table_form td, .table_form th {border-bottom:1px solid #eee !important;border-right:0 !important}
+.table_form tr {background:none !important}
 .table_form th {font-weight:normal; text-align:center; padding-right:10px; color:#333; background:none !important}
-// .table_form td, .table_form th {padding:4px 0 4px 8px}
+.table_form td, .table_form th {padding:4px 0 4px 8px}
 .table_form td input[type='radio'] {vertical-align:middle}
 .table_form td label {margin-right:20px}
 select {vertical-align:middle; background:none repeat scroll 0 0 #F9F9F9; border-color:#666666 #CCCCCC #CCCCCC #666666; border-style:solid; border-width:1px; color:#333; padding:2px}

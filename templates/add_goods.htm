@@ -1,16 +1,16 @@
-<div class="blank">添加新商品</div>
-<div style="width:40%;" class="table_bg_img c_b"> 
+<br />
+<div style="width:40%;" class="box_center c_b"> 
   <form method="post" name="newProduct" action="javascript:void(0)" onsubmit="addNewProduct()">
-    <table width="100%" height="100%" id="general-table" class="table-form wu_table_form" cellpadding="1" cellspacing="1">
-      <caption><h1>添加新商品</h1></caption>
-      <tr><th>商品名称：</th><td><input type="text" name="goods_name" value=""/></td></tr>
+    <table width="100%" height="100%" id="general-table" class="wu_table_form" cellpadding="1" cellspacing="1">
+      <caption><h1>{$title}</h1></caption>
+      <tr><th>商品名称：</th><td><input type="text" name="goods_name" value="{$goods.name}"/></td></tr>
       <tr>
         <th>商品分类：</th>
         <td>
-          <select name="cat_id" onchange="hideCatDiv()" >
+          <select name="cat_id">
             <option value="0">请选择</option>
             {foreach from=$cat_list item=val}
-            <option value="{$val.eff_id}">{$val.eff_name}</option>
+            <option value="{$val.eff_id}" {if $val.eff_id eq $goods.eff_id}selected{/if}>{$val.eff_name}</option>
             {/foreach}
           </select>
         </td>
@@ -21,7 +21,7 @@
           <select name="brand_id">
             <option value="0">{$lang.select_please}</option>
             {foreach from=$brand_list item=val}
-            <option value="{$val.brand_id}">{$val.brand_name}</option>
+            <option value="{$val.brand_id}" {if $val.brand_id eq $goods.brand_id}selected{/if}>{$val.brand_name}</option>
             {/foreach}
           </select>
         </td>
@@ -29,8 +29,9 @@
       <tr>
         <th>主要销售平台：</th>
         <td>
-          <label><input type="radio" name="sale_platform" value="1" checked/>其它</label>
-          <label><input type="radio" name="sale_platform" value="2" />微商</label>
+          {foreach from=$sale_platform key=k item=v}
+          <label><input type="radio" name="sale_platform" value="1" {if $k eq $goods.sale_platform || !$goods.sale_platform}checked{/if}/>{$v}</label>
+          {/if}
         </td>
       </tr>
       <tr>
@@ -43,10 +44,9 @@
       <tr>
         <th>产品类型：</th>
         <td>
-          <label><input type="radio" name="goods_type" value="0"/>赠品</label>
-          <label><input type="radio" name="goods_type" value="1"/>蓝帽</label>
-          <label><input type="radio" name="goods_type" value="2" checked/>普通食品</label>
-          <label><input type="radio" name="goods_type" value="3"/>进口食品</label>
+          {foreach from=$goods_type key=k item=v}
+          <label><input type="radio" name="goods_type" value="{$k}" {if $k eq 2 || $k eq $goods.goods_type}checked{/if}/>{$v}</label>
+          {/foreach}
         </td>
       </tr>
       <tr><th>商品售价：</th><td><input type="text" name="shop_price" value=""/></td></tr>
@@ -63,11 +63,7 @@
         <td>
           <input type="number" name="per_unit_number" min="1" value=""/>
           <select name="per_number_units" onchange="document.getElementById('every_num_units').innerHTML='&nbsp;&nbsp;'+this.value;" id="per_number_units">
-            <option>粒</option>
-            <option>克</option>
-            <option>片</option>
-            <option>粉</option>
-            <option>件</option>
+            {html_options options=$per_number_units}
           </select>
         </td>
       </tr>
@@ -81,15 +77,20 @@
       <tr>
         <th>每天服用次数：</th>
         <td>
+          {foreach from=$everyday_use $k item=v}
           <label><input type="radio" name="everyday_use" value="1"/>1次</label>
-          <label><input type="radio" name="everyday_use" value="2"/>2次</label>
-          <label><input type="radio" name="everyday_use" value="3"/>3次</label>
-          <label><input type="radio" name="everyday_use" value="4"/>4次</label>
+          {/foreach}
         </td>
       </tr>
       <tr><th>可服用天数：</th><td><input type="number" name="take_days" value="" /></td></tr>
       <tr><th>批准功效：</th><td><input type="text" name="effect" value="" /></td></tr>
-      <tr><th> </th><td><input type="submit" value="确定" class="input_submit" /></td></tr>
+      <tr>
+        <th>官网链接</th>
+        <td>
+          <input type="url" name="office_url" value="" />
+          <input type="submit" value="保 存" class="input_submit" />
+        </td>
+      </tr>
     </table>
   </form>
 </div>

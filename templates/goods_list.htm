@@ -1,12 +1,7 @@
 <div width="100%">
   <div class="finder-title mt10">
     {$curr_title}<font>{$num}</font>
-    {if $power_turn_on eq 'able'}
-    <span style="float:right;margin-right:12px;">
-      <input type="button" class="btn_top_right" name="sold_out" value="下架0库存商品" onclick="soldOutZero({$brand_id})"/>
-    </span>
-    {/if}
-  </div>
+    </div>
   <div class="finder-packet" id="">
     <div class="packet-items" id="">
       <ul id="sub_tag" class="clearfix">
@@ -37,7 +32,10 @@
         {/foreach}
       </select>
       <input type="text" name="keyword" value="{if $keyword}{$keyword}{else}商品名称/编号{/if}" onfocus="this.value=''" onblur="if (this.value=='') this.value='商品名称/编号'" id="keyword"/>
-      <button value="storage.php?act=goods_list&brand_id={$brand_id}" id="target" class="b_submit" onclick="searchGoodsByBrand(this)">搜索</button>
+      <button value="storage.php?act=goods_list&brand_id={$brand_id}" id="target" class="b_submit" onclick="searchGoodsByBrand(this)">搜 索</button>
+      {if $power_turn_on eq 'able'}
+      <button class="b_submit" name="sold_out" onclick="soldOutZero({$brand_id})">下架0库存商品</button>
+      {/if}
       <label{if $filter eq 'low_qty'} class="input_checked"{/if}>
         <input type="radio" name="filter" value="low_qty"{if $filter eq 'low_qty'} checked{/if} onclick="filterGoods(this)"/>低库存
       </label>
@@ -65,9 +63,10 @@
         <input type="hidden" id="switch_info" name="0" value="{main_switch}"/>
       </span>
       <span id="current_stauts_desc">
-        <font color="red">状态：{if $main_switch gt 0}未开启{else}已开启{/if}</font>
+        <font color="red" style="font-weight:bold;">状态：{if $main_switch gt 0}未开启{else}已开启{/if}</font>
       </span>
       {/if}
+
     </div>
   </div>
 
@@ -81,7 +80,7 @@
         <th width="4%">最低价格</th>
         {/if}
         <th width="4%">建议售价</th>
-        <th width="6%">
+        <th width="4%">
           <label style="cursor:pointer" onclick="goodsSort('goods_number')" name="stock">
             库存{if $sort_info.sort_by eq 'goods_number'}{if $sort_info.sort_order eq 'DESC'}▼{else}▲{/if}{/if}
           </label>
@@ -95,10 +94,10 @@
         <th width="5%">商品分类</th>
         <!--<th width="3%">类型</th>-->
         {if $power_turn_on eq 'able'}
+        <th width="3%">状态</th>
         <th width="6%">操作</th>
-        <th width="6%">状态</th>
         {/if}
-        <th width="5%">备注</th>
+        <th width="8%">备注</th>
       </tr>
       {if $goods_list}
       {foreach from=$goods_list item=v}
@@ -132,6 +131,13 @@
         <!--<td>{$v.goods_type}</td>-->
         {if $power_turn_on eq 'able'}
         <td>
+          {if $v.status eq 0}
+          <img src="images/nottrack.gif" {if $mod_stock_role eq 'able'}onclick="modGoodsStatus(this)"{/if} value="{$v.goods_sn}" sta="1" class="png_btn" title="点击恢复进货该商品">
+          {else}
+          <img src="images/track.png" {if $mod_stock_role eq 'able'} onclick="modGoodsStatus(this)"{/if} value="{$v.goods_sn}" sta="0" class="png_btn" title="点击不再进货该商品">
+          {/if}
+        </td>
+        <td>
           <!--<a href="storage.php?act=edit_goods&goods_id={$v.goods_id}"><img src="images/edit.gif"></a>-->
           {if $filter neq 'sold_out' && $v.is_on_sale eq 1}
           <button class="btn_new" onclick="isOnsale(0,{$v.goods_id},this)">下架</button>
@@ -141,16 +147,11 @@
           <button class="btn_new" onclick="editGoodsInfo({$v.goods_id})">编辑</button>
         </td>
         {/if}
+        
         <td>
-          {if $power_turn_on eq 'able'}
-          {if $v.status eq 0}
-          <img src="images/nottrack.gif" {if $mod_stock_role eq 'able'}onclick="modGoodsStatus(this)"{/if} value="{$v.goods_sn}" sta="1" class="png_btn" title="点击恢复进货该商品">
-          {else}
-          <img src="images/track.png" {if $mod_stock_role eq 'able'} onclick="modGoodsStatus(this)"{/if} value="{$v.goods_sn}" sta="0" class="png_btn" title="点击不再进货该商品">
-          {/if}
-          {/if}
+          <a href="{$v.office_url}" target="_blank">知识</a> | 
+          <a href="{$v.office_url}" target="_blank">官网</a>
         </td>
-        <td></td>
       </tr>
       {/foreach}
       {else}

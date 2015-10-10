@@ -78,3 +78,4 @@ a:active {color:#EB8A3D; text-decoration:underline}
 /*右下的固定宽度 end*/
 .list_table_form input{margin:6px 3px 6px 0px;}
 /*======================================定义全局样式区 end=========================================*/
+input[type=url] { width:230px;}
