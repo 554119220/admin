@@ -679,7 +679,10 @@
                   <th>运费</th>
                   <td><input type="text" name="shipping_fee" id="shipping_fee" value="0" onchange="calcOrderAmount()"/></td>
                   <th>商品总额</th>
-                  <td><input type="text" name="goods_amount" value="0" id="goods_amount" onchange="calcOrderAmount()"/></td>
+                  <td>
+                    <input type="text" name="goods_amount" value="0" disabled id="goods_amount" onchange="calcOrderAmount()"
+                    style="border:0px;border-bottom: 1px solid #ccc;font-weight:bolder;background:none;"/>
+                  </td>
                   <th>订单总价</th><td id="order_amount"></td>
                 </tr>
                 <tr class="wu_table_list">

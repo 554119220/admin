@@ -144,12 +144,12 @@
           {else}
           <button class="btn_new" onclick="isOnsale(1,{$v.goods_id},this)">上架</button>
           {/if}
-          <button class="btn_new" onclick="editGoodsInfo({$v.goods_id})">编辑</button>
+          <button class="btn_new" onclick="editGoodsInfo({$v.goods_id},'edit')">编辑</button>
         </td>
         {/if}
         
         <td>
-          <a href="{$v.office_url}" target="_blank">知识</a> | 
+          <a href="article.php?act=goods_articel_detail&goods_id={$v.goods_id}" target="_blank">知识</a> | 
           <a href="{$v.office_url}" target="_blank">官网</a>
         </td>
       </tr>

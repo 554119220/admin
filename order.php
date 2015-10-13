@@ -3831,7 +3831,7 @@ function order_list()
             $order_status = " AND order_status=0 AND o.platform IN ($role_list_str) ";
         } elseif (admin_priv('order_group_view', '', false)) {
             //$order_status = ' AND order_status=0 AND o.admin_id>0 AND o.group_id='.$_SESSION['group_id'];
-            $order_status = ' AND order_status=0 AND o.admin_id>0 AND o.platform='.$_SESSION['role_id'];
+            $order_status = ' AND order_status=0 AND o.admin_id>0 ';
             if (isset($_REQUEST['admin_id']) && intval($_REQUEST['admin_id'])) {
                 $order_status = ' AND order_status=0 AND o.admin_id='.intval($_REQUEST['admin_id']);
             }
@@ -3978,8 +3978,6 @@ function order_list()
         break;
     }
 
-    echo $order_status;exit;
-
     // 如果是中老年事业部，只列出本部门订单
     if (!admin_priv('all', '', false) && !admin_priv('order_list_all', '', false) && admin_priv('zhln', '', false)) {
         if (admin_priv('order_part_view', '', false)) {
@@ -3991,7 +3989,6 @@ function order_list()
     } elseif (!admin_priv('order_list_all', '', false)) {
         $order_status .= " AND o.platform IN ($role_list_str) ";
     }
-
 
     $result = get_filter();
     if ($result === false) {

@@ -581,9 +581,8 @@ elseif($_REQUEST['act'] == 'check_stock_batch')
 
 /*--- 添加商品 ---*/
 else if($_REQUEST['act'] == 'add_goods') {
-
     $res = array ();
-    $is_add = $_REQUEST['behave'] == 'add'; // 添加还是编辑的标识
+    $is_add = $_REQUEST['behave'] == 'add' || !isset($_REQUEST['behave']); // 添加还是编辑的标识
     $is_edit = $_REQUEST['behave'] == 'edit'; //是否编辑
 
     /* 模板赋值 */
@@ -596,14 +595,30 @@ else if($_REQUEST['act'] == 'add_goods') {
 
     if ($is_edit && isset($_REQUEST['goods_id']) && !empty($_REQUEST['goods_id'])) {
         $goods_id = intval($_REQUEST['goods_id']);
-        $sql = 'SELECT * FROM '.$GLOBALS['ecs']->table('goods')." WHERE goods_id=$goods_id";
+        $sql = 'SELECT goods_id,goods_sn,goods_name,shop_price,min_price,cost_price,office_url,everyday_use FROM '
+            .$GLOBALS['ecs']->table('goods')." WHERE goods_id=$goods_id";
         $goods = $GLOBALS['db']->getRow($sql,true);
         $smarty->assign('goods',$goods);
-        $smarty->assign('title',$_LANG['edit_goods']);
-    }else{
+        $smarty->assign('title','编辑商品');
+        $res['main'] = $smarty->fetch('edit_goods.htm');
+    }elseif($is_add){
         assign_query_info();
-        $smarty->assign('title',$_LANG['add_products']);
+        $smarty->assign('title',$_LANG['添加商品']);
+        $smarty->assign('is_add',true);
         $res['main'] = $smarty->fetch('add_goods.htm');
+    }elseif($_REQUEST['behave'] == 'done' && !empty($_REQUEST['goods_id'])){
+        $goods_name = mysql_real_escape_string(trim($_REQUEST['goods_name']));
+        $office_url = trim(addslashes($_REQUEST['office_url']));
+        $goods_id = intval($_REQUEST['goods_id']);
+        $sql = 'UPDATE '.$GLOBALS['ecs']->table('goods')
+            ." SET goods_name='$goods_name',office_url='$office_url' WHERE goods_id=$goods_id";
+        $code = $GLOBALS['db']->query($sql);
+        if ($code) {
+            $res = crm_msg('修改失败',$code);
+        }else{
+            $res = crm_msg('修改失败',$code);
+        }
+        $res['act'] = 'done';
     }
     // else{
     //    $goods = array(

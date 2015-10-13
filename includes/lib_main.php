@@ -1629,7 +1629,7 @@ function ECP_list()
 function hideContact($val){
     $sql = 'SELECT status FROM '.$GLOBALS['ecs']->table('contact_status')." WHERE where_use='anywhere'";
     $status = $GLOBALS['db']->getOne($sql);
-    if ($status && !in_array($_SESSION['role_id'],array(13,20))) {
+    if ($status && in_array($_SESSION['role_id'],array(37))) {
         if ($val) {
             $val = substr_replace($val,'****',3,4);
         }
@@ -1767,13 +1767,17 @@ function goods_knowlage_list(){
     $filter['cat_id']        = empty($_REQUEST['cat_id']) ? 0 : intval($_REQUEST['cat_id']);
     $filter['brand_id']      = empty($_REQUEST['brand_id']) ? 0 : $_REQUEST['brand_id'];
     $filter['goods_sn']       = empty($_REQUEST['goods_sn']) ? '' : trim($_REQUEST['goods_sn']);
-    $where = " WHERE is_delete=0 AND is_on_sale=1";
-    if ($filter['brand_id']) {
-        $where .= " AND brand_id={$filter['brand_id']}";
-    }
+
+    $where = " WHERE 1 ";
     if ($filter['goods_sn']) {
         $where .= " AND goods_sn={$filter['goods_sn']}";
     }
+
+    if ($filter['brand_id']) {
+        $where .= " AND brand_id={$filter['brand_id']}";
+    }
+
+    $where = " AND is_delete=0 AND is_on_sale=1";
 
     $sql = 'SELECT goods_name,goods_sn FROM '.$GLOBALS['ecs']->table('goods').$where;
     return $GLOBALS['db']->getAll($sql);

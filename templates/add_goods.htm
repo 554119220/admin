@@ -31,7 +31,7 @@
         <td>
           {foreach from=$sale_platform key=k item=v}
           <label><input type="radio" name="sale_platform" value="1" {if $k eq $goods.sale_platform || !$goods.sale_platform}checked{/if}/>{$v}</label>
-          {/if}
+          {/foreach}
         </td>
       </tr>
       <tr>
@@ -77,8 +77,8 @@
       <tr>
         <th>每天服用次数：</th>
         <td>
-          {foreach from=$everyday_use $k item=v}
-          <label><input type="radio" name="everyday_use" value="1"/>1次</label>
+          {foreach from=$everyday_use key=k item=v}
+          <label><input type="radio" name="everyday_use" value="{$v}"/>{$v}次</label>
           {/foreach}
         </td>
       </tr>
@@ -88,7 +88,12 @@
         <th>官网链接</th>
         <td>
           <input type="url" name="office_url" value="" />
+          {if $is_add}
           <input type="submit" value="保 存" class="input_submit" />
+          {else}
+          <input type="submit" value="修 改" class="input_submit" />
+          <input type="button" value="取 消" class="input_submit" onclick="close_pop()"/>
+          {/if}
         </td>
       </tr>
     </table>
