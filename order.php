@@ -3684,6 +3684,8 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
         //$plarform = intval($_REQUEST['platform']);
         break;
     case 'show':
+        admin_priv('all','',false) && $smarty->assign('all',true); 
+        $smarty->assign('platform_list',platform_list(explode(',',ONLINE_STORE),true));
         $smarty->assign('shipping_list',shipping_list(3));
         $res['main'] = $smarty->fetch('deal_flush_order.htm');
         die($json->encode($res));
@@ -3747,6 +3749,28 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
         die($json->encode($res));
     }
     break;
+}
+
+//将订单标记成刷单
+elseif('mark_flush_order' == $_REQUEST['act']){
+
+    $platform   = intval($_REQUEST['platform']);
+    $goods_sn   = mysql_real_escape_string(($_REQUEST['goods_sn']));
+    $price      = intval($_REQUEST['price']);
+    $start_time = strtotime(date('Y-m-d 00:00:00'));
+    $end_time   = $_SERVER['REQUEST_TIME'];
+
+    if ($platform && $goods_sn && $price) {
+        $sql = 'UPDATE '.$GLOBALS['ecs']->table('ordersyn_info')
+            .' o,'.$GLOBALS['ecs']->table('order_goods').' g '
+            ." SET o.order_type=1 WHERE o.order_id=g.order_id AND g.goods_sn=$goods_sn AND o.platform=$platform 
+            AND o.order_status=0 AND o.final_amount IN($price) AND o.add_time BETWEEN $start_time AND $end_time"; 
+        $res = $GLOBALS['db']->query($sql);
+        $res ? crm_msg('标记成功',$res) : crm_msg('标记失败');
+    }else{
+        $res = crm_msg('标记失败');
+    }
+    die($json->encode($res));
 }
 
 //协助完成订单操作 , 在添加订单的时候判断并执行
@@ -3964,6 +3988,7 @@ function order_list()
         }else{
             $order_status = " AND u.admin_id=a.user_id AND o.order_status=5 AND o.shipping_status IN (1,2) AND u.admin_id={$_SESSION['admin_id']}";
         }
+        //$order_status = " AND u.admin_id=a.user_id AND o.order_status=5 AND o.shipping_status IN (1,2) AND u.admin_id={$_SESSION['admin_id']}";
         $table_admin = ','.$GLOBALS['ecs']->table('admin_user').' a ';
         $temp_fields = ',o.review,a.user_name add_admin';
         $sort_by = ' o.shipping_time DESC';

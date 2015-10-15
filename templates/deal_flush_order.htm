@@ -43,6 +43,33 @@
   </form>
   <hr>
   <br />
-  <div id="error_div">
-  </div>
+  <div id="error_div">  </div>
 </div>
+
+{if $all}
+<br />
+<h3>通过商品和价格标记刷单</h3>
+<div style="width:58%;" class="white_bg">
+  <form action="javascript:void(0)" onsubmit="markFlushOrder(this)">
+    <table class="form_table" style="width:100%;">
+      <tr>
+        <td>
+          <select name="platform">
+            {html_options options=$platform_list}
+          </select>
+          <input type="number" name="price" value="" min="0" required placeholder="价格"/>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <input type="text" name="name" value="" oninput="searchGoods(this)" placeholder="商品名"/>
+          <select id="goods_id" name="goods_sn" style="width:220px;">
+            <option value="0">选择商品</option>
+          </select>
+          <input type="submit" name="name" value="标 记" class="input_submit"/>
+        </td>
+      </tr>
+    </table>
+  </form>
+</div>
+{/if}

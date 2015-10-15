@@ -1278,7 +1278,6 @@ function get_role_list($type = '',$fields='',$append='')
     if (!empty($append)) {
         $where .= $append;
     }
-
     //权限判断
     if (admin_priv('order_sales_all', '', false)) {
     } elseif (admin_priv('order_sales_trans-part', '', false)) {
@@ -1364,7 +1363,7 @@ function assoc_value ($arr, $key = 0)
 /**
  * 获取销售平台列表
  */
-function platform_list ($platform = array ()) {
+function platform_list ($platform = array (),$single=false) {
     $sql_select = 'SELECT role_name,role_id,role_describe FROM '.$GLOBALS['ecs']->table('role')
         ." WHERE role_type>0 AND depart_id>=0";
     if (!admin_priv('all', '', false) && empty($platform)) {
@@ -1378,7 +1377,14 @@ function platform_list ($platform = array ()) {
         $sql_select .= " AND role_id IN ($platform)";
     }
 
-    return $GLOBALS['db']->getAll($sql_select);
+    $res =  $GLOBALS['db']->getAll($sql_select);
+    if ($single && $res) {
+        foreach ($res as $v) {
+            $arr[$v['role_id']] = $v['role_name'];
+        }
+        $res = $arr;
+    }
+    return $res;
 }
 
 /**
@@ -1777,7 +1783,7 @@ function goods_knowlage_list(){
         $where .= " AND brand_id={$filter['brand_id']}";
     }
 
-    $where = " AND is_delete=0 AND is_on_sale=1";
+    $where .= " AND is_delete=0 AND is_on_sale=1";
 
     $sql = 'SELECT goods_name,goods_sn FROM '.$GLOBALS['ecs']->table('goods').$where;
     return $GLOBALS['db']->getAll($sql);

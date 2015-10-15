@@ -117,7 +117,7 @@ function dealFlushOrder(obj){
 }
 
 function dealFlushOrderRes(res){
- $('#error_div').html(res); 
+  $('#error_div').html(res); 
 }
 
 //批量标记刷单
@@ -127,4 +127,13 @@ function markFlushOrder(obj){
   if (orderlist) {
     Ajax.call('order.php?act=deal_flush_order&behave=mark','&orderlist='+orderlist+'&shipping_id='+shipping_id,dealFlushOrderRes,'POST','JSON');
   }
+}
+
+function markFlushOrder(obj){
+  var platform = obj.elements['platform'].value;
+  var goodsSn = obj.elements['goods_sn'].value;
+  var price = obj.elements['price'].value;
+  if (platform && goodsSn && price) {
+    Ajax.call('order.php?act=mark_flush_order','&platform='+platform+'&goods_sn='+goodsSn+'&price='+price,showMsg,'POST','JSON');
+  }else return false;
 }
