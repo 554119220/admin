@@ -1469,7 +1469,7 @@ elseif ($_REQUEST['act'] == 'advance_batch') {
 
     $code = $GLOBALS['db']->query($sql);
     if ($code) {
-        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'高级转移'.PHP_EOL.$sql.PHP_EOL,FILE_APPEND);
+        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').$_SESSION['admin_name'].'高级转移'.PHP_EOL.$sql.PHP_EOL,FILE_APPEND);
         $res = crm_msg("成功转了{$count}个顾客。",$code);
     }else{
         $res = crm_msg('操作失败');
@@ -2347,7 +2347,7 @@ elseif ($_REQUEST['act'] == 'give_up')
             "u.group_id=a.group_id WHERE u.user_id=$user_id AND a.user_id=$to_id";
         $GLOBALS['db']->query($sql_update);
 
-        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'顾客转赠成功'.PHP_EOL.$sql_update.PHP_EOL,FILE_APPEND);
+        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').$_SESSION['admin_name'].'顾客转赠成功'.PHP_EOL.$sql_update.PHP_EOL,FILE_APPEND);
         $res['message'] = '顾客转赠成功！';
         $res['code'] = 1;
         die($json->encode($res));
@@ -2796,7 +2796,7 @@ elseif($_REQUEST['act'] == 'from_to')
     }
 
     if($db->query($sql)) {
-        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'转顾客操作'.PHP_EOL.$sql.PHP_EOL,FILE_APPEND);
+        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').$_SESSION['admin_name'].'转顾客操作'.PHP_EOL.$sql.PHP_EOL,FILE_APPEND);
         $res = array (
             'req_msg' => true,
             'timeout' => 2000,
@@ -3778,7 +3778,7 @@ elseif ($_REQUEST['act'] == 'send_users') {
         "group_id={$admin_info['group_id']}, role_id={$admin_info['role_id']}, assign_time=UNIX_TIMESTAMP() WHERE user_id IN ($user_list) LIMIT $user_number";
     $GLOBALS['db']->query($sql_update);
 
-    file_put_contents('../batch_user.log',date('Y-m-d H:i:s').' send user '.PHP_EOL.$sql_update.PHP_EOL,FILE_APPEND);
+    file_put_contents('../batch_user.log',date('Y-m-d H:i:s').$_SESSION['admin_name'].' send user '.PHP_EOL.$sql_update.PHP_EOL,FILE_APPEND);
 
     $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('admin_user')." SET counter=counter+$user_number WHERE user_id=$send_to LIMIT 1";
     $GLOBALS['db']->query($sql_update);
@@ -4883,7 +4883,7 @@ elseif($_REQUEST['act'] == 'onekey_classify_user'){
     $admin_id = intval($_REQUEST['admin_id']);
     if ($admin_id) {
         $sql_p = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET customer_type=%d WHERE admin_id=$admin_id";
-        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'修改顾客分类'.PHP_EOL.$sql.PHP_EOL,FILE_APPEND);
+        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').$_SESSION['admin_name'].'修改顾客分类'.PHP_EOL.$sql.PHP_EOL,FILE_APPEND);
         //先将一般顾客全部转到临时分类
         $res = crm_msg("成功转了{$count}个顾客。",$code);
         //$sql = sprintf($sql_p.' AND customer_type NOT IN(1,4,5,6)',24);
@@ -5012,7 +5012,8 @@ function user_list() {
         $filter['city']         = empty($_REQUEST['city'])         ? 0  : $_REQUEST['city'];
         $filter['province']     = empty($_REQUEST['province'])     ? 0  : $_REQUEST['province'];
         $filter['address']      = empty($_REQUEST['address'])      ? 0  : trim($_REQUEST['address']);
-
+        $filter['sel_opt']      = !isset($_REQUEST['sel_opt'])      ? 0  : intval($_REQUEST['sel_opt']);
+        $filter['contact_opt']  = empty($_REQUEST['contact_opt'])  ? 0  : intval($_REQUEST['contact_opt']);
         $filter['number_purchased'] = empty($_REQUEST['number_purchased'])?0:intval($_REQUEST['number_purchased']);
 
         $filter['start_time'] = strtotime(stamp2date($_REQUEST['start_time'], 'Y-m-d H:i:s'));
@@ -5065,6 +5066,13 @@ function user_list() {
 
         if ($filter['number_purchased']) {
             $ex_where .= " AND number_purchased>={$filter['number_purchased']} ";
+        }
+
+        //有无微信
+        if ($filter['sel_opt'] && $filter['contact_opt']) {
+            $contact_field = $filter['contact_opt'] == 1 ? 'u.qq' : 'u.wechat';
+            $operator = $filter['sel_opt'] == 1 ? '=' : '<>';
+            $ex_where .= " AND $contact_field$operator'' ";
         }
 
         /* 按顾客来源显示 顾客列表 */
@@ -5252,9 +5260,6 @@ function user_list() {
 
         $filter['keywords'] = stripslashes($filter['keywords']);
         set_filter($filter, $sql);
-        if (497 == $_SESSION['admin_id']) {
-            //echo $sql,PHP_EOL;
-        }
     } else {
         $sql    = $result['sql'];
         $filter = $result['filter'];

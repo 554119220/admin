@@ -165,6 +165,8 @@ elseif ($_REQUEST['act'] == 'order_sales') {
 
 /* 产品销售排行 */
 elseif ($_REQUEST['act'] == 'goods_num') {
+    print_r($_REQUEST);exit;
+    $depart_list = get_department();
     $brand_list = get_brand_id_name(true);
     // 单品销量
     $sales_rank = sales_rank();
@@ -184,6 +186,7 @@ elseif ($_REQUEST['act'] == 'goods_num') {
 
     $smarty->assign('rank', $sales_rank['sales_order_data']);
     $smarty->assign('platform_list', $platform_list);
+    $smarty->assign('depart_list',$depart_list);
 
     $smarty->assign('curr_title', '产品销量排行');
     //$smarty->assign('num', sprintf('（共%d条记录）', $sales_rank['record_count']));

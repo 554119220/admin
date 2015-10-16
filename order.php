@@ -2422,7 +2422,7 @@ elseif ($_REQUEST['act'] == 'shipping_done') {
                 $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users').
                     " SET customer_type=IF(customer_type<>1,2,1) WHERE user_id={$user['user_id']}";
                 $GLOBALS['db']->query($sql_update);
-                file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'成交顾客转到已购'.PHP_EOL.$sql_update.PHP_EOL,FILE_APPEND);
+                file_put_contents('../batch_user.log',date('Y-m-d H:i:s').$_SESSION['admin_name'].'成交顾客转到已购'.PHP_EOL.$sql_update.PHP_EOL,FILE_APPEND);
             }
 
             $res['timeout'] = 2000;
@@ -2518,7 +2518,7 @@ elseif ($_REQUEST['act'] == 'do_returns') {
             if ($deal_order_number <= 0) {
                 $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET customer_type=IF(customer_type<>1,2,1) WHERE user_id=$user_id";
                 $GLOBALS['db']->query($sql_update);
-                file_put_contents('../batch_user.log',date('Y-m-d H:i:s').'申请退货'.PHP_EOL.$sql.PHP_EOL,FILE_APPEND);
+                file_put_contents('../batch_user.log',date('Y-m-d H:i:s').$_SESSION['admin_name'].'申请退货'.PHP_EOL.$sql_update.PHP_EOL,FILE_APPEND);
             }
         } else {
             $res['message'] = '申请退货失败，请稍后再试！';
@@ -3654,7 +3654,7 @@ elseif($_REQUEST['act'] == 'deal_flush_order'){
                     }
                 }
             }else{
-               $msg = $_LANG['unsyn_order'].'：'.$order_str; 
+                $msg = $_LANG['unsyn_order'].'：'.$order_str; 
             }
 
             if ($error_sn) {
@@ -6150,6 +6150,8 @@ function assign_user($order_id) {
             $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users')." SET admin_id=605 WHERE user_id={$order_amount['user_id']}".
                 ' AND role_id NOT IN ('.OFFLINE_SALE.',8,23) LIMIT 1';
         }
+
+        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').$_SESSION['admin_name'].'确认收货转1'.PHP_EOL.$sql_update.PHP_EOL,FILE_APPEND);
     }
 
     $GLOBALS['db']->query($sql_update);
@@ -6159,6 +6161,8 @@ function assign_user($order_id) {
             'u.group_id=a.group_id,u.assign_time=UNIX_TIMESTAMP() WHERE u.role_id NOT IN ('.OFFLINE_SALE.
             ",8) AND u.user_id={$order_amount['user_id']} AND a.user_id=u.admin_id";
         $GLOBALS['db']->query($sql_update);
+
+        file_put_contents('../batch_user.log',date('Y-m-d H:i:s').$_SESSION['admin_name'].'确认收货转2'.PHP_EOL.$sql_update.PHP_EOL,FILE_APPEND);
         $user_list[$admin_id]++;
         $mem->replace('users_counter', $user_list, false, $expire);
     }

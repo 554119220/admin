@@ -1037,6 +1037,10 @@ function searchOrder (obj)
     data += '&start_time='+start_time+'&end_time='+end_time+'&time_select='+time_select;
   }
 
+  if ($("#sel_opt").val()>0) {
+    data += '&sel_opt='+$("#sel_opt").val()+'&contact_opt='+$("#contact_opt").val();
+  }
+
 
   switch (keyfields) {
     case 'region':

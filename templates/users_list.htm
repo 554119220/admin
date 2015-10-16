@@ -1,4 +1,4 @@
-<div class="mt10 w830">
+<div class="mt10" style="width:83%">
     {if $full_page}
     {if $transfer eq 0}
     <div class="content-head">
@@ -83,6 +83,15 @@
                 <span id="keywordsArea">
                     <input type="text" value="{$kw}" id="keywords"/>
                 </span>
+                <select id="sel_opt">
+                	<option value="0">不限</option>
+                	<option value="1">无</option>
+                	<option value="2">有</option>
+                </select>
+                <select id="contact_opt">
+                	<option value="1">QQ</option>
+                	<option value="2">微信</option>
+                </select>
                 <button value="{$file}.php?act={$act}&tag={$tag}&type={$type}" onclick="searchOrder(this)" class="b_submit">搜索</button>
             </div>
         </div>
