@@ -800,11 +800,30 @@ elseif ($_REQUEST['act'] == 'batch')
     sys_msg($_LANG['batch_handle_ok'], 0, $lnk);
 }
 
+//浏览商品话述，详情，卖点
+elseif('goods_article_all' == $_REQUEST['act']){
+    //把商品的详情和文章保存到客户端2天
+    $goods_sn = intval($_REQUEST['goods_sn']); 
+    if ($goods_sn) {
+        $sql = 'SELECT content,article_type FROM '.$GLOBALS['ecs']->table('article')
+            ." WHERE goods_sn=$goods_sn AND article_type IN(2,3,4)";
+        $articles = $GLOBALS['db']->getAll($sql);
+        $info = array();
+        foreach ($articles as &$v) {
+            $info[$v['article_type']] = $v['content'];
+        }
+
+        $smarty->assign('info',$info);
+    }
+
+    $smarty->display('goods_article_all.htm');
+}
+
 /* 把商品删除关联 */
 function drop_link_goods($goods_id, $article_id)
 {
     $sql = "DELETE FROM " . $GLOBALS['ecs']->table('goods_article') .
-            " WHERE goods_id = '$goods_id' AND article_id = '$article_id' LIMIT 1";
+        " WHERE goods_id = '$goods_id' AND article_id = '$article_id' LIMIT 1";
     $GLOBALS['db']->query($sql);
     create_result(true, '', $goods_id);
 }
@@ -814,9 +833,9 @@ function get_article_goods($article_id)
 {
     $list = array();
     $sql  = 'SELECT g.goods_id, g.goods_name'.
-            ' FROM ' . $GLOBALS['ecs']->table('goods_article') . ' AS ga'.
-            ' LEFT JOIN ' . $GLOBALS['ecs']->table('goods') . ' AS g ON g.goods_id = ga.goods_id'.
-            " WHERE ga.article_id = '$article_id'";
+        ' FROM ' . $GLOBALS['ecs']->table('goods_article') . ' AS ga'.
+        ' LEFT JOIN ' . $GLOBALS['ecs']->table('goods') . ' AS g ON g.goods_id = ga.goods_id'.
+        " WHERE ga.article_id = '$article_id'";
     $list = $GLOBALS['db']->getAll($sql);
 
     return $list;
@@ -850,17 +869,17 @@ function get_articleslist()
 
         /* 文章总数 */
         $sql = 'SELECT COUNT(*) FROM ' .$GLOBALS['ecs']->table('article'). ' AS a '.
-               'LEFT JOIN ' .$GLOBALS['ecs']->table('article_cat'). ' AS ac ON ac.cat_id = a.cat_id '.
-               'WHERE 1 ' .$where;
+            'LEFT JOIN ' .$GLOBALS['ecs']->table('article_cat'). ' AS ac ON ac.cat_id = a.cat_id '.
+            'WHERE 1 ' .$where;
         $filter['record_count'] = $GLOBALS['db']->getOne($sql);
 
         $filter = page_and_size($filter);
 
         /* 获取文章数据 */
         $sql = 'SELECT a.* , ac.cat_name '.
-               'FROM ' .$GLOBALS['ecs']->table('article'). ' AS a '.
-               'LEFT JOIN ' .$GLOBALS['ecs']->table('article_cat'). ' AS ac ON ac.cat_id = a.cat_id '.
-               'WHERE 1 ' .$where. ' ORDER by '.$filter['sort_by'].' '.$filter['sort_order'];
+            'FROM ' .$GLOBALS['ecs']->table('article'). ' AS a '.
+            'LEFT JOIN ' .$GLOBALS['ecs']->table('article_cat'). ' AS ac ON ac.cat_id = a.cat_id '.
+            'WHERE 1 ' .$where. ' ORDER by '.$filter['sort_by'].' '.$filter['sort_order'];
 
         $filter['keyword'] = stripslashes($filter['keyword']);
         set_filter($filter, $sql);

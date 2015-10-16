@@ -447,12 +447,12 @@
                 <summary>{$g.goods_name}  {$g.goods_number}×￥{$g.goods_price}</summary>
                 {foreach from=$g.goods_list item=o}
                 <p>
-                {if $g.knowlage_url}
-                <a title="商品详细信息" target="_blank" href="{$g.knowlage_url}"><strong>{$o.goods_name}
-                </strong></a>
-                {else}
-                <strong>{$o.goods_name}</strong>
-                {/if}
+                <a title="商品详细信息" target="_blank" href="article.php?act=goods_article_all&goods_sn={$o.goods_sn}"><strong>{$o.goods_name}</strong></a>
+                <!--{if $g.knowlage_url}-->
+                <!--<a title="商品详细信息" target="_blank" href="{$g.knowlage_url}"><strong>{$o.goods_name}</strong></a>-->
+                <!--{else}-->
+                <!--<strong>{$o.goods_name}</strong>-->
+                <!--{/if}-->
                 <wbr>（数量：{$o.goods_number}）
                 {$g.office_url}
                 </p>
@@ -460,13 +460,14 @@
                 </details>
                 {else}
                 <p>
-                {if $g.knowlage_url}
-                <a title="商品详细信息" target="_blank" href="{$g.knowlage_url}">
-                  <strong>{$g.goods_name}</strong>
-                </a>
-                {else}
-                  <strong>{$g.goods_name}</strong>
-                {/if}
+                <a title="商品详细信息" target="_blank" href="article.php?act=goods_article_all&goods_sn={$g.goods_sn}"><strong>{$g.goods_name}</strong></a>
+                <!--{if $g.knowlage_url}-->
+                <!--<a title="商品详细信息" target="_blank" href="{$g.knowlage_url}">-->
+                <!--  <strong>{$g.goods_name}</strong>-->
+                <!--</a>-->
+                <!--{else}-->
+                <!--  <strong>{$g.goods_name}</strong>-->
+                <!--{/if}-->
                 {$g.goods_number}×￥{$g.goods_price}
                 {$g.office_url}
                 </p>

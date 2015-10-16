@@ -6693,23 +6693,24 @@ function get_user_bmi($user_id){
     return $bmi;
 }
 
-//产品资料
+//购买记录中产品资料
 function goods_introduce(&$order_list){
-    $sql_select = 'SELECT id,good_sn,classid FROM '.$GLOBALS['ecs']->table('ecms_goods');
-    $ecms_goods = $GLOBALS['db']->getAll($sql_select);
-    $goods_sn   = array();
+    //$sql_select = 'SELECT id,good_sn,classid FROM '.$GLOBALS['ecs']->table('ecms_goods');
+    //$ecms_goods = $GLOBALS['db']->getAll($sql_select);
+    //$goods_sn   = array();
     foreach ($order_list as &$o) {
-        foreach ($o['goods_list'] as $k=>&$g) {
-            $goods_sn[] = &$g['goods_sn'];
-            foreach ($ecms_goods as $eg) {
-                if ($eg['good_sn'] == $g['goods_sn']) {
-                    $g['classid'] = $eg['classid'];
-                    $g['id'] = $eg['id'];
-                    $g['knowlage_url'] = "http://192.168.1.217/zhishi/e/action/ShowInfo.php?classid={$eg['classid']}&id={$eg['id']}";
-                }
-            }
-        }
+       foreach ($o['goods_list'] as $k=>&$g) {
+           $goods_sn[] = &$g['goods_sn'];
+           //foreach ($ecms_goods as $eg) {
+           //    if ($eg['good_sn'] == $g['goods_sn']) {
+           //        $g['classid'] = $eg['classid'];
+           //        $g['id'] = $eg['id'];
+           //        $g['knowlage_url'] = "http://192.168.1.217/zhishi/e/action/ShowInfo.php?classid={$eg['classid']}&id={$eg['id']}";
+           //    }
+           //}
+       }
     }
+    //print_r($order_list);exit;
     $goods_sn = array_unique($goods_sn);
     if ($goods_sn) {
         $str_goods = implode("','",$goods_sn);
