@@ -165,7 +165,6 @@ elseif ($_REQUEST['act'] == 'order_sales') {
 
 /* 产品销售排行 */
 elseif ($_REQUEST['act'] == 'goods_num') {
-    print_r($_REQUEST);exit;
     $depart_list = get_department();
     $brand_list = get_brand_id_name(true);
     // 单品销量
@@ -2095,6 +2094,7 @@ function sales_rank ($is_pagination = true) {
     $filter['sort_by']    = empty($_REQUEST['sort_by'])    ? 'goods_num' : trim($_REQUEST['sort_by']);
     $filter['sort_order'] = empty($_REQUEST['sort_order']) ? 'DESC'      : trim($_REQUEST['sort_order']);
     $filter['platform']   = empty($_REQUEST['platform'])   ? '' : intval($_REQUEST['platform']);
+    $filter['depart_id']   = empty($_REQUEST['depart_id'])   ? '' : intval($_REQUEST['depart_id']);
 
     $config = report_statistics_limit(1); // 报表统计范围
     if ($config['statistics_date_limit'] > 0 && $config['offset_month'] > 0 && (empty($filter['start_time']) || empty($filter['end_time']))) {
@@ -2130,6 +2130,16 @@ function sales_rank ($is_pagination = true) {
         }
     } else {
         $where .= " AND oi.admin_id={$_SESSION['admin_id']} ";
+    }
+
+    //按部门查看产品销量
+    if ($filter['depart_id']) {
+        $where = "depart_id={$filter['depart_id']}";
+        $role_list = get_role($where);
+        $list = array();
+        foreach ($role_list as &$v) {
+            $list[] = $v['role_id'];
+        }
     }
 
 

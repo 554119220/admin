@@ -1795,7 +1795,7 @@ function salesStats (obj) {
  */
 function salesStatsResponse (res)
 {
-  var tableObj = document.getElementById(res.act);
+  //var tableObj = document.getElementById(res.act);
   //tableObj.innerHTML = res.main;
   main = document.getElementById('main');
   main.innerHTML = res.main;
