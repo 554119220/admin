@@ -17,10 +17,15 @@ a:active {color:#EB8A3D; text-decoration:underline}
 .rgt {float:right}
 .f20 {font-size:20px}
 .f30 {font-size:30px}
+.w860{width:860px}
+.tr{text-align:right;}
 .bold {font-weight:bolder}
 /* 显示与隐藏 */
 .show {display:block}
+.tc{text-align:center}
+.tl{text-align:left}
 .hide {display:none}
+.index_trend{width:489px;border:1px solid #000;}
 
 /* 头部样式 */
 .sys {height:10px; line-height:10px; padding:10px 20px 7px 20px}
@@ -80,4 +85,6 @@ a:active {color:#EB8A3D; text-decoration:underline}
 /*======================================定义全局样式区 end=========================================*/
 input[type=url] { width:230px;}
 
-.ul-nav li{float:left;margin-left:6px;}
+.ul-nav li{float:left;margin-left:6px;border:1px solid #ccc;padding:5px;margin-bottom:5px;}
+.ul-nav li a{color:#232323}
+.nav-current{font-weight:bold;}

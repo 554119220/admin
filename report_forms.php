@@ -186,6 +186,9 @@ elseif ($_REQUEST['act'] == 'goods_num') {
     $smarty->assign('rank', $sales_rank['sales_order_data']);
     $smarty->assign('platform_list', $platform_list);
     $smarty->assign('depart_list',$depart_list);
+    if ($_REQUEST['depart_id']) {
+        $smarty->assign('depart_id',$_REQUEST['depart_id']);
+    }
 
     $smarty->assign('curr_title', '产品销量排行');
     //$smarty->assign('num', sprintf('（共%d条记录）', $sales_rank['record_count']));
@@ -2075,7 +2078,47 @@ elseif('user_service_stats' == $_REQUEST['act']){
     die($json->encode($res));
 }
 
+//顾客分析之有无QQ，微信，旺旺
+elseif ('user_analyse' == $_REQUEST['act']){
+    $smarty->assign('role_id',$_REQUEST['role_id']);
+    $list = analyse_user_contact();
+    $smarty->assign('role_list', get_role_customer(' AND role_id IN('.MEMBER_SALE.')'));
+    $smarty->assign('list',$list);
+    $res['main'] = $smarty->fetch('user_analyse_stats.htm');
+    die($json->encode($res));
+}
+//顾客分析图表
+elseif ('user_analyse_report' == $_REQUEST['act']){
 
+    $role_list = get_role_list('',true,' AND role_id IN('.SALE.')');
+    $sel_opt   = array('不限','有','无');
+    $item_list = array('所有','QQ','微信');
+    $smarty->assign('admin_list',get_admin_tmp_list()); 
+    $smarty->assign('customer_type',get_customer_type('',true));
+    $smarty->assign('sel_opt',$sel_opt);
+    $smarty->assign('item_list',$item_list);
+    $smarty->assign('role_list',$role_list);
+    $res['main'] = $smarty->fetch('user_analyse.htm');
+    die($json->encode($res));
+}
+
+elseif('act_user_analyse' == $_REQUEST['act']){
+    $analyse_result = analyse_user('contact');
+    die($json->encode($analyse_result));
+}
+
+elseif('sale_trend' == $_REQUEST['act']){
+    $depart_id = isset($_REQUEST['depart_id']) ? intval($_REQUEST['depart_id']) : 0;
+    $role_id = isset($_REQUEST['role_id']) ? intval($_REQUEST['role_id']) : 0;
+    $start_time = strtotime(date('Y-m-01 00:00:00'));
+    $end_time = strtotime(date('Y-m-t 23:59:59'));
+
+    if ($role_id) {
+        $where = " AND role_id=$platform";
+    }
+    $sql = 'SELECT SUM(final_amount) amount FROM '.$GLOBALS['ecs']->table('order_info');
+    $sql_where = " WHERE add_time BETWEEN {$start_time} AND {$end_time} AND order_status IN (5,1) AND shipping_status<>3 AND order_type<>1 AND order_type<100 ";
+}
 /*------------------------------------------------------ */
 //--排行统计需要的函数
 /*------------------------------------------------------ */
@@ -2134,14 +2177,14 @@ function sales_rank ($is_pagination = true) {
 
     //按部门查看产品销量
     if ($filter['depart_id']) {
-        $where = "depart_id={$filter['depart_id']}";
-        $role_list = get_role($where);
+        $role_condition = "depart_id={$filter['depart_id']}";
+        $role_list = get_role($role_condition);
         $list = array();
         foreach ($role_list as &$v) {
             $list[] = $v['role_id'];
         }
+        $where .= " AND oi.platform IN(".implode(',',$list).') ';
     }
-
 
     if (isset($_REQUEST['package'])) {
         $order_type = ' AND og.goods_sn LIKE "%\_%" ';
@@ -3046,7 +3089,6 @@ function user_stats2() {
     foreach ($section_total as &$val) {
         $val['total'] = array_sum($val);
     }
-    //print_r($section_total);exit;
     return array('total' => $user_total, 'section' => $section_total);
 }
 
@@ -4728,4 +4770,96 @@ function report_authority(&$status,&$refund_where,&$trans_role_list){
     }
 
     return $stats_list;
+}
+
+function analyse_user($opt){
+    switch($opt){
+    case 'contact':
+        $sel_opt = intval($_REQUEST['sel_opt']);
+        $item_opt = intval($_REQUEST['item_opt']);
+        $customer_type = intval($_REQUEST['customer_type']);
+        $where = ' WHERE 1 ';
+        if ($item_opt) {
+            $operator = $sel_opt == 1 ? '<>' : '=';  
+            $field = $item_opt == 1 ? 'qq' : 'wechat';  
+            $res['title'] = $sel_opt == 1 ? "有{$field}顾客" : "无{$field}顾客";
+            $where .= " AND $field$operator'' ";
+            $sql = 'SELECT r.role_name,COUNT(*) count FROM '.$GLOBALS['ecs']->table('users')
+                .' u LEFT JOIN '.$GLOBALS['ecs']->table('role').' r ON u.role_id=r.role_id';
+            $append = ' AND u.role_id IN('.OFFLINE_SALE.')'
+                .' AND u.customer_type NOT IN(5,6,7) GROUP BY u.role_id ORDER BY count DESC';
+            $result = $GLOBALS['db']->getAll($sql.$where.$append);
+            //$no_qq = $GLOBALS['db']->getAll($sql.$where.$append);
+            foreach ($result as $v) {
+                $data_name[] = $v['role_name'];
+                $data_detail[] = array('value'=>$v['count'],'name'=>$v['role_name']);  
+            }
+
+            $res['max'] = $result[0]['count'];
+            $res['data1'] = $data_name;
+            $res['data2'] = $data_detail;
+        }else{
+            $res = false;
+        }
+    }
+    return $res;
+}
+
+//顾客分析有无联系方式
+function analyse_user_contact(){
+    $role_id    = isset($_REQUEST['role_id']) ? intval($_REQUEST['role_id']) : 0;
+    if (!$role_id) {
+        $role_id = OFFLINE_SALE;
+    }
+    $admin_list = get_admin_tmp_list($role_id);
+    $where      = " WHERE 1 ";
+    $append     = " AND customer_type NOT IN(4,5,6)";
+    $sql        = 'SELECT admin_id,count(*) count FROM '.$GLOBALS['ecs']->table('users');
+    $where .= " AND role_id IN($role_id)";
+    $sql .= $where;
+    $group_by = ' GROUP BY admin_id ORDER BY admin_id ASC';
+    $arr['total'] = $GLOBALS['db']->getAll($sql." $append $group_by");
+    $arr['has_qq']= $GLOBALS['db']->getAll($sql." AND qq<>'' $aqqend ".$group_by);
+    $arr['no_qq'] = $GLOBALS['db']->getAll($sql." AND qq='' $append ".$group_by);
+    $arr['has_wechat'] = $GLOBALS['db']->getAll($sql." AND wechat<>'' $append ".$group_by);
+    $arr['no_wechat'] = $GLOBALS['db']->getAll($sql." AND wechat='' $append ".$group_by);
+    foreach ($arr as &$v) {
+       $v = optimize_array($v); 
+    }
+    unset($v);
+    $total = array(
+        'user_id'    => 'total',
+        'user_name'  => '总计',
+        'total'      => 0,
+        'has_qq'     => 0,
+        'no_qq'      => 0,
+        'has_wechat' => 0,
+        'no_wechat'  => 0,
+    );
+    foreach ($admin_list as &$v) {
+        $v['total']      = $arr['total'][$v['user_id']];
+        $v['has_qq']     = $arr['has_qq'][$v['user_id']];
+        $v['no_qq']      = $arr['no_qq'][$v['user_id']];
+        $v['has_wechat'] = $arr['has_wechat'][$v['user_id']];
+        $v['no_wechat']  = $arr['no_wechat'][$v['user_id']];
+
+        $total['total']     += $v['total'];
+        $total['has_qq']     += $v['has_qq'];
+        $total['no_qq']      += $v['no_qq'];
+        $total['has_wechat'] += $v['has_wechat'];
+        $total['no_wechat']  += $v['no_wechat'];
+    }
+    
+
+    array_push($admin_list,$total);
+
+    return $admin_list;
+}
+
+function optimize_array($arr){
+    foreach ($arr as $v) {
+        $res[$v['admin_id']] = $v['count'];
+    }
+    unset($v);
+    return $res;
 }

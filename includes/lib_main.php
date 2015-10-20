@@ -989,14 +989,22 @@ function get_from_where()
 /**
  * 获取顾客类型
  */
-function get_customer_type($str = '') {
+function get_customer_type($str = '',$single=false) {
     if ($str) {
         $sql = 'SELECT type_name,type_id FROM '.$GLOBALS['ecs']->table('customer_type').
             " WHERE available>0 AND type_id IN ($str) ORDER BY sort ASC";
     } else {
         $sql = 'SELECT * FROM '.$GLOBALS['ecs']->table('customer_type').' WHERE available>0 ORDER BY sort ASC';
     }
-    return $GLOBALS['db']->getAll($sql);
+    $res =  $GLOBALS['db']->getAll($sql);
+    if ($res && $single) {
+        foreach ($res as $v) {
+            $arr[$v['type_id']] = $v['type_name']; 
+        }
+        $res = $arr;
+    }
+
+    return $res;
 }
 
 
@@ -1413,7 +1421,10 @@ function get_admin_tmp_list ($role = 0)
         }
         $sql .= " AND role_id IN($role_id)";
     } else {
-        $sql .= ' AND role_id IN ('.SALE.') ';
+        if (!$role) {
+            $role = SALE;
+        }
+        $sql .= ' AND role_id IN ('.$role.') ';
     }
     $admin_list = $GLOBALS['db']->getAll($sql.' ORDER BY convert(user_name using gbk) ASC');
     return $admin_list;
@@ -1833,4 +1844,3 @@ function get_depart_role($role_id,$type='string'){
     }
     return $list;
 }
-

@@ -818,3 +818,6 @@ function get_index_role(){
     $platform_list = $GLOBALS['db']->getAll($sql_select);
     return $platform_list;
 }
+
+    $sql_where = " WHERE add_time BETWEEN {$filter['start_time']} AND {$filter['end_time']} AND order_status IN (5,1) AND shipping_status<>3 AND order_type<>1 AND order_type<100 ";
+    $sql_platform = '';

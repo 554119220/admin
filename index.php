@@ -61,7 +61,7 @@ if ($_REQUEST['act'] == '')
         $smarty->assign('stats_info',$stats_info);         //销量排行
         $smarty->assign('public_notice',$public_notice);  //公告
         //$smarty->assign('commemoration_list',get_commemoration()); //顾客记念日
-        $smarty->assign('sale_alarm_list',get_sale_alarm_list());  //销量警报
+        //$smarty->assign('sale_alarm_list',get_sale_alarm_list());  //销量警报
     }
 
     $date_status = intval($_REQUEST['date_status']);
@@ -81,12 +81,15 @@ if ($_REQUEST['act'] == '')
         $index_role = company_rule($role_id);              //公司规章
         $smarty->assign('nature_stats_index',$smarty->fetch('nature_stats_index.htm'));
         $smarty->assign('index_role',$index_role);
-        $smarty->assign('role_list',get_role_list());
+        $smarty->assign('role_list',get_role_list(0,'role_id,role_name',' AND depart_id>0'));
+        $smarty->assign('depart_list',get_department('',false,true));
         $smarty->assign('left',$smarty->fetch('company_rule.htm'));
         $smarty->assign('index_stock_alarm_div',$smarty->fetch('index_stock_alarm.htm'));
         $smarty->assign('index_public_notice',$smarty->fetch('index_public_notice.htm'));
+        $smarty->assign('index_sale_trend',$smarty->fetch('index_sale_trend.htm')); //销量趋势
+        //$smarty->assign('index_sale_alarm_div',$smarty->fetch('index_sale_alarm.htm'));
         //$smarty->assign('commemoration',$smarty->fetch('commemoration.htm'));
-        $smarty->assign('index_sale_alarm_div',$smarty->fetch('index_sale_alarm.htm'));
+        //$smarty->assign('index_sale_alarm_div',$smarty->fetch('index_sale_alarm.htm'));
         $smarty->assign('spread_activity',index_spread_activity());
         $smarty->assign('spread_activity_div',$smarty->fetch('index_spread_activity.htm'));
     }

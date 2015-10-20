@@ -129,7 +129,7 @@ function markFlushOrder(obj){
   }
 }
 
-function markFlushOrder(obj){
+function justMarkFlushOrder(obj){
   var platform = obj.elements['platform'].value;
   var goodsSn = obj.elements['goods_sn'].value;
   var price = obj.elements['price'].value;

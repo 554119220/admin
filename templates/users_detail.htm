@@ -27,9 +27,9 @@
       <table cellspacing="0" cellpadding="0" border="0">
         <tr>
           <th align="right"><font color="red">*</font>姓名 ：</th>
-          <td width="100">{$user.user_name}<button value="users.php?act=edit&info=user_name&id={$user.user_id}&type=text" title="修改姓名" onclick="sendEditInfo(this)"></button></td>
+          <td width="120">{$user.user_name}<button value="users.php?act=edit&info=user_name&id={$user.user_id}&type=text" title="修改姓名" onclick="sendEditInfo(this)"></button></td>
           <th align="right"><font color="red">*</font>性别：</th>
-          <td width="100">{if $user.sex eq 1}男{elseif $user.sex eq 2}女{elseif $user.sex eq 0}不详{/if}<button value="users.php?act=edit&info=sex&id={$user.user_id}&type=radio" title="修改性别" onclick="sendEditInfo(this)"></button></td>
+          <td width="120">{if $user.sex eq 1}男{elseif $user.sex eq 2}女{elseif $user.sex eq 0}不详{/if}<button value="users.php?act=edit&info=sex&id={$user.user_id}&type=radio" title="修改性别" onclick="sendEditInfo(this)"></button></td>
           <th align="right">电话：</th>
           <td>
             {if $user.home_phone || $contact_list.tel}
@@ -103,6 +103,7 @@
             <th>旺旺：</th>
             <td>
               {if $user.aliww}<a target="_blank" href="http://www.taobao.com/webww/ww.php?ver=3&touid={$user.aliww}&siteid=cntaobao&status=2&charset=utf-8" title="{$user.aliww}"><img border="0" src="http://amos.alicdn.com/realonline.aw?v=2&uid={$user.aliww}&site=cntaobao&s=2&charset=utf-8" alt="{$user.aliww}" /></a>{/if}
+              {$user.aliww}
               <button value="users.php?act=edit&info=aliww&id={$user.user_id}&type=text" title="修改旺旺" onclick="sendEditInfo(this)"></button>
             </td>
             <th>QQ：</th>
@@ -682,7 +683,7 @@
                     <td><input type="text" name="shipping_fee" id="shipping_fee" value="0" onchange="calcOrderAmount()"/></td>
                     <th>商品总额</th>
                     <td>
-                      <input type="text" name="goods_amount" value="0" disabled id="goods_amount" onchange="calcOrderAmount()"
+                      <input type="text" name="goods_amount" value="0" id="goods_amount" onchange="calcOrderAmount()"
                       style="border:0px;border-bottom: 1px solid #ccc;font-weight:bolder;background:none;"/>
                     </td>
                     <th>订单总价</th><td id="order_amount"></td>
