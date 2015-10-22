@@ -240,27 +240,84 @@ elseif ($_REQUEST['act'] == 'goods_num') {
 }
 //产品销量明细排行
 elseif($_REQUEST['act'] == 'goods_sale_rank'){
-   $sel_item = $_REQUEST['sel_item'] ? intval($_REQUEST['sel_item']) : 2; 
-   $goods_sn = intval($_REQUEST['goods_sn']);
+   $sel_item   = is_numeric($_REQUEST['sel_item']) ? intval($_REQUEST['sel_item']) : 2;
+   $goods_sn   = mysql_real_escape_string($_REQUEST['goods_sn']);
    $start_time = strtotime($_REQUEST['start_time']);
-   $end_time = strtotime($_REQUEST['end_time']);
-   $where = " WHERE oi.order_status IN(5,1) AND oi.shipping_status<>3 AND og.goods_sn='$goods_sn' AND oi.add_time BETWEEN $start_time AND $end_time ";
+   $end_time   = strtotime($_REQUEST['end_time']);
+   $platform   = intval($_REQUEST['platform']);
+   $depart_id  = intval($_REQUEST['depart_id']);
 
-   switch($sel_item){
-   case 1 :
-       break;
-   case 2:
-       $group_by =
-       break;
-   case 3:
-       break;
+   //不包含待发货
+   $where = " WHERE oi.order_id=og.order_id AND oi.order_status IN(5,1) AND oi.shipping_status IN(1,2,4) AND oi.add_time BETWEEN $start_time AND $end_time AND oi.order_type IN (2,3,4,6,100) AND og.goods_sn='$goods_sn' ";
+   if ($platform) {
+       $where .= " AND oi.platform=$platform ";
    }
-   $sql = 'SELECT og.goods_name,SUM(og.goods_number) goods_num,'.
+
+   if ($depart_id) {
+       $platform = get_role_by_depart($depart_id,true);
+       $where .= " AND oi.platform IN($platform) ";
+   }
+
+   // @sel_item 1 部门 2 小组 3 员工
+   if ($sel_item == 3) {
+       $table = 'admin_user';
+       $field = ',t.user_name name';
+       $where .= ' AND t.user_id=oi.admin_id ';
+       $group_by = 'oi.admin_id, ';
+   }else{
+       $table = 'role';
+       $field = ',t.role_name name';
+       if ($sel_item == 1) {
+           $field .= ",t.depart_id";
+       }
+       $where .= ' AND t.role_id=oi.platform ';
+       $group_by = 'oi.platform,';
+   }
+   
+   $sql = 'SELECT og.goods_name,SUM(og.goods_number) goods_num,count(oi.order_id) order_num,'.
        'SUM(og.goods_number*og.goods_price) turnover %s FROM '.$GLOBALS['ecs']->table('order_goods').' og, '.
-       $GLOBALS['ecs']->table('order_info')." oi $where %s GROUP BY og.goods_sn ";
+       $GLOBALS['ecs']->table('order_info').' oi, '.$GLOBALS['ecs']->table($table)
+       ." t $where GROUP BY %s og.goods_sn ORDER BY goods_num DESC";
+   $rank_status = $GLOBALS['db']->getAll(sprintf($sql, $field,$group_by));
+   if ($rank_status) {
+       $res['goods_name'] = $rank_status[0]['goods_name'];
+       foreach ($rank_status as &$v) {
+           $v['ave'] = sprintf("%.2f",$v['turnover']/$v['goods_num']);
+       }
+       //部门
+       if ($sel_item == 1) {
+           unset($v);
+           $depart_list = get_department();
+           foreach ($depart_list as $ky=>&$v) {
+               $v['name'] = $v['depart_name'];
+              foreach ($rank_status as $k=>$r) {
+                  if ($v['depart_id'] == $r['depart_id']) {
+                      $v['goods_num'] += $r['goods_num'];
+                      $v['order_num'] += $r['order_num'];
+                      $v['turnover'] += $r['turnover'];
+                  }
+              } 
+               if ($v['goods_num'] > 0 ) {
+                   $v['turnover'] = sprintf("%.2f",$v['turnover']);
+                   $v['ave'] = sprintf("%.2f",$v['turnover']/$v['goods_num']);
+                   $sort[] = $v['turnover'];
+               }else{
+                   unset($depart_list[$ky]);
+               }
+           }
+           if ($depart_list) {
+               array_multisort($sort,SORT_DESC,$depart_list);
+               $rank_status = $depart_list;
+           }
+       }
+   }
 
-   $sales_order_data = $GLOBALS['db']->getAll(sprintf($sql, $order_type." AND oi.order_type IN (2,3,4,6,100)"));
-
+   $smarty->assign('sel_item',$sel_item);
+   $smarty->assign('sel_item_list',array(1=>'部门','小组','员工'));
+   $smarty->assign('rank_status',$rank_status);
+   $res['goods_sn'] = $goods_sn;
+   $res['main'] = $smarty->fetch('goods_sale_rank.htm');
+   die($json->encode($res));
 }
 
 /* 销售统计 */
@@ -409,9 +466,9 @@ elseif ($_REQUEST['act'] == 'buy_back_stats') {
         $admin[$val['user_id']] = $val['user_name'];
     }
 
-    $smarty->assign('buy_back', $buy_back);
-    $smarty->assign('platform', $platform);
-    $smarty->assign('admin_list', $admin);
+    $smarty->assign('buy_back',    $buy_back);
+    $smarty->assign('platform',    $platform);
+    $smarty->assign('admin_list',  $admin);
 
     if (!isset($_REQUEST['start_time'], $_REQUEST['end_time'])) {
         $smarty->assign('show_all', 1);

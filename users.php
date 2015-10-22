@@ -1426,7 +1426,7 @@ elseif ($_REQUEST['act'] == 'advance_batch') {
     $buy_startTime      = strtotime($_REQUEST['buy_startTime']);
     $buy_endTime        = strtotime($_REQUEST['buy_endTime']);
     $add_startTime      = strtotime($_REQUEST['add_startTime']);
-    $add_endTime        = strtotime($_REQUEST['add_startTime']);
+    $add_endTime        = strtotime($_REQUEST['add_endTime']);
     $max_service_time   = strtotime($_REQUEST['max_service_time']);
     $adv_number         = intval($_REQUEST['adv_number']);
 
@@ -1446,7 +1446,7 @@ elseif ($_REQUEST['act'] == 'advance_batch') {
     }
 
     if(!empty($add_startTime) && !empty($add_endTime)) {
-        $where .= " AND add_time BETWEEN $buy_startTime AND $add_endTime";
+        $where .= " AND add_time BETWEEN $add_startTime AND $add_endTime";
     }
 
     if(!empty($buy_startTime) && !empty($buy_endTime)) {

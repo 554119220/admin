@@ -1,31 +1,35 @@
-<table border="0" cellpadding="0" cellspacing="0" class="wu_table_list mt10 w248">
+<table border="0" cellpadding="0" cellspacing="0" class="wu_table_list wu_rb_border border tr_hover mt10 w400">
   <thead>
     <tr>
-      <th colspan="4">
+      <th colspan="6">
         {foreach from=$sel_item_list key=k item=v}
         <label><input type="radio" value="{$k}" name="sel_item"
           onclick="getGoodsSaleRank(this)"
-          {if $sel_item eq $k || $k eq 1}checked{/if}> {$v}</label>
+          {if $sel_item eq $k}checked{/if}> {$v}</label>
         {/foreach}
-        <!--<label><input type="radio" value="1" name="sel_item" {if $sel_item eq 1 || !$sel_itme}checked{/if}> 部门</label>-->
-        <!--<label><input type="radio" value="2" name="sel_item" {if $sel_item eq 2}checked{/if}> 小组</label>-->
         <!--<label><input type="radio" value="3" name="sel_item" {if $sel_item eq 3}checked{/if}> 员工</label>-->
-        <input type="hidden" id="goods_sn" value="00"/>
+        <input type="hidden" id="goods_sn" value=""/>
       </th>
     </tr>
+    <tr><th colspan="6" id="goods_name"></th></tr>
     <tr>
-      <th>排名</th>
-      <th>姓名</th>
-      <th>销量</th>
-      <th>均价</th>
+      <th width="10%">排名</th>
+      <th width="24%">姓名</th>
+      <th width="15%">卖出</th>
+      <th width="15%">订单数</th>
+      <th width="20%">总额</th>
+      <th width="15%">均价</th>
     </tr>
   </thead>
   <tbody>
-    {foreach from=$rank_status item=v}
+    {foreach from=$rank_status item=v name=i}
     <tr>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td>{$smarty.foreach.i.iteration}</td>
+      <td>{$v.name}</td>
+      <td>{$v.goods_num}</td>
+      <td>{$v.order_num}</td>
+      <td>{$v.turnover}</td>
+      <td>{$v.ave}</td>
     </tr>
     {/foreach}
   </tbody>

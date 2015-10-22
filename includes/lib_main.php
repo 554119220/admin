@@ -1848,6 +1848,19 @@ function get_department($where='',$change=false,$single=false){
     return $list;
 }
 
+function get_role_by_depart($depart_id,$str=false){
+    $sql = "SELECT role_id,role_name FROM ".$GLOBALS['ecs']->table('role')." WHERE depart_id=$depart_id";
+    $role_list = $GLOBALS['db']->getAll($sql);
+    if ($str && $role_list) {
+        foreach ($role_list as $v) {
+            $arr[] = $v['role_id'];
+        }
+        $role_list = implode(',',$arr);
+    }
+
+    return $role_list;
+}
+
 //获取顶级部门下的下属部门
 //return string or array
 function get_depart_role($role_id,$type='string'){

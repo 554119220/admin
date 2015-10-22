@@ -4,7 +4,6 @@
   <div class="finder-title">{$curr_title}<font>{$num}</font></div>
   <div>
     <ul class="ul-nav">
-      <li style=“none> 按部门</li>
       {foreach from=$depart_list item=v}
       <li>
       <a href="{$filename}.php?act={$act}&depart_id={$v.depart_id}" 
@@ -26,6 +25,8 @@
         {/foreach}
       </ul>
       <input type="hidden" id="cache_data" value="{$cache_data}"/>
+      <input type="hidden" id="depart_id" value="{$depart_id}"/>
+      <input type="hidden" id="platform" value="{$platform}"/>
     </div>
   </div>
 
@@ -46,16 +47,16 @@
   <div id="goods_num">
     {/if}
     <div class="flt mr8">
-      <table border="0" id="person_style" cellpadding="0" cellspacing="0" class="wu_table_list wu_rb_border w780 mt10 border">
+      <table border="0" id="person_style" cellpadding="0" cellspacing="0" class="wu_table_list wu_rb_border w650 mt10 border">
         <thead>
           <tr>
-            <th>序号</th>
-            <th>货号</th>
-            <th width="28%">商品名称</th>
-            <th>日常销量</th>
-            <th>套餐销量(不计金额)</th>
-            <th>活动销量</th>
-            <th>赠送数量</th>
+            <th width="5%">序号</th>
+            <th width="11%">货号</th>
+            <th width="38%">商品名称</th>
+            <th>日常</th>
+            <th>套餐</th>
+            <th>活动</th>
+            <th>赠送数</th>
             <th>总销量</th>
             <!-- th>总销售额</th-->
             <th>均价</th>
@@ -66,7 +67,7 @@
           <td>{$v.index}</td>
           <td>{$v.goods_sn}</td>
           <td style="text-align:left">
-            <label class="btn_new" onclick="getGoodsSaleRank({$v.goods_sn})">
+            <label class="btn_new" onclick="getGoodsSaleRank('{$v.goods_sn}')">
               {$v.goods_name}
             </label>
            </td>

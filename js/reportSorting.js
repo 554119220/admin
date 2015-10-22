@@ -371,107 +371,22 @@ function userAnalyse(role_id){
 //产品销量报表
 function getGoodsSaleRank(para){
   var goodsSn = '';
+
   goodsSn = typeof(para) == 'string' ? para : $("#goods_sn").val();
-  var selOpt = $("[name='sel_item']:checked").val();
-    
+  var selItem = $("[name='sel_item']:checked").val();
+
   var startTime = $("#start_time").val();
   var endTime = $("#end_time").val();
-  Ajax.call('report_forms.php?act=goods_sale_rank','goods_sn='+goodsSn+'&start_time='+startTime+'&end_time='+endTime,getGoodsSaleRankResp,'GET','JSON');
+  var departId = $("#depart_id").val();
+  var platform = $("#platform").val();
+  Ajax.call('report_forms.php?act=goods_sale_rank','goods_sn='+goodsSn+'&start_time='+startTime+'&end_time='+endTime+'&sel_item='+selItem+'&depart_id='+departId+'&platform='+platform,getGoodsSaleRankResp,'GET','JSON');
 }
 
 function getGoodsSaleRankResp(res){
-  
+  $("#goods_rank_slae_div").html(res.main);
+  $("#goods_sn").val(res.goods_sn);
+  $("#goods_name").html(res.goods_name);
 }
 
 function sale_trend(res){
-if (res) {
-    // 路径配置
-    require.config({
-      paths: {
-               //echarts: './js'
-               echarts: 'http://echarts.baidu.com/build/dist'
-             }
-    });
-
-    // 使用
-    require(
-        [
-        'echarts',
-        'echarts/chart/pie', // 使用柱状图就加载bar模块，按需加载
-        'echarts/chart/funnel',
-        ],
-        function (ec) {
-          var myChart = ec.init(document.getElementById('analyse')); 
-option = {
-    tooltip : {
-        trigger: 'axis'
-    },
-    legend: {
-        data:['邮件营销','联盟广告','视频广告','直接访问','搜索引擎']
-    },
-    toolbox: {
-        show : true,
-        feature : {
-            mark : {show: true},
-            dataView : {show: true, readOnly: false},
-            magicType : {show: true, type: ['line', 'bar', 'stack', 'tiled']},
-            restore : {show: true},
-            saveAsImage : {show: true}
-        }
-    },
-    calculable : true,
-    xAxis : [
-        {
-            type : 'category',
-            boundaryGap : false,
-            data : ['周一','周二','周三','周四','周五','周六','周日']
-        }
-    ],
-    yAxis : [
-        {
-            type : 'value'
-        }
-    ],
-    series : [
-        {
-            name:'邮件营销',
-            type:'line',
-            stack: '总量',
-            data:[120, 132, 101, 134, 90, 230, 210]
-        },
-        {
-            name:'联盟广告',
-            type:'line',
-            stack: '总量',
-            data:[220, 182, 191, 234, 290, 330, 310]
-        },
-        {
-            name:'视频广告',
-            type:'line',
-            stack: '总量',
-            data:[150, 232, 201, 154, 190, 330, 410]
-        },
-        {
-            name:'直接访问',
-            type:'line',
-            stack: '总量',
-            data:[320, 332, 301, 334, 390, 330, 320]
-        },
-        {
-            name:'搜索引擎',
-            type:'line',
-            stack: '总量',
-            data:[820, 932, 901, 934, 1290, 1330, 1320]
-        }
-    ]
-};
-                    
-          
-
-          // 为echarts对象加载数据 
-          myChart.setOption(option); 
-        }
-    );
-  }
-  
 }
