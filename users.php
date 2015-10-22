@@ -6716,8 +6716,8 @@ function goods_introduce(&$order_list){
        }
     }
     //print_r($order_list);exit;
-    $goods_sn = array_unique($goods_sn);
     if ($goods_sn) {
+        $goods_sn = array_unique($goods_sn);
         $str_goods = implode("','",$goods_sn);
         $sql = 'SELECT goods_sn,office_url FROM '.$GLOBALS['ecs']->table('goods')
             ." WHERE goods_sn IN('$str_goods') AND office_url<>''";

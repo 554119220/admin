@@ -1670,6 +1670,27 @@ function curlPhone($phone, $exten) {
     curl_close($ch);
     return $result;
 }
+
+function crm_curl($url,$parameter){
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $parameter);
+    $result = curl_exec($ch);
+
+    //if () {
+    //    throw new Exception(curl_error($ch),0);
+    //} else {
+    //    $httpStatusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    //    echo $httpStatusCode;exit;
+    //    if (200 !== $httpStatusCode) {
+    //        //throw new Exception($data, $httpStatusCode);
+    //    }
+    //}
+    curl_close($ch);
+    return $result;   
+}
 /**
  * 验证号码及是否为市话
  */
@@ -1844,3 +1865,4 @@ function get_depart_role($role_id,$type='string'){
     }
     return $list;
 }
+

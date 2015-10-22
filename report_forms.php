@@ -170,7 +170,6 @@ elseif ($_REQUEST['act'] == 'goods_num') {
     // 单品销量
     $sales_rank = sales_rank();
 
-    //if (1 == $_SESSION['admin_id']) {
     // 套餐销量
     $_REQUEST['package'] = 1;
     $package_sales_rank  = sales_rank();
@@ -231,11 +230,37 @@ elseif ($_REQUEST['act'] == 'goods_num') {
         $smarty->assign('max_date', $max_date);
     }
 
+    $smarty->assign('sel_item_list',array(1=>'部门','小组','员工'));
     $smarty->assign('brand_id',$_REQUEST['brand_id']);
     $smarty->assign('brand_list',$brand_list);
     $res['act'] = $_REQUEST['act'];
+    $smarty->assign('goods_sale_rank',$smarty->fetch('goods_sale_rank.htm'));
     $res['main'] = $smarty->fetch('sales_rank.htm');
     die($json->encode($res));
+}
+//产品销量明细排行
+elseif($_REQUEST['act'] == 'goods_sale_rank'){
+   $sel_item = $_REQUEST['sel_item'] ? intval($_REQUEST['sel_item']) : 2; 
+   $goods_sn = intval($_REQUEST['goods_sn']);
+   $start_time = strtotime($_REQUEST['start_time']);
+   $end_time = strtotime($_REQUEST['end_time']);
+   $where = " WHERE oi.order_status IN(5,1) AND oi.shipping_status<>3 AND og.goods_sn='$goods_sn' AND oi.add_time BETWEEN $start_time AND $end_time ";
+
+   switch($sel_item){
+   case 1 :
+       break;
+   case 2:
+       $group_by =
+       break;
+   case 3:
+       break;
+   }
+   $sql = 'SELECT og.goods_name,SUM(og.goods_number) goods_num,'.
+       'SUM(og.goods_number*og.goods_price) turnover %s FROM '.$GLOBALS['ecs']->table('order_goods').' og, '.
+       $GLOBALS['ecs']->table('order_info')." oi $where %s GROUP BY og.goods_sn ";
+
+   $sales_order_data = $GLOBALS['db']->getAll(sprintf($sql, $order_type." AND oi.order_type IN (2,3,4,6,100)"));
+
 }
 
 /* 销售统计 */
@@ -2107,17 +2132,22 @@ elseif('act_user_analyse' == $_REQUEST['act']){
     die($json->encode($analyse_result));
 }
 
+//销量趋势
 elseif('sale_trend' == $_REQUEST['act']){
-    $depart_id = isset($_REQUEST['depart_id']) ? intval($_REQUEST['depart_id']) : 0;
-    $role_id = isset($_REQUEST['role_id']) ? intval($_REQUEST['role_id']) : 0;
+    $depart_id  = isset($_REQUEST['depart_id']) ? intval($_REQUEST['depart_id']) : 0;
+    $role_id    = isset($_REQUEST['role_id']) ? intval($_REQUEST['role_id']) : 0;
     $start_time = strtotime(date('Y-m-01 00:00:00'));
-    $end_time = strtotime(date('Y-m-t 23:59:59'));
+    $end_time   = strtotime(date('Y-m-t 23:59:59'));
 
     if ($role_id) {
         $where = " AND role_id=$platform";
     }
-    $sql = 'SELECT SUM(final_amount) amount FROM '.$GLOBALS['ecs']->table('order_info');
-    $sql_where = " WHERE add_time BETWEEN {$start_time} AND {$end_time} AND order_status IN (5,1) AND shipping_status<>3 AND order_type<>1 AND order_type<100 ";
+    $sql = 'SELECT SUM(final_amount) amount FROM '.$GLOBALS['ecs']->table('order_info').
+        " WHERE add_time BETWEEN {$start_time} AND {$end_time} AND $where AND order_status IN (5,1) AND shipping_status<>3 AND order_type<>1 AND order_type<100 ";
+    //$res = $GLOBALS['db']->getAll($sql);
+    $res = $sql;
+    echo $res;exit;
+    //die($json->encode($res));
 }
 /*------------------------------------------------------ */
 //--排行统计需要的函数
@@ -3071,7 +3101,7 @@ function user_stats2() {
     $ex_group = 'u.role_id,u.customer_type';
     $ex_field = 'u.role_id id ,r.role_name k';
     $ex_where = 'r.role_id=u.role_id';
-    //克服的顾客数量
+    //客服的顾客数量
     if (isset($_REQUEST['person']) && 1 == $_REQUEST['person']) {
         $table    = 'admin_user';
         $ex_group = 'u.admin_id,u.customer_type';
@@ -4811,49 +4841,53 @@ function analyse_user_contact(){
     if (!$role_id) {
         $role_id = OFFLINE_SALE;
     }
-    $admin_list = get_admin_tmp_list($role_id);
+    //$admin_list = get_admin_tmp_list($role_id);
     $where      = " WHERE 1 ";
     $append     = " AND customer_type NOT IN(4,5,6)";
     $sql        = 'SELECT admin_id,count(*) count FROM '.$GLOBALS['ecs']->table('users');
     $where .= " AND role_id IN($role_id)";
     $sql .= $where;
     $group_by = ' GROUP BY admin_id ORDER BY admin_id ASC';
-    $arr['total'] = $GLOBALS['db']->getAll($sql." $append $group_by");
+    $list = $GLOBALS['db']->getAll('SELECT admin_id,count(*) total,admin_name FROM '.$GLOBALS['ecs']->table('users')
+        ." WHERE role_id IN($role_id) $append $group_by");
     $arr['has_qq']= $GLOBALS['db']->getAll($sql." AND qq<>'' $aqqend ".$group_by);
-    $arr['no_qq'] = $GLOBALS['db']->getAll($sql." AND qq='' $append ".$group_by);
+    //$arr['no_qq'] = $GLOBALS['db']->getAll($sql." AND qq='' $append ".$group_by);
     $arr['has_wechat'] = $GLOBALS['db']->getAll($sql." AND wechat<>'' $append ".$group_by);
-    $arr['no_wechat'] = $GLOBALS['db']->getAll($sql." AND wechat='' $append ".$group_by);
+    //$arr['no_wechat'] = $GLOBALS['db']->getAll($sql." AND wechat='' $append ".$group_by);
     foreach ($arr as &$v) {
        $v = optimize_array($v); 
     }
     unset($v);
     $total = array(
         'user_id'    => 'total',
-        'user_name'  => '总计',
+        'admin_name'  => '总计',
         'total'      => 0,
         'has_qq'     => 0,
-        'no_qq'      => 0,
+        'qq_rate'      => 0,
         'has_wechat' => 0,
-        'no_wechat'  => 0,
+        'wechat_rate'  => 0,
     );
-    foreach ($admin_list as &$v) {
-        $v['total']      = $arr['total'][$v['user_id']];
-        $v['has_qq']     = $arr['has_qq'][$v['user_id']];
-        $v['no_qq']      = $arr['no_qq'][$v['user_id']];
-        $v['has_wechat'] = $arr['has_wechat'][$v['user_id']];
-        $v['no_wechat']  = $arr['no_wechat'][$v['user_id']];
+    foreach ($list as &$v) {
+        //echo $arr['total'][$v['user_id']];exit;
+        //$v['total']      = $arr['total'][$v['admin_id']];
+        $v['has_qq']     = $arr['has_qq'][$v['admin_id']];
+        $v['qq_rate']    = sprintf("%.2f",$v['has_qq']/$v['total'])*100;
+        $v['has_wechat'] = $arr['has_wechat'][$v['admin_id']];
+        $v['wechat_rate']  = sprintf("%.2f",$v['has_wechat']/$v['total'])*100;
 
         $total['total']     += $v['total'];
         $total['has_qq']     += $v['has_qq'];
-        $total['no_qq']      += $v['no_qq'];
+        //$total['no_qq']      += $v['no_qq'];
         $total['has_wechat'] += $v['has_wechat'];
-        $total['no_wechat']  += $v['no_wechat'];
+        //$total['no_wechat']  += $v['no_wechat'];
     }
-    
 
-    array_push($admin_list,$total);
+    $total['qq_rate'] = sprintf("%.2f",$total['has_qq']/$total['total'])*100;
+    $total['wechat_rate'] = sprintf("%.2f",$total['has_wechat']/$total['total'])*100;
 
-    return $admin_list;
+
+    array_push($list,$total);
+    return $list;
 }
 
 function optimize_array($arr){

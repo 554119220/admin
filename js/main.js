@@ -1799,7 +1799,6 @@ function salesStatsResponse (res)
   //tableObj.innerHTML = res.main;
   main = document.getElementById('main');
   main.innerHTML = res.main;
-
   init();
 }
 

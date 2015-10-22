@@ -45,36 +45,45 @@
 
   <div id="goods_num">
     {/if}
-    <table border="0" id="person_style" cellpadding="0" cellspacing="0" class="wu_table_list wu_rb_border w830 mt10 border c_b">
-      <thead>
-        <tr>
-          <th>序号</th>
-          <th>货号</th>
-          <th>商品名称</th>
-          <th>日常销量</th>
-          <th>套餐销量(不计金额)</th>
-          <th>活动销量</th>
-          <th>赠送数量</th>
-          <th>总销量</th>
-          <!-- th>总销售额</th-->
-          <th>均价</th>
+    <div class="flt mr8">
+      <table border="0" id="person_style" cellpadding="0" cellspacing="0" class="wu_table_list wu_rb_border w780 mt10 border">
+        <thead>
+          <tr>
+            <th>序号</th>
+            <th>货号</th>
+            <th width="28%">商品名称</th>
+            <th>日常销量</th>
+            <th>套餐销量(不计金额)</th>
+            <th>活动销量</th>
+            <th>赠送数量</th>
+            <th>总销量</th>
+            <!-- th>总销售额</th-->
+            <th>均价</th>
+          </tr>
+        </thead>
+        {foreach from=$rank item=v}
+        <tr{if $package_struct}{/if}>
+          <td>{$v.index}</td>
+          <td>{$v.goods_sn}</td>
+          <td style="text-align:left">
+            <label class="btn_new" onclick="getGoodsSaleRank({$v.goods_sn})">
+              {$v.goods_name}
+            </label>
+           </td>
+          <td>{$v.goods_num}</td>
+          <td>{$v.package_num}</td>
+          <td>{$v.promotion_num}</td>
+          <td>{$v.gift_num}</td>
+          <td>{$v.total_num}</td>
+          <!--td>{$v.turnover}</td-->
+          <td>{$v.wvera_price}</td>
         </tr>
-      </thead>
-      {foreach from=$rank item=v}
-      <tr{if $package_struct}{/if}>
-        <td>{$v.index}</td>
-        <td>{$v.goods_sn}</td>
-        <td style="text-align:left">{$v.goods_name}</td>
-        <td>{$v.goods_num}</td>
-        <td>{$v.package_num}</td>
-        <td>{$v.promotion_num}</td>
-        <td>{$v.gift_num}</td>
-        <td>{$v.total_num}</td>
-        <!--td>{$v.turnover}</td-->
-        <td>{$v.wvera_price}</td>
-      </tr>
-      {/foreach}
-    </table>
+        {/foreach}
+      </table>
+    </div>
+    <div class="flt" id="goods_rank_slae_div">
+      {$goods_sale_rank}
+    </div>
 
     <!-- 分页 -->
     {if $page_set}

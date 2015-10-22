@@ -25,19 +25,19 @@
         <tr id="sortByThis">
           <th id="rank">排 名</th>
           <th>客 服</th>
-          <th>顾客数量</th><th>有QQ</th><th>无QQ</th><th>有微信</th><th>无微信</th>
+          <th>顾客数量</th><th>有QQ</th><th>比例</th><th>有微信</th><th>比例</th>
         </tr>
       </thead>
       <tbody>
         {foreach from=$list item=val name=i}
         <tr{if !$smarty.foreach.i.last} group="{$val.group_id}" role="{$val.role_id}" admin="{$val.admin_id}" role_code='{$val.role_code}'{/if}>
           <th>{if !$smarty.foreach.i.last}{$smarty.foreach.i.iteration}{/if}</th>
-          <th>{$val.user_name}</th>
+          <th>{$val.admin_name}</th>
           <th title="">{if $val.total}{$val.total}{else}0{/if}</th>
           <th title="">{if $val.has_qq}{$val.has_qq}{else}0{/if}</th>
-          <th title="">{if $val.no_qq}{$val.no_qq}{else}0{/if}</th>
+          <th title="">{if $val.qq_rate}{$val.qq_rate}{else}0{/if}%</th>
           <th title="">{if $val.has_wechat}{$val.has_wechat}{else}0{/if}</th>
-          <th title="">{if $val.no_wechat}{$val.no_wechat}{else}0{/if}</th>
+          <th title="">{if $val.wechat_rate}{$val.wechat_rate}{else}0{/if}%</th>
         {/foreach}
       </tbody>
     </table>

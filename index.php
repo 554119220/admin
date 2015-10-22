@@ -78,6 +78,8 @@ if ($_REQUEST['act'] == '')
         $res = $smarty->fetch('index_publice_notice');
         die($json->encode($res));
     } else{
+        //销量趋势
+        $sale_trend = sale_trend();
         $index_role = company_rule($role_id);              //公司规章
         $smarty->assign('nature_stats_index',$smarty->fetch('nature_stats_index.htm'));
         $smarty->assign('index_role',$index_role);

@@ -819,5 +819,18 @@ function get_index_role(){
     return $platform_list;
 }
 
-    $sql_where = " WHERE add_time BETWEEN {$filter['start_time']} AND {$filter['end_time']} AND order_status IN (5,1) AND shipping_status<>3 AND order_type<>1 AND order_type<100 ";
-    $sql_platform = '';
+function sale_trend(){
+$depart_id  = isset($_REQUEST['depart_id']) ? intval($_REQUEST['depart_id']) : 0;
+    $role_id    = isset($_REQUEST['role_id']) ? intval($_REQUEST['role_id']) : 0;
+    $start_time = strtotime(date('Y-m-01 00:00:00'));
+    $end_time   = strtotime(date('Y-m-t 23:59:59'));
+
+    if ($role_id) {
+        $where = " AND role_id=$platform";
+    }
+    $sql = "SELECT SUM(final_amount) amount,FROM_UNIXTIME(add_time,'%Y-%m-%d') DT FROM ".$GLOBALS['ecs']->table('order_info').
+        " WHERE add_time BETWEEN {$start_time} AND {$end_time} $where AND order_status IN (5,1) AND shipping_status<>3 AND order_type<>1 AND order_type<100 GROUP BY DT ORDER BY DT ASC";
+
+    $trend = $GLOBALS['db']->getAll($sql);
+    return $trend;
+}
