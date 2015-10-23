@@ -282,7 +282,7 @@ elseif($_REQUEST['act'] == 'goods_sale_rank'){
    if ($rank_status) {
        $res['goods_name'] = $rank_status[0]['goods_name'];
        foreach ($rank_status as &$v) {
-           $v['ave'] = sprintf("%.2f",$v['turnover']/$v['goods_num']);
+           $v['ave'] = bcdiv($v['turnover'],$v['goods_num'],2);
        }
        //部门
        if ($sel_item == 1) {
@@ -299,7 +299,7 @@ elseif($_REQUEST['act'] == 'goods_sale_rank'){
               } 
                if ($v['goods_num'] > 0 ) {
                    $v['turnover'] = sprintf("%.2f",$v['turnover']);
-                   $v['ave'] = sprintf("%.2f",$v['turnover']/$v['goods_num']);
+                   $v['ave'] = bcdiv($v['turnover']/$v['goods_num'],2);
                    $sort[] = $v['turnover'];
                }else{
                    unset($depart_list[$ky]);
