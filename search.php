@@ -64,7 +64,10 @@ elseif ($act == 'search')
                 $user_old = $GLOBALS['db']->getAll($sql_select);
             }else{
                 $where    = " WHERE $condition='$keyword' ";
-                $user_old = get_user_id('order_info',$where,$keyword);
+                if ('order_sn' == $condition) {
+                    $append_where = " OR platform_order_sn='$keyword' ";
+                }
+                $user_old = get_user_id('order_info',$where.$append_where,$keyword);
 
                 if (!$user_old) {
                     $user_new = get_user_id('ordersyn_info',$where,$keyword);
@@ -183,7 +186,7 @@ elseif ($_REQUEST['act'] == 'get_more_info'){
                 .$GLOBALS['ecs']->table($table_name)
                 .' o LEFT JOIN '.$GLOBALS['ecs']->table('role')
                 .' r ON o.platform=r.role_id'
-                ." WHERE o.user_id=$user_id AND o.shipping_status<>3 ORDER BY o.add_time DESC LIMIT 6";
+                ." WHERE o.user_id=$user_id ORDER BY o.add_time DESC LIMIT 6";
 
             try{
                 $order_info = $GLOBALS['db']->getAll($sql_select);

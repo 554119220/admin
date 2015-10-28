@@ -885,7 +885,7 @@ elseif ($_REQUEST['act'] == 'user_detail') {
     $smarty->assign('bmi',get_user_bmi($user_id));
 
 
-    if (in_array($_SESSION['admin_id'],array(1,493,2,4,580,359))) {
+    if (in_array($_SESSION['admin_id'],array(1,493,2,4,580,359,142))) {
         $admin_list = get_admin_tmp_list();
         $smarty->assign('all_power',true);
     }elseif(in_array($_SESSION['admin_id'],array(520))){
@@ -2345,11 +2345,14 @@ elseif ($_REQUEST['act'] == 'give_up')
         $sql_update = 'UPDATE '.$GLOBALS['ecs']->table('users').' u, '.$GLOBALS['ecs']->table('admin_user').
             " a SET u.admin_id=$to_id,u.assign_time=$now_time,u.user_cat='',u.admin_name=a.user_name,u.role_id=a.role_id,".
             "u.group_id=a.group_id WHERE u.user_id=$user_id AND a.user_id=$to_id";
-        $GLOBALS['db']->query($sql_update);
+        $res['code'] = $GLOBALS['db']->query($sql_update);
 
         file_put_contents('../batch_user.log',date('Y-m-d H:i:s').$_SESSION['admin_name'].'顾客转赠成功'.PHP_EOL.$sql_update.PHP_EOL,FILE_APPEND);
-        $res['message'] = '顾客转赠成功！';
-        $res['code'] = 1;
+        if ($res['code']) {
+            $res = crm_msg('顾客转赠成功！',$res['code']);
+        }else{
+            $res = crm_msg('顾客转赠失败！',$res['code']);
+        }
         die($json->encode($res));
     }
     else{
@@ -5094,6 +5097,11 @@ function user_list() {
 
         // 客服
         if (admin_priv('all', '', false)) {
+            //限制最高权限
+            $rb = return_role_by_all();
+            if ($rb) {
+                $ex_where .= " AND u.role_id IN($rb)";
+            }
             $ex_where .= ' AND u.admin_id>0';
             $filter['admin_id']>0 && $ex_where .= " AND u.admin_id={$filter['admin_id']} ";
         } elseif (admin_priv('user_trans-part_view', '', false) || admin_priv('user_part_view', '', false)) {

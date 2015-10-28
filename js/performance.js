@@ -701,3 +701,12 @@ function clearLog() {
 	} else return;
 }
 
+//平均试卷数
+function averageQuestion(val){
+  var name = 'fill_question' == val ? 'fill_num' : 'sha_num';
+  var total = $("[name='"+name+"']").val();
+  var average = parseInt(total)/3;
+  $("[title='"+val+"']").each(function(){
+      $(this).val(average);
+  });
+}

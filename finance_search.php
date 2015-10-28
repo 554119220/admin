@@ -53,7 +53,11 @@ elseif ($act == 'search')
     if (strpos($keyword, '-') === false) {
         if($condition == 'tracking_sn' || $condition == 'order_sn') {
             $where    = " WHERE $condition='$keyword' ";
-            $user_old = get_user_id('order_info',$where,$keyword);
+            if ('order_sn' == $condition) {
+                $append_where = " OR platform_order_sn='$keyword' ";
+            }
+
+            $user_old = get_user_id('order_info',$where.$append_where,$keyword);
 
             if (!$user_old) {
                 $user_new = get_user_id('ordersyn_info',$where,$keyword);

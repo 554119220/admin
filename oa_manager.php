@@ -17,6 +17,75 @@ if ($_REQUEST['act'] == 'menu')
     die($smarty->fetch('left.htm'));
 }
 
+//出题
+elseif($_REQUEST['act'] == 'examination'){
+    $type_list = array('1'=>'产品知识','健康知识','话术');
+    $smarty->assign('type_list',$type_list);
+    $res['main'] = $smarty->fetch('examination.htm'); 
+    die($json->encode($res));
+}
+//生成试卷
+elseif($_REQUEST['act'] == 'create_examination'){
+    $page_num      = intval($_REQUEST['page_num']);  //试卷数
+    $sql           = 'SELECT ex_id,question,answer FROM '.$GLOBALS['ecs']->table('examine')
+        ." WHERE type_id=%d AND catalog=%d ORDER BY RAND() LIMIT 1,%d";
+    $fill_question = array_filter($_REQUEST['fill_question']);
+    $short_answer  = array_filter($_REQUEST['short_answer']);
+    if (empty($fill_question) && empty($short_answer)){
+        header('Location:index.php');
+        exit;
+    }
+
+    $file_path = $_SERVER['DOCUMENT_ROOT'].'/crm2/files/'.date('Y-m-d-H-i-s',$_SERVER['REQUEST_TIME']);  //存放试卷目录
+    //打包试卷
+    $file_name = strtotime(date('Y-m-d'));
+    $q_file_path = $file_path.'/q_'.$file_name.'.txt';
+    $a_file_path = $file_path.'/a_'.$file_name.'.txt';
+    if (mkdir($file_path,777)) {
+        $q_f = fopen($q_file_path,'a');
+        $a_f = fopen($a_file_path,'a');
+        for ($i = 0; $i < $page_num; $i++) {
+            $n = 1;
+            $m = 1;
+            fwrite($q_f,"\n试卷编号："."$file_name\n姓名：______\n====================================\n");
+            fwrite($a_f,"\n试卷编号："."$file_name  答案\n=============================================\n");
+            //填空题
+            $fq = array();
+            foreach ( $fill_question as $k=>$f) {
+                $res = $GLOBALS['db']->getAll(sprintf($sql,$k,1,$f));
+                //$fq = array_merge($fq,$res);
+                foreach ($res as $q) {
+                    fwrite($q_f,($n++).'、  '.$q['question']."\n");
+                    fwrite($a_f,($m++).'、  '.$q['answer']."\n");
+                    //$fq_answer[] = $q['anaser']; 
+                }
+            }
+            //简答题
+            $sa = array();
+            fwrite($q_f,"\n");
+            fwrite($a_f,"\n");
+            if ($short_answer) {
+                foreach ($short_answer as $ke=>$s) {
+                    $res = $GLOBALS['db']->getAll(sprintf($sql,$ke,2,$s));
+                    //$sa = array_merge($sa,$res);
+                    foreach ($res as $a) {
+                        fwrite($q_f,($n++).'、  '.$a['question']."\n");
+                        fwrite($a_f,($m++).'、  '.$a['answer']."\n");
+                    }
+                }
+            }
+        }
+        $answer = file_get_contents($a_file_path);
+        fwrite($q_f,"\n".$answer);
+        header("Content-Type:application/force-download");
+        header("Content-Disposition:attachment;filename=".basename($q_file_path));
+        readfile($q_file_path);
+    }else{
+        echo '生成失败';
+    }
+}
+
+
 //办公电脑管理
 elseif ($_REQUEST['act'] == 'pc_manager')
 {
@@ -77,11 +146,11 @@ elseif ($_REQUEST['act'] == 'pc_manager')
         {
             if($i == 0)
             {
-               $room_info[$i]['status'] = "style=\"display:''\"";
+                $room_info[$i]['status'] = "style=\"display:''\"";
             }
             else
             {
-               $room_info[$i]['status'] = "style=\"display:none\"";
+                $room_info[$i]['status'] = "style=\"display:none\"";
             }
         }
     }

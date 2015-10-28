@@ -1430,6 +1430,14 @@ function get_admin_tmp_list ($role = 0)
     return $admin_list;
 }
 
+function return_role_by_all(){
+    if ($_SESSION['admin_id'] == 493) {
+        return KEFU;
+    }elseif($_SESSION['admin_id'] == 359){
+        return KEFU2;
+    }else
+        return false;
+}
 //ALL权限查询部门的客服
 function get_admin_by_all(){
     $where = ' WHERE status>0 AND stats>0';
@@ -1624,10 +1632,10 @@ function trans_group_list()
  **/
 function trans_part_list()
 {
-    $sql_select = 'SELECT role_describe FROM '.$GLOBALS['ecs']->table('role')." WHERE role_id={$_SESSION['role_id']}";
-    $role_code = $GLOBALS['db']->getOne($sql_select);
+    $sql_select = 'SELECT depart_id FROM '.$GLOBALS['ecs']->table('role')." WHERE role_id={$_SESSION['role_id']}";
+    $depart_id = $GLOBALS['db']->getOne($sql_select);
 
-    $sql_select = 'SELECT role_id FROM '.$GLOBALS['ecs']->table('role')." WHERE role_describe='$role_code'";
+    $sql_select = 'SELECT role_id FROM '.$GLOBALS['ecs']->table('role')." WHERE depart_id=$depart_id";
     return $GLOBALS['db']->getCol($sql_select);
 }
 

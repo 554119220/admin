@@ -258,56 +258,64 @@ elseif($_REQUEST['act'] == 'goods_sale_rank'){
        $where .= " AND oi.platform IN($platform) ";
    }
 
-   // @sel_item 1 部门 2 小组 3 员工
-   if ($sel_item == 3) {
-       $table = 'admin_user';
-       $field = ',t.user_name name';
-       $where .= ' AND t.user_id=oi.admin_id ';
-       $group_by = 'oi.admin_id, ';
-   }else{
-       $table = 'role';
-       $field = ',t.role_name name';
-       if ($sel_item == 1) {
-           $field .= ",t.depart_id";
-       }
-       $where .= ' AND t.role_id=oi.platform ';
-       $group_by = 'oi.platform,';
-   }
-   
-   $sql = 'SELECT og.goods_name,SUM(og.goods_number) goods_num,count(oi.order_id) order_num,'.
-       'SUM(og.goods_number*og.goods_price) turnover %s FROM '.$GLOBALS['ecs']->table('order_goods').' og, '.
-       $GLOBALS['ecs']->table('order_info').' oi, '.$GLOBALS['ecs']->table($table)
-       ." t $where GROUP BY %s og.goods_sn ORDER BY goods_num DESC";
-   $rank_status = $GLOBALS['db']->getAll(sprintf($sql, $field,$group_by));
-   if ($rank_status) {
-       $res['goods_name'] = $rank_status[0]['goods_name'];
-       foreach ($rank_status as &$v) {
-           $v['ave'] = bcdiv($v['turnover'],$v['goods_num'],2);
-       }
-       //部门
-       if ($sel_item == 1) {
-           unset($v);
-           $depart_list = get_department();
-           foreach ($depart_list as $ky=>&$v) {
-               $v['name'] = $v['depart_name'];
-              foreach ($rank_status as $k=>$r) {
-                  if ($v['depart_id'] == $r['depart_id']) {
-                      $v['goods_num'] += $r['goods_num'];
-                      $v['order_num'] += $r['order_num'];
-                      $v['turnover'] += $r['turnover'];
-                  }
-              } 
-               if ($v['goods_num'] > 0 ) {
-                   $v['turnover'] = sprintf("%.2f",$v['turnover']);
-                   $v['ave'] = bcdiv($v['turnover']/$v['goods_num'],2);
-                   $sort[] = $v['turnover'];
-               }else{
-                   unset($depart_list[$ky]);
-               }
+   //总的销售额
+   $sql_count = 'SELECT SUM(og.goods_number*og.goods_price) FROM '.$GLOBALS['ecs']->table('order_goods').' og,'
+       .$GLOBALS['ecs']->table('order_info').' oi '.$where;
+   $total = $GLOBALS['db']->getOne($sql_count);
+   if ($total) {
+       // @sel_item 1 部门 2 小组 3 员工
+       if ($sel_item == 3) {
+           $table = 'admin_user';
+           $field = ',t.user_name name';
+           $where .= ' AND t.user_id=oi.admin_id ';
+           $group_by = 'oi.admin_id, ';
+       }else{
+           $table = 'role';
+           $field = ',t.role_name name';
+           if ($sel_item == 1) {
+               $field .= ",t.depart_id";
            }
-           if ($depart_list) {
-               array_multisort($sort,SORT_DESC,$depart_list);
-               $rank_status = $depart_list;
+           $where .= ' AND t.role_id=oi.platform ';
+           $group_by = 'oi.platform,';
+       }
+
+       $sql = 'SELECT og.goods_name,SUM(og.goods_number) goods_num,count(oi.order_id) order_num,'.
+           'SUM(og.goods_number*og.goods_price) turnover %s FROM '.$GLOBALS['ecs']->table('order_goods').' og, '.
+           $GLOBALS['ecs']->table('order_info').' oi, '.$GLOBALS['ecs']->table($table)
+           ." t $where GROUP BY %s og.goods_sn ORDER BY goods_num DESC";
+       $rank_status = $GLOBALS['db']->getAll(sprintf($sql, $field,$group_by));
+       if ($rank_status) {
+           $res['goods_name'] = $rank_status[0]['goods_name'];
+           foreach ($rank_status as &$v) {
+               $v['ave'] = bcdiv($v['turnover'],$v['goods_num'],2);
+               $v['sale_rate'] = bcdiv($v['turnover'],$total,3)*100;
+           }
+           //部门
+           if ($sel_item == 1) {
+               unset($v);
+               $depart_list = get_department();
+               foreach ($depart_list as $ky=>&$v) {
+                   $v['name'] = $v['depart_name'];
+                   foreach ($rank_status as $k=>$r) {
+                       if ($v['depart_id'] == $r['depart_id']) {
+                           $v['goods_num'] += $r['goods_num'];
+                           $v['order_num'] += $r['order_num'];
+                           $v['turnover'] += $r['turnover'];
+                       }
+                   } 
+                   if ($v['goods_num'] > 0 ) {
+                       $v['turnover'] = sprintf("%.2f",$v['turnover']);
+                       $v['ave'] = bcdiv($v['turnover']/$v['goods_num'],2);
+                       $v['sale_rate'] = bcdiv($v['turnover']/$total,3)*100;
+                       $sort[] = $v['turnover'];
+                   }else{
+                       unset($depart_list[$ky]);
+                   }
+               }
+               if ($depart_list) {
+                   array_multisort($sort,SORT_DESC,$depart_list);
+                   $rank_status = $depart_list;
+               }
            }
        }
    }
@@ -1422,6 +1430,9 @@ elseif ($_REQUEST['act'] == 'personal_sales_stats') {
     $trans_role_list = '';
     if (!admin_priv('all', '', false) && admin_priv('personal_trans-part_stats', '', false)) {
         $trans_role_list = implode(',', trans_part_list());
+        if ($_SESSION['admin_id'] == 64) {
+            $trans_role_list = KEFU.','.KEFU2;
+        }
         $range = "r.role_id IN ($trans_role_list) AND a.stats>0";
     } elseif (!admin_priv('all', '',false) && !admin_priv('finance', '', false)) {
         if (admin_priv('personal_part_stats', '', false)) {
